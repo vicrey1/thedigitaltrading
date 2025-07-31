@@ -3,8 +3,8 @@
     {
       "src": "package.json",
       "use": "@vercel/static-build",
-      "config": { "distDir": "build" }
+      "config": { "distDir": "dist" }
     }
   ],
-  "framework": "create-react-app"
+  "framework": "vite"
 }
