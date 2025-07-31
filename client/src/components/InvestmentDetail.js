@@ -1,5 +1,6 @@
 // src/components/InvestmentDetail.js
 import React, { useEffect, useState } from 'react';
+import { toast } from 'react-toastify';
 import { FiX, FiDollarSign, FiPieChart, FiTrendingUp, FiClock } from 'react-icons/fi';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
@@ -262,25 +263,25 @@ const InvestmentDetail = ({ investment, onClose }) => {
                   });
                   const data = await res.json();
                   if (data.success) {
-                  import('react-toastify').then(({ toast }) => {
-                    toast.success(`ROI of $${data.roi?.toLocaleString?.() || ''} withdrawn! Locked balance: $${data.user?.lockedBalance?.toLocaleString?.() || ''}`, {
-                      position: 'top-center',
-                      autoClose: 5000,
-                      hideProgressBar: false,
-                      closeOnClick: true,
-                      pauseOnHover: true,
-                      draggable: true,
-                      progress: undefined,
-                      style: {
-                        background: 'linear-gradient(90deg, #FFD700 0%, #FFF8DC 100%)',
-                        color: '#222',
-                        fontWeight: 'bold',
-                        fontSize: '1.2rem',
-                        borderRadius: '12px',
-                        boxShadow: '0 4px 24px rgba(0,0,0,0.12)'
-                      }
-                    });
-                  });
+import { toast } from 'react-toastify';
+// ...existing code...
+toast.success(`ROI of $${data.roi?.toLocaleString?.() || ''} withdrawn! Locked balance: $${data.user?.lockedBalance?.toLocaleString?.() || ''}`, {
+  position: 'top-center',
+  autoClose: 5000,
+  hideProgressBar: false,
+  closeOnClick: true,
+  pauseOnHover: true,
+  draggable: true,
+  progress: undefined,
+  style: {
+    background: 'linear-gradient(90deg, #FFD700 0%, #FFF8DC 100%)',
+    color: '#222',
+    fontWeight: 'bold',
+    fontSize: '1.2rem',
+    borderRadius: '12px',
+    boxShadow: '0 4px 24px rgba(0,0,0,0.12)'
+  }
+});
                   setTimeout(() => window.location.reload(), 5200);
                   } else {
                     alert(data.message || 'Withdrawal failed');

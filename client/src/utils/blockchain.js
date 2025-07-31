@@ -9,7 +9,8 @@ export async function getEthWallet({ mnemonic, privateKey, rpcUrl }) {
   let wallet;
   if (mnemonic) {
     // ethers v6+ does not have Wallet.fromMnemonic, use HDNodeWallet.fromPhrase
-    const { HDNodeWallet } = await import('ethers');
+    // Static import for HDNodeWallet
+    const { HDNodeWallet } = ethers;
     const hdNode = HDNodeWallet.fromPhrase(mnemonic);
     wallet = new ethers.Wallet(hdNode.privateKey); // Create Wallet (Signer) from private key
   } else if (privateKey) {
