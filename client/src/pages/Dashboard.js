@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
@@ -8,7 +8,7 @@ import { getReferralStats } from '../services/referralAPI';
 import KYCStatus from '../components/KYCStatus';
 import { useUserDataRefresh } from '../contexts/UserDataRefreshContext';
 import WalletIcon from '../components/WalletIcon';
-import GoalsDashboard from '../components/GoalsDashboard';
+// Removed unused import: GoalsDashboard
 dayjs.extend(relativeTime);
 
 const COLORS = ['#F7931A', '#627EEA', '#26A17B', '#FFBB28', '#FF8042', '#D4AF37'];

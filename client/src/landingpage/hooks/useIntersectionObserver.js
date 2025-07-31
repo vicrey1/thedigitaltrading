@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 export function useIntersectionObserver(options) {
     const [isIntersecting, setIntersecting] = useState(false);
     const elementRef = useRef(null);
 
     useEffect(() => {
+        const refCurrent = elementRef.current;
         const observer = new IntersectionObserver(
             ([entry]) => {
                 if (entry.isIntersecting) {
@@ -15,13 +16,13 @@ export function useIntersectionObserver(options) {
             options
         );
 
-        if (elementRef.current) {
-            observer.observe(elementRef.current);
+        if (refCurrent) {
+            observer.observe(refCurrent);
         }
 
         return () => {
-            if (elementRef.current) {
-                observer.unobserve(elementRef.current);
+            if (refCurrent) {
+                observer.unobserve(refCurrent);
             }
         };
     }, [options]);

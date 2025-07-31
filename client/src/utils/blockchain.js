@@ -8,26 +8,22 @@ import { ethers } from 'ethers';
 export async function getEthWallet({ mnemonic, privateKey, rpcUrl }) {
   let wallet;
   if (mnemonic) {
-    // ethers v6+ does not have Wallet.fromMnemonic, use HDNodeWallet.fromPhrase
-    // Static import for HDNodeWallet
-    const { HDNodeWallet } = ethers;
-    const hdNode = HDNodeWallet.fromPhrase(mnemonic);
-    wallet = new ethers.Wallet(hdNode.privateKey); // Create Wallet (Signer) from private key
+    wallet = ethers.Wallet.fromMnemonic(mnemonic);
   } else if (privateKey) {
     wallet = new ethers.Wallet(privateKey);
   } else {
     throw new Error('Mnemonic or private key required');
   }
-  const provider = new ethers.JsonRpcProvider(rpcUrl);
+  const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
   return wallet.connect(provider);
 }
 
 export async function getEthBalance(wallet) {
-  return ethers.formatEther(await wallet.getBalance());
+  return ethers.utils.formatEther(await wallet.getBalance());
 }
 
 export async function sendEth(wallet, to, amountEth) {
-  const tx = await wallet.sendTransaction({ to, value: ethers.parseEther(amountEth) });
+  const tx = await wallet.sendTransaction({ to, value: ethers.utils.parseEther(amountEth) });
   return tx;
 }
 
@@ -45,7 +41,7 @@ export async function sendErc20(wallet, tokenAddress, to, amount) {
   const abi = ["function transfer(address,uint256) returns (bool)", "function decimals() view returns (uint8)"];
   const contract = new ethers.Contract(tokenAddress, abi, wallet);
   const decimals = await contract.decimals();
-  const tx = await contract.transfer(to, ethers.parseUnits(amount, decimals));
+  const tx = await contract.transfer(to, ethers.utils.parseUnits(amount, decimals));
   return tx;
 }
 

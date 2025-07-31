@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
 import { useUser } from '../contexts/UserContext';
 
@@ -11,7 +11,6 @@ const EmailVerification = ({ email, onVerified }) => {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
-  const codeInputs = useRef([]);
 
   React.useEffect(() => {
     refreshUserContext(); // Always get latest status on mount
