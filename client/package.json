@@ -61,11 +61,9 @@
     ]
   },
   "devDependencies": {
-    "@vitejs/plugin-react": "^4.7.0",
     "autoprefixer": "^10.4.17",
     "postcss": "^8.4.35",
-    "tailwindcss": "^3.4.1",
-    "vite": "^7.0.6"
+    "tailwindcss": "^3.4.1"
   },
   "proxy": "http://localhost:5001",
   "engines": {
