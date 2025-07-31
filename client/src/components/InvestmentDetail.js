@@ -1,6 +1,7 @@
 // src/components/InvestmentDetail.js
 import React, { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 import { FiX, FiDollarSign, FiPieChart, FiTrendingUp, FiClock } from 'react-icons/fi';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
