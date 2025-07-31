@@ -1,0 +1,22 @@
+// Script to fix currentValue for all active investments
+// Sets currentValue = amount for all active investments
+
+const mongoose = require('mongoose');
+const Investment = require('../models/Investment');
+
+async function main() {
+  await mongoose.connect('mongodb://localhost:27017/luxhedge', { useNewUrlParser: true, useUnifiedTopology: true });
+  const result = await Investment.updateMany(
+    { status: 'active' },
+    [
+      { $set: { currentValue: "$amount" } }
+    ]
+  );
+  console.log(`Updated ${result.modifiedCount} active investments.`);
+  await mongoose.disconnect();
+}
+
+main().catch(err => {
+  console.error(err);
+  process.exit(1);
+});

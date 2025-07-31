@@ -1,0 +1,36 @@
+.scrollbar-thumb-gold::-webkit-scrollbar {
+  width: 8px;
+}
+.scrollbar-thumb-gold::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #D4AF37 60%, #FFD700 100%);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px #d4af3740;
+}
+.scrollbar-thumb-gold::-webkit-scrollbar-track {
+  background: #18181b99;
+  border-radius: 8px;
+}
+
+/* For Firefox */
+.scrollbar-thumb-gold {
+  scrollbar-width: thin;
+  scrollbar-color: #D4AF37 #18181b99;
+}
+
+/* Extra thin gold scrollbar for sidebar */
+.sidebar-scrollbar::-webkit-scrollbar {
+  width: 5px;
+}
+.sidebar-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #D4AF37 60%, #FFD700 100%);
+  border-radius: 8px;
+}
+.sidebar-scrollbar::-webkit-scrollbar-track {
+  background: #18181b99;
+  border-radius: 8px;
+}
+
+.sidebar-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #D4AF37 #18181b99;
+}

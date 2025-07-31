@@ -1,0 +1,12 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "shell",
+			"label": "Automated ROI Update (Daily)",
+			"command": "node server/scripts/update_roi.js",
+			"isBackground": false,
+			"group": "build"
+		}
+	]
+}

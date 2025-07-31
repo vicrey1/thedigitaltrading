@@ -1,0 +1,99 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  background-color: #0F0F0F;
+  color: white;
+}
+
+.glassmorphic {
+  background: rgba(15, 15, 15, 0.7);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+}
+/* Add to your index.css */
+.glass-card {
+  background: rgba(15, 15, 15, 0.5);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.glass-card:hover {
+  border-color: rgba(212, 175, 55, 0.3);
+  box-shadow: 0 4px 30px rgba(212, 175, 55, 0.1);
+}
+
+.chart-tooltip {
+  background: rgba(30, 30, 30, 0.95) !important;
+  border: 1px solid rgba(212, 175, 55, 0.2) !important;
+  border-radius: 4px !important;
+  padding: 8px 12px !important;
+}
+
+/* Gold gradient text */
+.text-gold-gradient {
+  background: linear-gradient(90deg, #D4AF37 0%, #F9D423 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Add to your index.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Mobile menu toggle */
+.mobile-menu {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out;
+}
+
+.mobile-menu.open {
+  max-height: 1000px;
+  transition: max-height 0.5s ease-in;
+}
+
+/* Better table scrolling on mobile */
+.table-container {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Tap targets for mobile */
+button, a {
+  @apply min-w-[44px] min-h-[44px];
+}
+
+/* Hide scrollbar but allow scrolling */
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Global gold glassmorphic scrollbar for html/body */
+html, body {
+  scrollbar-width: thin;
+  scrollbar-color: #D4AF37 #18181b99;
+}
+html::-webkit-scrollbar, body::-webkit-scrollbar {
+  width: 10px;
+}
+html::-webkit-scrollbar-thumb, body::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #D4AF37 60%, #FFD700 100%);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px #d4af3740;
+}
+html::-webkit-scrollbar-track, body::-webkit-scrollbar-track {
+  background: #18181b99;
+  border-radius: 8px;
+}
