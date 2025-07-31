@@ -27,15 +27,7 @@ router.patch('/:id', auth, async (req, res) => {
     if (!withdrawal) return res.status(404).json({ message: 'Withdrawal not found' });
     if (status === 'completed' && destination === 'available') {
       withdrawal.status = 'confirmed';
-      // Move ROI from lockedBalance to availableBalance
-      const User = require('../../models/User');
-      const user = await User.findById(withdrawal.userId);
-      if (user) {
-        const amt = withdrawal.amount;
-        user.lockedBalance = Math.max((user.lockedBalance || 0) - amt, 0);
-        user.availableBalance = (user.availableBalance || 0) + amt;
-        await user.save();
-      }
+      // Optionally, update user balances here if needed
     } else if (status === 'rejected') {
       withdrawal.status = 'rejected';
     }

@@ -1,6 +1,5 @@
 // src/components/admin/FundEditor.js
 import React, { useState, useEffect } from 'react';
-import toast from '../../utils/toast';
 import { FiX, FiSave, FiTrash2 } from 'react-icons/fi';
 import FundPerformanceChart from './FundPerformanceChart';
 
@@ -137,18 +136,7 @@ const FundEditor = ({ fund, onSave, onCancel }) => {
       body: formData
     });
     setPdfFile(null);
-    toast.success('PDF uploaded!', {
-      position: 'top-center',
-      autoClose: 4000,
-      style: {
-        background: 'linear-gradient(90deg, #FFD700 0%, #FFF8DC 100%)',
-        color: '#222',
-        fontWeight: 'bold',
-        fontSize: '1.1rem',
-        borderRadius: '12px',
-        boxShadow: '0 4px 24px rgba(0,0,0,0.12)'
-      }
-    });
+    alert('PDF uploaded!');
   };
 
   const handlePerformanceChange = (idx, value) => {
@@ -169,18 +157,7 @@ const FundEditor = ({ fund, onSave, onCancel }) => {
 
   const handleSendAlert = () => {
     // TODO: Implement backend call to push alert
-    toast.success('Admin alert sent!', {
-      position: 'top-center',
-      autoClose: 4000,
-      style: {
-        background: 'linear-gradient(90deg, #FFD700 0%, #FFF8DC 100%)',
-        color: '#222',
-        fontWeight: 'bold',
-        fontSize: '1.1rem',
-        borderRadius: '12px',
-        boxShadow: '0 4px 24px rgba(0,0,0,0.12)'
-      }
-    });
+    alert('Admin alert sent!');
     setAlert('');
   };
 

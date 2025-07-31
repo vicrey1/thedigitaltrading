@@ -204,10 +204,6 @@ const UserSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
-  availableBalance: {
-    type: Number,
-    default: 0
-  },
   passwordResetOtp: {
     type: String,
     default: undefined

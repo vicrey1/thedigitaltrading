@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import toast from '../utils/toast';
 import axios from 'axios';
 
 const WithdrawalsAdmin = () => {
@@ -34,35 +33,13 @@ const WithdrawalsAdmin = () => {
       });
       fetchWithdrawals();
     } catch {
-      toast.error('Failed to approve withdrawal', {
-        position: 'top-center',
-        autoClose: 4000,
-        style: {
-          background: 'linear-gradient(90deg, #FFD700 0%, #FFF8DC 100%)',
-          color: '#222',
-          fontWeight: 'bold',
-          fontSize: '1.1rem',
-          borderRadius: '12px',
-          boxShadow: '0 4px 24px rgba(0,0,0,0.12)'
-        }
-      });
+      alert('Failed to approve withdrawal');
     }
   };
 
   const handleReject = async (id) => {
     if (!rejectReason) {
-      toast.error('Please provide a reason for rejection.', {
-        position: 'top-center',
-        autoClose: 4000,
-        style: {
-          background: 'linear-gradient(90deg, #FFD700 0%, #FFF8DC 100%)',
-          color: '#222',
-          fontWeight: 'bold',
-          fontSize: '1.1rem',
-          borderRadius: '12px',
-          boxShadow: '0 4px 24px rgba(0,0,0,0.12)'
-        }
-      });
+      alert('Please provide a reason for rejection.');
       return;
     }
     try {
@@ -73,18 +50,7 @@ const WithdrawalsAdmin = () => {
       setRejectReason('');
       fetchWithdrawals();
     } catch {
-      toast.error('Failed to reject withdrawal', {
-        position: 'top-center',
-        autoClose: 4000,
-        style: {
-          background: 'linear-gradient(90deg, #FFD700 0%, #FFF8DC 100%)',
-          color: '#222',
-          fontWeight: 'bold',
-          fontSize: '1.1rem',
-          borderRadius: '12px',
-          boxShadow: '0 4px 24px rgba(0,0,0,0.12)'
-        }
-      });
+      alert('Failed to reject withdrawal');
     }
   };
 

@@ -1,6 +1,5 @@
 // src/pages/Register.js
 import React, { useState } from 'react';
-import toast from '../utils/toast';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import axios from 'axios';
@@ -73,45 +72,12 @@ const Register = () => {
         if (error.response) {
           console.error('Backend response:', error.response.data);
           if (error.response.data && error.response.data.message === 'User already exists') {
-            toast.error('An account with this email or username already exists. Please log in or use a different email.', {
-              position: 'top-center',
-              autoClose: 4000,
-              style: {
-                background: 'linear-gradient(90deg, #FFD700 0%, #FFF8DC 100%)',
-                color: '#222',
-                fontWeight: 'bold',
-                fontSize: '1.1rem',
-                borderRadius: '12px',
-                boxShadow: '0 4px 24px rgba(0,0,0,0.12)'
-              }
-            });
+            alert('An account with this email or username already exists. Please log in or use a different email.');
           } else {
-            toast.error(error.response.data.message || 'Registration failed. Please try again.', {
-              position: 'top-center',
-              autoClose: 4000,
-              style: {
-                background: 'linear-gradient(90deg, #FFD700 0%, #FFF8DC 100%)',
-                color: '#222',
-                fontWeight: 'bold',
-                fontSize: '1.1rem',
-                borderRadius: '12px',
-                boxShadow: '0 4px 24px rgba(0,0,0,0.12)'
-              }
-            });
+            alert(error.response.data.message || 'Registration failed. Please try again.');
           }
         } else {
-          toast.error('Registration failed. Please check your network connection.', {
-            position: 'top-center',
-            autoClose: 4000,
-            style: {
-              background: 'linear-gradient(90deg, #FFD700 0%, #FFF8DC 100%)',
-              color: '#222',
-              fontWeight: 'bold',
-              fontSize: '1.1rem',
-              borderRadius: '12px',
-              boxShadow: '0 4px 24px rgba(0,0,0,0.12)'
-            }
-          });
+          alert('Registration failed. Please check your network connection.');
         }
       }
     },

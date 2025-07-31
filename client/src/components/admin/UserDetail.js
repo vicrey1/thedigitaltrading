@@ -1,6 +1,5 @@
 // src/components/admin/UserDetail.js
 import React, { useState } from 'react';
-import toast from '../../utils/toast';
 import { FiX, FiCheck, FiAlertTriangle, FiDownload } from 'react-icons/fi';
 import { approveKYC, rejectKYC, updateUserTier, updateUserRole, getUserKeys } from '../../services/adminAPI';
 
@@ -76,18 +75,7 @@ const UserDetail = ({ user, onClose, onUpdate }) => {
       const url = await fetchKYCImage(filename, token);
       setImageModal({ open: true, url, label });
     } catch {
-      toast.error('Failed to load image.', {
-        position: 'top-center',
-        autoClose: 4000,
-        style: {
-          background: 'linear-gradient(90deg, #FFD700 0%, #FFF8DC 100%)',
-          color: '#222',
-          fontWeight: 'bold',
-          fontSize: '1.1rem',
-          borderRadius: '12px',
-          boxShadow: '0 4px 24px rgba(0,0,0,0.12)'
-        }
-      });
+      alert('Failed to load image.');
     }
   };
 

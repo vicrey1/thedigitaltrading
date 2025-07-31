@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import toast from '../../utils/toast';
 import axios from 'axios';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
@@ -118,18 +117,7 @@ const AdminAnnouncements = () => {
         e.target.value = '';
       } catch (err) {
         console.error('Image upload failed:', err);
-        toast.error('Image upload failed', {
-          position: 'top-center',
-          autoClose: 4000,
-          style: {
-            background: 'linear-gradient(90deg, #FFD700 0%, #FFF8DC 100%)',
-            color: '#222',
-            fontWeight: 'bold',
-            fontSize: '1.1rem',
-            borderRadius: '12px',
-            boxShadow: '0 4px 24px rgba(0,0,0,0.12)'
-          }
-        });
+        alert('Image upload failed');
       }
     }
   };

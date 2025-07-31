@@ -42,7 +42,7 @@ const Withdraw = () => {
     const fetchWithdrawals = async () => {
       try {
         const data = await getUserWithdrawals();
-        setWithdrawals(Array.isArray(data.withdrawals) ? data.withdrawals : []);
+        setWithdrawals(data);
       } catch (err) {
         setWithdrawals([]);
       }

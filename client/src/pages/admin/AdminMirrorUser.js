@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import toast from '../../utils/toast';
 import axios from 'axios';
 import Portfolio from '../../pages/Portfolio';
 import Dashboard from '../../pages/Dashboard';
@@ -47,31 +46,9 @@ const AdminMirrorUser = ({ userId, onBack }) => {
       // Refresh portfolio data after completion
       const portfolioRes = await axios.get(`/api/admin/users/${userId}/portfolio`, { headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` } });
       setPortfolioData(portfolioRes.data);
-      toast.success('Active investment completed successfully.', {
-        position: 'top-center',
-        autoClose: 4000,
-        style: {
-          background: 'linear-gradient(90deg, #FFD700 0%, #FFF8DC 100%)',
-          color: '#222',
-          fontWeight: 'bold',
-          fontSize: '1.1rem',
-          borderRadius: '12px',
-          boxShadow: '0 4px 24px rgba(0,0,0,0.12)'
-        }
-      });
+      alert('Active investment completed successfully.');
     } catch (err) {
-      toast.error('Failed to complete active investment: ' + (err.response?.data?.error || err.message), {
-        position: 'top-center',
-        autoClose: 4000,
-        style: {
-          background: 'linear-gradient(90deg, #FFD700 0%, #FFF8DC 100%)',
-          color: '#222',
-          fontWeight: 'bold',
-          fontSize: '1.1rem',
-          borderRadius: '12px',
-          boxShadow: '0 4px 24px rgba(0,0,0,0.12)'
-        }
-      });
+      alert('Failed to complete active investment: ' + (err.response?.data?.error || err.message));
     }
   };
 
@@ -85,31 +62,9 @@ const AdminMirrorUser = ({ userId, onBack }) => {
       // Refresh portfolio data after continuation
       const portfolioRes = await axios.get(`/api/admin/users/${userId}/portfolio`, { headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` } });
       setPortfolioData(portfolioRes.data);
-      toast.success('Investment continued successfully.', {
-        position: 'top-center',
-        autoClose: 4000,
-        style: {
-          background: 'linear-gradient(90deg, #FFD700 0%, #FFF8DC 100%)',
-          color: '#222',
-          fontWeight: 'bold',
-          fontSize: '1.1rem',
-          borderRadius: '12px',
-          boxShadow: '0 4px 24px rgba(0,0,0,0.12)'
-        }
-      });
+      alert('Investment continued successfully.');
     } catch (err) {
-      toast.error('Failed to continue investment: ' + (err.response?.data?.error || err.message), {
-        position: 'top-center',
-        autoClose: 4000,
-        style: {
-          background: 'linear-gradient(90deg, #FFD700 0%, #FFF8DC 100%)',
-          color: '#222',
-          fontWeight: 'bold',
-          fontSize: '1.1rem',
-          borderRadius: '12px',
-          boxShadow: '0 4px 24px rgba(0,0,0,0.12)'
-        }
-      });
+      alert('Failed to continue investment: ' + (err.response?.data?.error || err.message));
     }
   };
 
@@ -178,8 +133,6 @@ const AdminMirrorUser = ({ userId, onBack }) => {
             <div>
               <div className="text-gray-400">Account Balance</div>
               <div className="text-xl font-bold">${Number(userInfo.availableBalance ?? 0).toLocaleString()}</div>
-              <div className="text-gray-400 mt-2">Locked Balance</div>
-              <div className="text-xl font-bold text-red-400">${Number(userInfo.lockedBalance ?? 0).toLocaleString()}</div>
             </div>
             <div>
               <div className="text-gray-400">Total Invested</div>

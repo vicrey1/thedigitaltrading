@@ -71,8 +71,8 @@ async function getPortfolioData(userId) {
   const depositBalance = confirmedDeposits.reduce((sum, d) => sum + d.amount, 0);
   // Calculate total invested (active + completed investments)
   const allInvestments = await Investment.find({ user: userId });
-  // Calculate admin-confirmed ROI withdrawals (status: 'confirmed' or 'completed', type: 'roi')
-  const confirmedRoiWithdrawals = await Withdrawal.find({ userId: userId, status: { $in: ['confirmed', 'completed'] }, type: 'roi' });
+  // Calculate admin-confirmed ROI withdrawals (status: 'confirmed', type: 'roi')
+  const confirmedRoiWithdrawals = await Withdrawal.find({ userId: userId, status: 'confirmed', type: 'roi' });
   const totalConfirmedRoi = confirmedRoiWithdrawals.reduce((sum, w) => sum + w.amount, 0);
   // Calculate totalInvested after allInvestments is defined
   const totalInvested = allInvestments.reduce((sum, inv) => sum + inv.amount, 0);
@@ -197,12 +197,72 @@ router.get('/', auth, async (req, res) => {
         availableBalance: data.userInfo.availableBalance,
         lockedBalance: data.userInfo.lockedBalance
       });
-      // Extra debug: print full userInfo
-      console.log('[DEBUG] Full userInfo returned to frontend:', data.userInfo);
     }
     res.json(data);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('Portfolio API error:', err.message, err.stack);
+    res.status(500).send('Server Error: ' + err.message);
+  }
+});
+
+// Invest in a plan
+router.post('/invest', auth, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { plan, amount, roi } = req.body;
+    if (!plan || !amount || isNaN(amount)) {
+      return res.status(400).json({ error: 'Invalid plan or amount.' });
+    }
+    // Plan config (should match frontend)
+    const PLAN_CONFIG = {
+      Silver: { min: 500, max: 4999 },
+      Gold: { min: 5000, max: 19999 },
+      Platinum: { min: 20000, max: 49999 },
+      Diamond: { min: 50000, max: 1000000 },
+    };
+    const config = PLAN_CONFIG[plan];
+    if (!config) return res.status(400).json({ error: 'Invalid plan selected.' });
+    if (amount < config.min || amount > config.max) {
+      return res.status(400).json({ error: `Amount must be between $${config.min} and $${config.max}` });
+    }
+    // Check for existing active investment
+    const active = await Investment.findOne({ user: userId, status: 'active' });
+    if (active) {
+      return res.status(400).json({ error: 'You can only have one active investment at a time.' });
+    }
+    // Check available balance
+    const confirmedDeposits = await Deposit.find({ user: userId, status: 'confirmed' });
+    const totalDeposited = confirmedDeposits.reduce((sum, d) => sum + d.amount, 0);
+    const allInvestments = await Investment.find({ user: userId });
+    const totalInvested = allInvestments.reduce((sum, inv) => sum + inv.amount, 0);
+    const availableBalance = totalDeposited - totalInvested;
+    if (amount > availableBalance) {
+      return res.status(400).json({ error: 'Insufficient balance.' });
+    }
+    // Create investment
+    const now = new Date();
+    const durationDays = plan === 'Silver' ? 7 : plan === 'Gold' ? 10 : plan === 'Platinum' ? 15 : 21;
+    const endDate = new Date(now.getTime() + durationDays * 24 * 60 * 60 * 1000);
+    const newInvestment = new Investment({
+      user: userId,
+      fundId: plan,
+      planId: plan,
+      fundName: plan,
+      amount,
+      currentValue: amount,
+      startDate: now,
+      endDate,
+      status: 'active',
+      roi: roi || 0,
+      transactions: [],
+    });
+    await newInvestment.save();
+    // Update user tier to match the plan
+    await User.findByIdAndUpdate(userId, { tier: plan });
+    res.json({ message: 'Investment successful', investment: newInvestment });
+  } catch (err) {
+    console.error('Invest error:', err);
+    res.status(500).json({ error: 'Server error' });
   }
 });
 

@@ -9,30 +9,16 @@ export default function AdminPlans() {
   const [plans, setPlans] = useState([]);
   const [form, setForm] = useState({ name: '', roi: '', duration: '', min: '', max: '' });
   const [editingId, setEditingId] = useState(null);
-  const [error, setError] = useState(null);
-  const [success, setSuccess] = useState(null);
 
   useEffect(() => {
     fetchPlans();
   }, []);
 
   async function fetchPlans() {
-    setError(null);
-    setSuccess(null);
     const token = localStorage.getItem('adminToken');
-    if (!token) {
-      setError('Admin token missing. Please log in as admin.');
-      setPlans([]);
-      return;
-    }
     const config = { headers: { Authorization: `Bearer ${token}` } };
-    try {
-      const res = await axios.get(API_BASE, config);
-      setPlans(res.data);
-    } catch (err) {
-      setError(err.response?.data?.error || 'Failed to fetch plans.');
-      setPlans([]);
-    }
+    const res = await axios.get(API_BASE, config);
+    setPlans(res.data);
   }
 
   function handleChange(e) {
@@ -41,13 +27,7 @@ export default function AdminPlans() {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    setError(null);
-    setSuccess(null);
     const token = localStorage.getItem('adminToken');
-    if (!token) {
-      setError('Admin token missing. Please log in as admin.');
-      return;
-    }
     const config = { headers: { Authorization: `Bearer ${token}` } };
     const payload = {
       name: form.name,
@@ -60,20 +40,14 @@ export default function AdminPlans() {
       minInvestment: form.min,
       maxInvestment: form.max
     };
-    try {
-      if (editingId) {
-        await axios.put(`${API_BASE}/${editingId}`, payload, config);
-        setSuccess('Plan updated successfully.');
-      } else {
-        await axios.post(API_BASE, payload, config);
-        setSuccess('Plan added successfully.');
-      }
-      setForm({ name: '', roi: '', duration: '', min: '', max: '' });
-      setEditingId(null);
-      fetchPlans();
-    } catch (err) {
-      setError(err.response?.data?.error || 'Failed to save plan.');
+    if (editingId) {
+      await axios.put(`${API_BASE}/${editingId}`, payload, config);
+    } else {
+      await axios.post(API_BASE, payload, config);
     }
+    setForm({ name: '', roi: '', duration: '', min: '', max: '' });
+    setEditingId(null);
+    fetchPlans();
   }
 
   function handleEdit(plan) {
@@ -82,27 +56,14 @@ export default function AdminPlans() {
   }
 
   async function handleDelete(id) {
-    setError(null);
-    setSuccess(null);
     const token = localStorage.getItem('adminToken');
-    if (!token) {
-      setError('Admin token missing. Please log in as admin.');
-      return;
-    }
     const config = { headers: { Authorization: `Bearer ${token}` } };
-    try {
-      await axios.delete(`${API_BASE}/${id}`, config);
-      setSuccess('Plan deleted successfully.');
-      fetchPlans();
-    } catch (err) {
-      setError(err.response?.data?.error || 'Failed to delete plan.');
-    }
+    await axios.delete(`${API_BASE}/${id}`, config);
+    fetchPlans();
   }
 
   return (
     <div className="w-full max-w-5xl mx-auto px-2 md:px-6 py-6 font-sans text-base text-gray-900">
-      {error && <div className="mb-4 p-3 bg-red-200 text-red-800 rounded">{error}</div>}
-      {success && <div className="mb-4 p-3 bg-green-200 text-green-800 rounded">{success}</div>}
       <div className="flex flex-col gap-4 mb-6 md:flex-row md:items-center md:justify-between">
         <h1 className="text-2xl font-bold whitespace-nowrap">Plan Management</h1>
         <span className="text-sm text-gray-400">Total Plans: {plans.length}</span>

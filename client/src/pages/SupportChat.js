@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import toast from '../utils/toast';
 import axios from 'axios';
 import { FaHeadset, FaPaperPlane, FaCheckDouble, FaArrowLeft } from 'react-icons/fa';
 import { useUser } from '../contexts/UserContext';
@@ -210,18 +209,7 @@ export default function SupportChat() {
         // Send a message with both text and file if both are present
         sendMessage(input.trim() || res.data.originalName, 'file', res.data.url);
       } catch (err) {
-        toast.error('File upload failed: ' + (err.response?.data?.message || err.message), {
-          position: 'top-center',
-          autoClose: 4000,
-          style: {
-            background: 'linear-gradient(90deg, #FFD700 0%, #FFF8DC 100%)',
-            color: '#222',
-            fontWeight: 'bold',
-            fontSize: '1.1rem',
-            borderRadius: '12px',
-            boxShadow: '0 4px 24px rgba(0,0,0,0.12)'
-          }
-        });
+        alert('File upload failed: ' + (err.response?.data?.message || err.message));
         console.error('File upload error:', err);
       }
       setFile(null);

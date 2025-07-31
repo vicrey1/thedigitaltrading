@@ -145,7 +145,7 @@ router.patch('/withdrawals/:id', authAdmin, async (req, res) => {
       } else if (destination === 'locked') {
         user.lockedBalance += withdrawal.amount;
       }
-      withdrawal.status = 'confirmed';
+      withdrawal.status = 'completed';
       withdrawal.destination = destination;
       await user.save();
       await withdrawal.save();
