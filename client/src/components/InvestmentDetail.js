@@ -1,7 +1,6 @@
 // src/components/InvestmentDetail.js
 import React, { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
-import { toast } from 'react-toastify';
 import { FiX, FiDollarSign, FiPieChart, FiTrendingUp, FiClock } from 'react-icons/fi';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
@@ -264,8 +263,6 @@ const InvestmentDetail = ({ investment, onClose }) => {
                   });
                   const data = await res.json();
                   if (data.success) {
-import { toast } from 'react-toastify';
-// ...existing code...
 toast.success(`ROI of $${data.roi?.toLocaleString?.() || ''} withdrawn! Locked balance: $${data.user?.lockedBalance?.toLocaleString?.() || ''}`, {
   position: 'top-center',
   autoClose: 5000,
