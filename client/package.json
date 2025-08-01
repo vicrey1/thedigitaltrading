@@ -40,7 +40,7 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "postbuild": "cp static.json build/",
+    "postbuild": "node -e \"require('fs').copyFileSync('static.json','build/static.json')\"",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
