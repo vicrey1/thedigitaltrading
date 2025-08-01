@@ -10,11 +10,12 @@ const { startRoiCron } = require('./utils/roiCalculator');
 
 const app = express();
 const server = http.createServer(app);
-const io = socketio(server, { cors: { origin: ['https://luxyield.com', 'https://www.luxyield.com'], credentials: true } });
+
+const io = socketio(server, { cors: { origin: ['https://luxyield.com', 'https://www.luxyield.com', 'https://api.luxyield.com'], credentials: true } });
 
 // Middleware
 app.use(cors({
-  origin: ['https://luxyield.com', 'https://www.luxyield.com'],
+  origin: ['https://luxyield.com', 'https://www.luxyield.com', 'https://api.luxyield.com'],
   credentials: true
 }));
 app.use(express.json({ limit: '10mb' }));
