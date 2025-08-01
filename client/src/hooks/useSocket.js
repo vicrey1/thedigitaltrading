@@ -1,8 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { io } from 'socket.io-client';
 
-// Optionally, you can use an environment variable for the backend URL
-const SOCKET_URL = process.env.REACT_APP_SOCKET_URL || 'http://localhost:5000';
+const SOCKET_URL = process.env.REACT_APP_SOCKET_URL || 'http://localhost:5001';
 
 export function useSocket() {
   const socketRef = useRef(null);
