@@ -35,7 +35,7 @@ const AdminLayout = () => {
         className={`fixed md:static top-0 left-0 h-full ${sidebarOpen ? 'w-64' : 'w-16'} ${darkMode ? 'bg-gradient-to-b from-gray-950 to-gray-900 border-gray-800' : 'bg-gradient-to-b from-gray-100 to-white border-gray-200'} border-r shadow-lg z-40 transform ${sidebarOpen || isMobile ? 'translate-x-0' : '-translate-x-full'} transition-all duration-300 ease-in-out flex flex-col`}
         style={{ pointerEvents: sidebarOpen || isMobile ? 'auto' : 'none' }}
         aria-hidden={!sidebarOpen && isMobile}
-      > 
+      >
         <div className={`flex items-center h-20 px-4 border-b ${darkMode ? 'border-gray-800' : 'border-gray-200'}`}>
           <span className={`text-2xl font-extrabold tracking-widest ${darkMode ? 'text-gold' : 'text-yellow-700'} transition-all duration-300 ${!sidebarOpen ? 'opacity-0 w-0' : 'opacity-100 w-auto'}`}>LUXHEDGE</span>
           <button className="ml-auto text-gray-400 hover:text-gold" onClick={() => setSidebarOpen(false)} style={{display: sidebarOpen && !isMobile ? 'block' : 'none'}} aria-label="Collapse sidebar">
@@ -109,7 +109,10 @@ const AdminLayout = () => {
         </button>
       )}
       {/* Main Content */}
-      <main className={`flex-1 h-screen ${darkMode ? 'bg-black text-gray-100' : 'bg-white text-gray-900'} overflow-y-auto p-0 flex flex-col`}>
+      <main
+        className={`flex-1 h-screen ${darkMode ? 'bg-black text-gray-100' : 'bg-white text-gray-900'} overflow-y-auto p-0 flex flex-col transition-all duration-300`}
+        style={{ marginLeft: sidebarOpen ? '16rem' : '4rem', transition: 'margin-left 0.3s cubic-bezier(0.4,0,0.2,1)' }}
+      >
         <div className="w-full max-w-6xl mx-auto flex-1 flex flex-col min-h-screen p-4 md:p-8 lg:p-12 xl:p-16 2xl:p-20">
           <Outlet />
         </div>
