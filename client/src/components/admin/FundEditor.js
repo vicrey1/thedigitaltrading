@@ -130,7 +130,7 @@ const FundEditor = ({ fund, onSave, onCancel }) => {
     if (!pdfFile || !fund?._id) return;
     const formData = new FormData();
     formData.append('pdf', pdfFile);
-    await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api/funds'}/${fund._id}/report`, {
+    await fetch(`${process.env.REACT_APP_API_URL}/funds/${fund._id}/report`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` },
       body: formData

@@ -10,7 +10,7 @@ const VerifyEmail = () => {
   useEffect(() => {
     const verify = async () => {
       try {
-        await axios.post('http://localhost:5001/api/auth/verify-email', { token });
+        await axios.post(`${process.env.REACT_APP_API_URL}/auth/verify-email`, { token });
         setStatus('success');
         setTimeout(() => navigate('/login'), 3000);
       } catch (err) {
