@@ -65,7 +65,6 @@
     "postcss": "^8.4.35",
     "tailwindcss": "^3.4.1"
   },
-  "proxy": "http://localhost:5001",
   "engines": {
     "node": ">=18.0.0"
   }
