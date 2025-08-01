@@ -5,7 +5,7 @@ const mongoose = require('mongoose');
 const Investment = require('../models/Investment');
 
 async function main() {
-  await mongoose.connect('mongodb://localhost:27017/luxhedge', { useNewUrlParser: true, useUnifiedTopology: true });
+  await mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true });
   const result = await Investment.updateMany(
     { status: 'active' },
     [

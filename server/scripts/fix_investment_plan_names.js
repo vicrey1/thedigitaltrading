@@ -1,7 +1,7 @@
 // scripts/fix_investment_plan_names.js
 const mongoose = require('mongoose');
 const Investment = require('../models/Investment');
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/luxyield';
+const MONGO_URI = process.env.MONGO_URI;
 
 const PLAN_NAMES = ['Silver', 'Gold', 'Platinum', 'Diamond'];
 

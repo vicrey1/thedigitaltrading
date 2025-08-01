@@ -371,7 +371,7 @@ router.get('/referral-stats', auth, async (req, res) => {
     }
     res.json({
       referralCode: user.referralCode,
-      referralLink: `${process.env.BASE_URL || 'http://localhost:3000'}/register?ref=${user.referralCode}`,
+      referralLink: `${process.env.BASE_URL}/register?ref=${user.referralCode}`,
       totalInvited: referredUsers.length,
       referredDetails,
       totalRewards: Math.round(totalRewards * 100) / 100,

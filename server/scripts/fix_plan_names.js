@@ -4,7 +4,7 @@
 const mongoose = require('mongoose');
 const Investment = require('../models/Investment');
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/luxyield';
+const MONGODB_URI = process.env.MONGODB_URI;
 const validPlans = ['Silver', 'Gold', 'Platinum', 'Diamond'];
 
 async function fixPlanNames() {

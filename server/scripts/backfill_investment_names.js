@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const Investment = require('../models/Investment');
 const Fund = require('../models/Fund');
 
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/luxyield';
+const MONGO_URI = process.env.MONGO_URI;
 
 async function backfill() {
   await mongoose.connect(MONGO_URI);

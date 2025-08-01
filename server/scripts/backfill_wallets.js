@@ -13,7 +13,7 @@ try {
   TronWeb = require('tronweb');
 }
 
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/luxyield';
+const MONGO_URI = process.env.MONGO_URI;
 
 async function generateWallets() {
   // BTC

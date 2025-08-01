@@ -2,7 +2,7 @@
 const mongoose = require('mongoose');
 const User = require('../models/User');
 
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/luxyield';
+const MONGO_URI = process.env.MONGO_URI;
 
 async function generateReferralCode(user) {
   // Use username or email prefix + random 4 digits

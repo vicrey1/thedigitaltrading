@@ -4,7 +4,7 @@
 const mongoose = require('mongoose');
 const Investment = require('../models/Investment');
 
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/YOUR_DB_NAME'; // <-- Set your DB name
+const MONGO_URI = process.env.MONGO_URI;
 const DAILY_ROI_RATE = 0.0005; // 0.05% daily ROI (example)
 
 function isSameDay(date1, date2) {

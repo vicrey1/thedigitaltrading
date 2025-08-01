@@ -118,7 +118,7 @@ router.post('/register', async (req, res) => {
       });
       console.log('Created PendingUser:', newPending);
     }
-    const verifyUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/verify-email/${emailToken}`;
+    const verifyUrl = `${process.env.FRONTEND_URL}/verify-email/${emailToken}`;
     await sendMail({
       to: email,
       subject: 'Verify Your Email',
@@ -261,7 +261,7 @@ router.post('/forgot-password', async (req, res) => {
     user.passwordResetOtp = otp;
     user.passwordResetOtpExpiry = expiry;
     await user.save();
-    const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password/${token}`;
+    const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${token}`;
     await sendMail({
       to: user.email,
       subject: 'Password Reset Request',
@@ -574,7 +574,7 @@ router.post('/request-change-password', async (req, res) => {
     user.changePasswordToken = token;
     user.changePasswordExpiry = expiry;
     await user.save();
-    const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password/${token}`;
+    const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${token}`;
     await sendMail({
       to: user.email,
       subject: 'Confirm Password Change',
@@ -737,7 +737,7 @@ router.post('/resend-otp', async (req, res) => {
     pending.emailOtp = emailOtp;
     pending.emailOtpExpiry = expiry;
     await pending.save();
-    const verifyUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/verify-email/${pending.emailVerificationToken}`;
+    const verifyUrl = `${process.env.FRONTEND_URL}/verify-email/${pending.emailVerificationToken}`;
     await sendMail({
       to: email,
       subject: 'Verify Your Email',

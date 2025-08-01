@@ -2,7 +2,7 @@
 const mongoose = require('mongoose');
 const User = require('../models/User');
 
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/luxhedge';
+const MONGO_URI = process.env.MONGO_URI;
 const userId = '6884336eb48a3ee02f74bdb9'; // Replace with your userId
 const newLockedBalance = 1234.56; // Set to desired test value
 

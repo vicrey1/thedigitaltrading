@@ -1,7 +1,7 @@
 // server/scripts/groupchat_bot.js
 const { io } = require('socket.io-client');
 
-const SERVER_URL = process.env.BOT_SOCKET_URL || 'http://localhost:5001';
+const SERVER_URL = process.env.BOT_SOCKET_URL;
 const SIMULATED_NAMES = [
   'Alice', 'Bob', 'Charlie', 'Diana', 'Eve', 'Frank', 'Grace', 'Heidi', 'Ivan', 'Judy',
   'Mallory', 'Niaj', 'Olivia', 'Peggy', 'Rupert', 'Sybil', 'Trent', 'Victor', 'Walter', 'Yasmine'

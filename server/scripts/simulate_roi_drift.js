@@ -6,7 +6,7 @@ const Investment = require('../models/Investment');
 const Plan = require('../models/Plan');
 const UserGainLog = require('../models/UserGainLog');
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/luxyield';
+const MONGODB_URI = process.env.MONGODB_URI;
 
 function randomInRange(min, max) {
   return Math.random() * (max - min) + min;
