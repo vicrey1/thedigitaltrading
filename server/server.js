@@ -10,10 +10,13 @@ const { startRoiCron } = require('./utils/roiCalculator');
 
 const app = express();
 const server = http.createServer(app);
-const io = socketio(server, { cors: { origin: '*' } });
+const io = socketio(server, { cors: { origin: ['https://luxyield.com', 'https://www.luxyield.com'], credentials: true } });
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: ['https://luxyield.com', 'https://www.luxyield.com'],
+  credentials: true
+}));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 // Register /api/plans route after app is initialized and after all require statements
