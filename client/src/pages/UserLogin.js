@@ -92,7 +92,7 @@ const UserLogin = () => {
         </form>
         <div className="mt-4 text-center">
           Don't have an account?{' '}
-          <a href="/register" className="text-gold hover:underline">Register here</a>
+          <a href="https://www.luxyield.com/register" className="text-gold hover:underline">Register here</a>
         </div>
       </div>
     </div>
