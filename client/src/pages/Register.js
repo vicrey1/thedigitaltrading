@@ -85,6 +85,7 @@ const Register = () => {
 
   return (
     <React.Fragment>
+      <div style={{background: 'red', color: 'white', padding: '10px', textAlign: 'center', fontWeight: 'bold'}}>DEBUG: Register page is rendering</div>
       <div className="min-h-screen flex items-center justify-center bg-dark p-4">
         <div className="glassmorphic p-8 rounded-xl w-full max-w-2xl">
           {/* ...Logo and other UI... */}
