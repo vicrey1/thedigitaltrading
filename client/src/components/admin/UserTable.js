@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { FiSearch, FiFilter, FiEdit2, FiEye } from 'react-icons/fi';
 
+
 const UserTable = ({ users, onSelectUser }) => {
   const [searchTerm, setSearchTerm] = useState('');
   // const [filters, setFilters] = useState({
@@ -10,16 +11,17 @@ const UserTable = ({ users, onSelectUser }) => {
   //   kycPending: false
   // });
 
-  const filteredUsers = users.filter(user => {
+  // Ensure users is always an array
+  const safeUsers = Array.isArray(users) ? users : [];
+
+  const filteredUsers = safeUsers.filter(user => {
     const matchesSearch = 
-      user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.name.toLowerCase().includes(searchTerm.toLowerCase());
-    
+      user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.name?.toLowerCase().includes(searchTerm.toLowerCase());
     // const matchesFilters = 
     //   (!filters.verified || user.verified) &&
     //   (!filters.active || user.status === 'active') &&
     //   (!filters.kycPending || user.kycStatus === 'pending');
-    
     return matchesSearch; // && matchesFilters;
   });
 
