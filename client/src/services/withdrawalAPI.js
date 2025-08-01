@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 const API = axios.create({
-  baseURL: process.env.REACT_APP_API_BASE_URL || 'https://api.luxyield.com/api/admin/withdrawals',
+  baseURL: process.env.REACT_APP_API_BASE_URL + '/api/admin/withdrawals',
 });
 
 // Add auth token to requests
@@ -52,7 +52,7 @@ export const bulkUpdateWithdrawals = async (ids, updates) => {
 
 // User withdrawal endpoints (not admin)
 const userAPI = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || '/api/withdrawal',
+  baseURL: process.env.REACT_APP_API_BASE_URL + '/api/withdrawal',
 });
 userAPI.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');

@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { io } from 'socket.io-client';
 
-const SOCKET_URL = process.env.REACT_APP_WS_BASE_URL || 'wss://api.luxyield.com';
+const SOCKET_URL = process.env.REACT_APP_WS_BASE_URL;
 
 export function useSocket() {
   const socketRef = useRef(null);
