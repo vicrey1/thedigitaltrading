@@ -1,7 +1,10 @@
 {
   "dependencies": {
+    "bitcoinjs-lib": "^5.2.0",
+    "ethers": "^5.7.2",
     "mongoose": "^8.16.5",
     "react-toastify": "^11.0.5",
-    "socket.io-client": "^4.8.1"
+    "socket.io-client": "^4.8.1",
+    "tronweb": "^2.9.0"
   }
 }

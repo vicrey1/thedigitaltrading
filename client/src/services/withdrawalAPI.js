@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 const API = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:5001/api/admin/withdrawals',
+  baseURL: process.env.REACT_APP_API_BASE_URL || 'https://api.luxyield.com/api/admin/withdrawals',
 });
 
 // Add auth token to requests
