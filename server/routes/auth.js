@@ -28,11 +28,14 @@ const { logDeviceHistory } = require('./user');
 
 // Test email endpoint
 router.post('/test-email', async (req, res) => {
+  console.log('Test email endpoint called');
   const { to, subject, text, html } = req.body;
   try {
+    console.log('About to send email to:', to);
     const info = await require('../utils/mailer').sendMail({ to, subject, text, html });
     res.json({ success: true, info });
   } catch (err) {
+    console.error('Error in test email endpoint:', err);
     res.status(500).json({ success: false, error: err.message });
   }
 });
@@ -65,7 +68,7 @@ async function verifyCaptcha(token) {
 
 // Register route
 router.post('/register', async (req, res) => {
-  console.log('REGISTER ENDPOINT HIT');
+  console.log('Registration endpoint called');
   console.log('Registration request body:', req.body);
   try {
     const {
