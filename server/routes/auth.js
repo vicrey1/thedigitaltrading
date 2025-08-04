@@ -1,3 +1,13 @@
+// Test email endpoint
+router.post('/test-email', async (req, res) => {
+  const { to, subject, text, html } = req.body;
+  try {
+    const info = await require('../utils/mailer').sendMail({ to, subject, text, html });
+    res.json({ success: true, info });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
