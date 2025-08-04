@@ -1,6 +1,5 @@
 // ...existing code...
-const express = require('express');
-const router = express.Router();
+// ...existing code...
 // ...existing code...
 
 // Test email endpoint
@@ -13,8 +12,7 @@ router.post('/test-email', async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
-const express = require('express');
-const router = express.Router();
+// ...existing code...
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
