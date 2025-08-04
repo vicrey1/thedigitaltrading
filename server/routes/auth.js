@@ -1,3 +1,8 @@
+// ...existing code...
+const express = require('express');
+const router = express.Router();
+// ...existing code...
+
 // Test email endpoint
 router.post('/test-email', async (req, res) => {
   const { to, subject, text, html } = req.body;
