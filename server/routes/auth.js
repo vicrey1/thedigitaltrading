@@ -155,20 +155,21 @@ router.post('/register', async (req, res) => {
       console.error('[ERROR] Failed to send registration email:', err);
     }
     res.json({ message: 'Registration started. Please verify your email.' });
-  } catch (err) {
-    console.error('Registration error:', err);
-    res.status(500).json({ message: 'Registration failed', error: err.message });
-  }
-});
-
-// Login route
-router.post('/login', logDeviceHistory, async (req, res) => {
-  try {
-    const { email, password } = req.body;
-    // Check if user exists
-    let user = await User.findOne({ email });
-    if (!user) {
-      console.warn(`Login failed: No user found for email ${email}`);
+        const registrationData = {
+            fullName,
+            username,
+            email,
+            phone,
+            country,
+            securityQuestion,
+            securityAnswer,
+            password: hashedPassword,
+            registrationIP: req.headers['x-forwarded-for'] || req.connection.remoteAddress,
+        };
+        if (referralCode) {
+            registrationData.referralCode = referralCode;
+        } else {
+            registrationData.referralCode = null; // Ensure it's never undefined
       return res.status(400).json({ message: 'No account found for this email.' });
     }
     // Validate password
