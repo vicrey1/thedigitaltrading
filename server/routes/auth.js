@@ -1,29 +1,4 @@
-const express = require('express');
-const router = express.Router();
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const User = require('../models/User');
-const PendingUser = require('../models/PendingUser');
-const multer = require('multer');
-const path = require('path');
-const nodemailer = require('nodemailer');
-const speakeasy = require('speakeasy');
-const qrcode = require('qrcode');
-const axios = require('axios');
-const { sendMail } = require('../utils/mailer');
-const crypto = require('crypto');
-const bitcoin = require('bitcoinjs-lib');
-const ethers = require('ethers');
-// Robust TronWeb import for all export styles
-const tronwebPkg = require('tronweb');
-let TronWeb = tronwebPkg?.default?.TronWeb || tronwebPkg.TronWeb;
-const solanaWeb3 = require('@solana/web3.js');
-const bip39 = require('bip39');
-const fs = require('fs');
-const auth = require('../middleware/auth');
-const geoip = require('geoip-lite');
-const useragent = require('useragent');
-const { logDeviceHistory } = require('./user');
+// ...existing code up to the first set of require statements and router initialization...
 
 // User login route (must be after router is initialized)
 router.post('/login', async (req, res) => {
