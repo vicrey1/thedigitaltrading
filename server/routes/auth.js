@@ -118,6 +118,9 @@ router.post('/register', async (req, res) => {
         ...pending.registrationData, // fallback to previous data if any
         ...registrationData // overwrite with new data
       };
+      if (!pending.registrationData.referralCode) {
+        delete pending.registrationData.referralCode;
+      }
       pending.emailVerificationToken = emailToken;
       pending.emailVerificationTokenExpiry = expiry;
       pending.emailOtp = emailOtp;
@@ -125,6 +128,10 @@ router.post('/register', async (req, res) => {
       await pending.save();
       console.log('Updated PendingUser:', pending);
     } else {
+      // Remove referralCode if falsy before creating new PendingUser
+      if (!registrationData.referralCode) {
+        delete registrationData.referralCode;
+      }
       const newPending = await PendingUser.create({
         registrationData,
         email,
@@ -154,50 +161,9 @@ router.post('/register', async (req, res) => {
       console.error('[ERROR] Failed to send registration email:', err);
     }
     res.json({ message: 'Registration started. Please verify your email.' });
-    // Log device history manually since req.user is not set yet
-    try {
-      const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-      const agent = useragent.parse(req.headers['user-agent']);
-      const geo = geoip.lookup(ip) || {};
-      const browser = agent.family + ' ' + agent.major;
-      const device = agent.device.family;
-      const deviceEntry = {
-        date: new Date().toISOString(),
-        ip,
-        browser,
-        device,
-        location: geo.city ? `${geo.city}, ${geo.country}` : geo.country || '-',
-        status: 'Success',
-        lastActive: new Date().toISOString()
-      };
-      // Remove any existing session for this device/browser
-      await User.findByIdAndUpdate(user.id, {
-        $pull: { deviceHistory: { browser, device } }
-      });
-      // Add the new session
-      await User.findByIdAndUpdate(user.id, { $push: { deviceHistory: deviceEntry } });
-    } catch (e) {
-      console.error('Failed to log device history:', e);
-    }
-    // Create token
-    const payload = {
-      user: {
-        id: user.id,
-        role: user.role
-      }
-    };
-    jwt.sign(
-      payload,
-      process.env.JWT_SECRET,
-      { expiresIn: '24h' },
-      (err, token) => {
-        if (err) throw err;
-        res.json({ token, message: 'Login successful.' });
-      }
-    );
   } catch (err) {
-    console.error('Login error:', err.message, err.stack);
-    res.status(500).send('Server error');
+    console.error('Registration error:', err.message, err.stack);
+    res.status(500).json({ message: 'Registration failed', error: err.message });
   }
 });
 
