@@ -1,4 +1,5 @@
 // User login route
+// User login route (must be after router is initialized)
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
