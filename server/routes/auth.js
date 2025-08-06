@@ -30,18 +30,22 @@ const { logDeviceHistory } = require('./user');
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
+    console.log('[LOGIN] Attempt for email:', email);
     // Find user by email
     const user = await User.findOne({ email });
     if (!user) {
+      console.log('[LOGIN] User not found for email:', email);
       return res.status(401).json({ message: 'Invalid credentials' });
     }
     // Check password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
+      console.log('[LOGIN] Password mismatch for email:', email);
       return res.status(401).json({ message: 'Invalid credentials' });
     }
     // Check if email is verified
     if (!user.isEmailVerified) {
+      console.log('[LOGIN] Email not verified for email:', email);
       return res.status(403).json({ message: 'Please verify your email before logging in.' });
     }
     // Generate JWT token
@@ -50,6 +54,7 @@ router.post('/login', async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
+    console.log('[LOGIN] Success for email:', email);
     res.json({ token, message: 'Login successful' });
   } catch (err) {
     console.error('Login error:', err);
