@@ -1,7 +1,10 @@
 // scripts/backfill_current_value.js
 const mongoose = require('mongoose');
 const Investment = require('../models/Investment');
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/luxyield';
+const MONGO_URI = process.env.MONGO_URI;
+if (!MONGO_URI) {
+  throw new Error('MONGO_URI environment variable must be set.');
+}
 
 const PLAN_CONFIG = {
   Silver: { roi: 350 },
