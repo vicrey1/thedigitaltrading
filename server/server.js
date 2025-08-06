@@ -13,6 +13,14 @@ const server = http.createServer(app);
 
 const io = socketio(server, { cors: { origin: ['https://luxyield.com', 'https://www.luxyield.com', 'https://api.luxyield.com'], credentials: true } });
 
+// Basic Socket.IO connection handler
+io.on('connection', (socket) => {
+  console.log('A client connected to WebSocket:', socket.id);
+  socket.on('disconnect', () => {
+    console.log('Client disconnected:', socket.id);
+  });
+});
+
 // Middleware
 app.use(cors({
   origin: ['https://luxyield.com', 'https://www.luxyield.com', 'https://api.luxyield.com'],
