@@ -103,8 +103,11 @@ router.post('/register', async (req, res) => {
       securityQuestion,
       securityAnswer,
       password: hashedPassword,
-      referralCode: referralCode || null,
+            registrationIP: req.headers['x-forwarded-for'] || req.connection.remoteAddress,
       registrationIP: req.headers['x-forwarded-for'] || req.connection.remoteAddress,
+        if (referralCode) {
+            registrationData.referralCode = referralCode;
+        }
     };
     // Generate new email verification token and OTP
     const emailToken = crypto.randomBytes(32).toString('hex');
