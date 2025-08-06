@@ -439,7 +439,7 @@ router.get('/verify-email/:token', async (req, res) => {
     // Create user
     console.log('registrationData for token verification:', registrationData);
     // Explicitly map all required fields from registrationData
-    const newUser = new User({
+    const userData = {
       name: registrationData.name || registrationData.fullName,
       username: registrationData.username,
       email: registrationData.email,
@@ -448,7 +448,6 @@ router.get('/verify-email/:token', async (req, res) => {
       securityQuestion: registrationData.securityQuestion,
       securityAnswer: registrationData.securityAnswer,
       password: registrationData.password,
-      referralCode: registrationData.referralCode || null,
       registrationIP: registrationData.registrationIP || '',
       isEmailVerified: true,
       wallets: {
@@ -462,7 +461,12 @@ router.get('/verify-email/:token', async (req, res) => {
         usdc_trc20: { address: tronAddress, privateKey: tronPrivateKey, mnemonic: tronMnemonic }
       },
       lastActive: new Date().toISOString()
-    });
+    };
+    if (registrationData.referralCode) {
+      userData.referralCode = registrationData.referralCode;
+    }
+    console.log('[DEBUG] Email verification request from domain:', req.headers.host);
+    const newUser = new User(userData);
     await newUser.save();
     await PendingUser.deleteOne({ _id: pending._id });
     // Optionally redirect to frontend success page
