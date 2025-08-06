@@ -22,6 +22,7 @@ const Register = () => {
   const [otpSuccess, setOtpSuccess] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
   const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+  const AUTH_PATH = `${API_BASE_URL}/api/auth`;
 
   const formik = useFormik({
     initialValues: {
@@ -64,7 +65,7 @@ const Register = () => {
       };
       console.log('Registration data being sent:', registrationPayload);
       try {
-        await axios.post(`${API_BASE_URL}/auth/register`, registrationPayload);
+        await axios.post(`${AUTH_PATH}/register`, registrationPayload);
         // Registration successful, show verification modal
         setRegisteredEmail(values.email);
         setShowVerifyModal(true);
@@ -289,7 +290,7 @@ const Register = () => {
               onClick={async () => {
                 setOtpError("");
                 try {
-                  await axios.post(`${API_BASE_URL}/auth/resend-otp`, { email: registeredEmail });
+                  await axios.post(`${AUTH_PATH}/resend-otp`, { email: registeredEmail });
                   setOtpError("A new OTP has been sent to your email.");
                 } catch (err) {
                   setOtpError(err.response?.data?.message || "Failed to resend OTP.");
@@ -307,7 +308,7 @@ const Register = () => {
                   setIsVerifying(true);
                   setOtpError("");
                   try {
-                    await axios.post(`${API_BASE_URL}/auth/verify-otp`, {
+                    await axios.post(`${AUTH_PATH}/verify-otp`, {
                       email: registeredEmail,
                       otp,
                     });
