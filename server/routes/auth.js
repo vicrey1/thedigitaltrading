@@ -95,7 +95,7 @@ router.post('/register', async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
     const registrationData = {
-      name: fullName,
+      fullName,
       username,
       email,
       phone,
@@ -103,12 +103,11 @@ router.post('/register', async (req, res) => {
       securityQuestion,
       securityAnswer,
       password: hashedPassword,
-            registrationIP: req.headers['x-forwarded-for'] || req.connection.remoteAddress,
       registrationIP: req.headers['x-forwarded-for'] || req.connection.remoteAddress,
-        if (referralCode) {
-            registrationData.referralCode = referralCode;
-        }
     };
+    if (referralCode) {
+      registrationData.referralCode = referralCode;
+    }
     // Generate new email verification token and OTP
     const emailToken = crypto.randomBytes(32).toString('hex');
     const emailOtp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -155,29 +154,6 @@ router.post('/register', async (req, res) => {
       console.error('[ERROR] Failed to send registration email:', err);
     }
     res.json({ message: 'Registration started. Please verify your email.' });
-        const registrationData = {
-            fullName,
-            username,
-            email,
-            phone,
-            country,
-            securityQuestion,
-            securityAnswer,
-            password: hashedPassword,
-            registrationIP: req.headers['x-forwarded-for'] || req.connection.remoteAddress,
-        };
-        if (referralCode) {
-            registrationData.referralCode = referralCode;
-        } else {
-            registrationData.referralCode = null; // Ensure it's never undefined
-      return res.status(400).json({ message: 'No account found for this email.' });
-    }
-    // Validate password
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      console.warn(`Login failed: Incorrect password for email ${email}`);
-      return res.status(400).json({ message: 'Incorrect password.' });
-    }
     // Log device history manually since req.user is not set yet
     try {
       const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
