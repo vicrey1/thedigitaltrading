@@ -134,17 +134,23 @@ router.post('/register', async (req, res) => {
       console.log('Created PendingUser:', newPending);
     }
     const verifyUrl = `${process.env.FRONTEND_URL}/verify-email/${emailToken}`;
-    await sendMail({
-      to: email,
-      subject: 'Verify Your Email',
-      html: `<div style="font-family:sans-serif;max-width:480px;margin:auto;padding:32px 24px;background:#18181b;border-radius:16px;color:#fff;text-align:center;">
-        <h2 style="color:#FFD700;">Verify Your Email</h2>
-        <p style="margin:24px 0;">Click the button below to verify your email address and complete registration, or use the OTP code below.</p>
-        <a href="${verifyUrl}" style="display:inline-block;padding:12px 32px;background:#FFD700;color:#18181b;font-weight:bold;border-radius:8px;text-decoration:none;margin:16px 0;">Verify Email</a>
-        <p style="margin:24px 0;font-size:18px;">Or enter this OTP code: <span style="font-weight:bold;letter-spacing:2px;">${emailOtp}</span></p>
-        <p style="margin-top:24px;font-size:13px;color:#aaa;">If you did not create an account, you can ignore this email.</p>
-      </div>`
-    });
+    console.log('[DEBUG] About to send registration email to:', email, 'with OTP:', emailOtp);
+    try {
+      await sendMail({
+        to: email,
+        subject: 'Verify Your Email',
+        html: `<div style="font-family:sans-serif;max-width:480px;margin:auto;padding:32px 24px;background:#18181b;border-radius:16px;color:#fff;text-align:center;">
+          <h2 style="color:#FFD700;">Verify Your Email</h2>
+          <p style="margin:24px 0;">Click the button below to verify your email address and complete registration, or use the OTP code below.</p>
+          <a href="${verifyUrl}" style="display:inline-block;padding:12px 32px;background:#FFD700;color:#18181b;font-weight:bold;border-radius:8px;text-decoration:none;margin:16px 0;">Verify Email</a>
+          <p style="margin:24px 0;font-size:18px;">Or enter this OTP code: <span style="font-weight:bold;letter-spacing:2px;">${emailOtp}</span></p>
+          <p style="margin-top:24px;font-size:13px;color:#aaa;">If you did not create an account, you can ignore this email.</p>
+        </div>`
+      });
+      console.log('[DEBUG] Registration email sent to:', email);
+    } catch (err) {
+      console.error('[ERROR] Failed to send registration email:', err);
+    }
     res.json({ message: 'Registration started. Please verify your email.' });
   } catch (err) {
     console.error('Registration error:', err);
@@ -813,8 +819,8 @@ router.post('/verify-otp', async (req, res) => {
     const tronAddress = tronAccount.address.base58;
     const tronPrivateKey = tronAccount.privateKey;
     const tronMnemonic = '';
-    // Create user
-    const newUser = new User({
+    // Prepare user data, omitting referralCode if null/empty
+    const userData = {
       ...registrationData,
       isEmailVerified: true,
       wallets: {
@@ -828,7 +834,11 @@ router.post('/verify-otp', async (req, res) => {
         usdc_trc20: { address: tronAddress, privateKey: tronPrivateKey, mnemonic: tronMnemonic }
       },
       lastActive: new Date().toISOString()
-    });
+    };
+    if (!userData.referralCode) {
+      delete userData.referralCode;
+    }
+    const newUser = new User(userData);
     await newUser.save();
     await PendingUser.deleteOne({ _id: pending._id });
     res.json({ message: 'Email verified and account created! You can now log in.' });
