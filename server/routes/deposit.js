@@ -4,7 +4,7 @@ const auth = require('../middleware/auth');
 const Deposit = require('../models/Deposit');
 const User = require('../models/User');
 
-// POST /api/deposit - Create a new deposit
+// POST /api/deposit, Create a new deposit
 router.post('/', auth, async (req, res) => {
   try {
     const { amount, method } = req.body;
@@ -24,7 +24,7 @@ router.post('/', auth, async (req, res) => {
   }
 });
 
-// GET /api/deposit/history - Get user's deposit history
+// GET /api/deposit/history, Get user's deposit history
 router.get('/history', auth, async (req, res) => {
   try {
     const deposits = await Deposit.find({ user: req.user.id }).sort('-createdAt');
@@ -34,7 +34,7 @@ router.get('/history', auth, async (req, res) => {
   }
 });
 
-// POST /api/deposit/confirm - Simulate confirming a deposit for testing
+// POST /api/deposit/confirm, Simulate confirming a deposit for testing
 router.post('/confirm', auth, async (req, res) => {
   try {
     const { depositId } = req.body;

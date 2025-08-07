@@ -209,7 +209,7 @@ router.post('/deposit', auth, async (req, res) => {
   }
 });
 
-// In server/routes/user.js - update generatePerformanceData function
+// In server/routes/user.js, update generatePerformanceData function
 function generatePerformanceData(investments) {
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'];
   
