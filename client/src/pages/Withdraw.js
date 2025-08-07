@@ -211,7 +211,7 @@ const Withdraw = () => {
       <div className="glassmorphic p-8 rounded-xl text-center mt-10">
         <h2 className="text-2xl font-bold text-yellow-400 mb-4">KYC Required</h2>
         <p className="text-white mb-4">You must complete KYC verification before you can withdraw funds.</p>
-        <a href="/kyc" className="bg-gold text-black px-4 py-2 rounded-lg font-bold hover:bg-yellow-500 transition">Go to KYC Verification</a>
+        <a href="/dashboard/kyc" className="bg-gold text-black px-4 py-2 rounded-lg font-bold hover:bg-yellow-500 transition">Go to KYC Verification</a>
       </div>
     );
   }
