@@ -1,10 +1,3 @@
-// Health check/test route (must be after router is initialized)
-router.get('/ping', (req, res) => {
-  console.log('[PING] /api/auth/ping hit');
-  res.json({ message: 'pong' });
-});
-
-
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
@@ -31,6 +24,12 @@ const auth = require('../middleware/auth');
 const geoip = require('geoip-lite');
 const useragent = require('useragent');
 const { logDeviceHistory } = require('./user');
+
+// Health check/test route (must be after router is initialized)
+router.get('/ping', (req, res) => {
+  console.log('[PING] /api/auth/ping hit');
+  res.json({ message: 'pong' });
+});
 
 // User login route (must be after router is initialized)
 router.post('/login', async (req, res) => {
