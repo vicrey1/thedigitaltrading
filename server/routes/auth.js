@@ -55,18 +55,18 @@ router.post('/login', async (req, res) => {
     const user = await User.findOne({ email });
     if (!user) {
       console.log('[LOGIN] User not found', { email });
-      return res.status(401).json({ message: 'Invalid credentials' });
+      return res.status(401).json({ message: 'User not found' });
     }
     // Check password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       console.log('[LOGIN] Password mismatch', { email });
-      return res.status(401).json({ message: 'Invalid credentials' });
+      return res.status(401).json({ message: 'Incorrect password' });
     }
     // Check if email is verified
     if (!user.isEmailVerified) {
       console.log('[LOGIN] Email not verified', { email });
-      return res.status(403).json({ message: 'Please verify your email before logging in.' });
+      return res.status(403).json({ message: 'Email not verified. Please verify your email before logging in.' });
     }
     // Generate JWT token
     const token = jwt.sign(
