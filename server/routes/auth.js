@@ -133,6 +133,7 @@ async function verifyCaptcha(token) {
 router.post('/register', async (req, res) => {
   console.log('Registration endpoint called');
   console.log('Registration request body:', req.body);
+  console.log('[EMAIL VERIFICATION] Registration flow: email:', email, 'Token:', emailToken, 'Expiry:', new Date(expiry).toISOString());
   try {
     const {
       fullName,
@@ -175,6 +176,7 @@ router.post('/register', async (req, res) => {
     const emailToken = crypto.randomBytes(32).toString('hex');
     const emailOtp = Math.floor(100000 + Math.random() * 900000).toString();
     const expiry = Date.now() + 24 * 60 * 60 * 1000;
+    console.log('[EMAIL VERIFICATION] Generated token:', emailToken, 'Expiry:', new Date(expiry).toISOString());
     if (pending) {
       // Update existing pending registration with all fields
       pending.registrationData = {
@@ -484,7 +486,12 @@ router.post('/verify-email', async (req, res) => {
 router.get('/verify-email/:token', async (req, res) => {
   try {
     const { token } = req.params;
+    console.log('[EMAIL VERIFICATION] Verification flow: token:', req.params.token);
+    console.log('[EMAIL VERIFICATION] Verifying token:', token, 'Current time:', new Date(Date.now()).toISOString());
     const pending = await PendingUser.findOne({ emailVerificationToken: token, emailVerificationTokenExpiry: { $gt: Date.now() } });
+    if (pending) {
+      console.log('[EMAIL VERIFICATION] Found pending user. Expiry:', new Date(pending.emailVerificationTokenExpiry).toISOString());
+    }
     if (!pending) {
       return res.status(400).send('Invalid or expired verification link.');
     }
