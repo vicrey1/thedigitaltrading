@@ -152,8 +152,6 @@ router.post('/register', async (req, res) => {
     if (user) {
       return res.status(400).json({ message: 'User already exists' });
     }
-    // If pending registration exists, update it with new data and resend verification
-    // Otherwise, create a new pending registration
     // Hash password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
@@ -178,8 +176,8 @@ router.post('/register', async (req, res) => {
     if (pending) {
       // Update existing pending registration with all fields
       pending.registrationData = {
-        ...pending.registrationData, // fallback to previous data if any
-        ...registrationData // overwrite with new data
+        ...pending.registrationData,
+        ...registrationData
       };
       if (!pending.registrationData.referralCode) {
         delete pending.registrationData.referralCode;
@@ -191,33 +189,6 @@ router.post('/register', async (req, res) => {
       await pending.save();
       console.log('Updated PendingUser:', pending);
     } else {
-      // Remove referralCode if falsy before creating new PendingUser
-      if (!registrationData.referralCode) {
-        delete registrationData.referralCode;
-      }
-      const newPending = await PendingUser.create({
-        registrationData,
-        email,
-        emailVerificationToken: emailToken,
-        emailVerificationTokenExpiry: expiry,
-        emailOtp,
-    if (pending) {
-      // Update existing pending registration with all fields
-      pending.registrationData = {
-        ...pending.registrationData, // fallback to previous data if any
-        ...registrationData // overwrite with new data
-      };
-      if (!pending.registrationData.referralCode) {
-        delete pending.registrationData.referralCode;
-      }
-      pending.emailVerificationToken = emailToken;
-      pending.emailVerificationTokenExpiry = expiry;
-      pending.emailOtp = emailOtp;
-      pending.emailOtpExpiry = expiry;
-      await pending.save();
-      console.log('Updated PendingUser:', pending);
-    } else {
-      // Remove referralCode if falsy before creating new PendingUser
       if (!registrationData.referralCode) {
         delete registrationData.referralCode;
       }
@@ -232,8 +203,7 @@ router.post('/register', async (req, res) => {
       console.log('Created PendingUser:', newPending);
     }
     const verifyUrl = `${process.env.FRONTEND_URL}/verify-email/${emailToken}`;
-    // Fix: ensure 'email' is defined and used correctly in log statement
-    console.log('[EMAIL VERIFICATION] Registration flow: email:', req.body.email, 'Token:', emailToken, 'Expiry:', new Date(expiry).toISOString());
+    console.log('[EMAIL VERIFICATION] Registration flow: email:', email, 'Token:', emailToken, 'Expiry:', new Date(expiry).toISOString());
     try {
       await sendMail({
         to: email,
@@ -253,11 +223,6 @@ router.post('/register', async (req, res) => {
   } catch (err) {
     console.error('[REGISTER] Error:', err);
     res.status(500).json({ message: 'Registration failed', error: err.message });
-  }
-});
-  } catch (err) {
-    console.error('KYC upload error:', err);
-    res.status(500).send('Server error');
   }
 });
 
