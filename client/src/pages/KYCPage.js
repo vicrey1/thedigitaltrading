@@ -9,14 +9,19 @@ import { FiCamera, FiUpload, FiCheckCircle, FiAlertCircle } from 'react-icons/fi
 const KYCPage = () => {
   const [step, setStep] = useState(1); // 1: Info, 2: ID, 3: Selfie, 4: Review
   const [country, setCountry] = useState('');
-  const [idFile, setIdFile] = useState(null);
-  const [idPreview, setIdPreview] = useState(null);
+  const [documentType, setDocumentType] = useState('');
+  const [idFrontFile, setIdFrontFile] = useState(null);
+  const [idFrontPreview, setIdFrontPreview] = useState(null);
+  const [idBackFile, setIdBackFile] = useState(null);
+  const [idBackPreview, setIdBackPreview] = useState(null);
   const [selfieFile, setSelfieFile] = useState(null);
   const [selfiePreview, setSelfiePreview] = useState(null);
   const [useCamera, setUseCamera] = useState(false);
-  const [useIdCamera, setUseIdCamera] = useState(false);
+  const [useIdFrontCamera, setUseIdFrontCamera] = useState(false);
+  const [useIdBackCamera, setUseIdBackCamera] = useState(false);
   const webcamRef = useRef(null);
-  const idWebcamRef = useRef(null);
+  const idFrontWebcamRef = useRef(null);
+  const idBackWebcamRef = useRef(null);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -40,16 +45,27 @@ const KYCPage = () => {
     fetchKYC();
   }, [success]);
 
-  // Preview for ID file
+  // Preview for ID front file
   useEffect(() => {
-    if (idFile) {
+    if (idFrontFile) {
       const reader = new FileReader();
-      reader.onloadend = () => setIdPreview(reader.result);
-      reader.readAsDataURL(idFile);
+      reader.onloadend = () => setIdFrontPreview(reader.result);
+      reader.readAsDataURL(idFrontFile);
     } else {
-      setIdPreview(null);
+      setIdFrontPreview(null);
     }
-  }, [idFile]);
+  }, [idFrontFile]);
+
+  // Preview for ID back file
+  useEffect(() => {
+    if (idBackFile) {
+      const reader = new FileReader();
+      reader.onloadend = () => setIdBackPreview(reader.result);
+      reader.readAsDataURL(idBackFile);
+    } else {
+      setIdBackPreview(null);
+    }
+  }, [idBackFile]);
 
   // Preview for selfie file
   useEffect(() => {
@@ -66,15 +82,24 @@ const KYCPage = () => {
     e.preventDefault();
     setError('');
     setSuccess(false);
-    if (!country || !idFile || !selfieFile) {
+    if (!country || !documentType || !selfieFile) {
       setError('All fields are required.');
       toast.error('All fields are required.');
+      return;
+    }
+    // For types needing both front and back
+    const needsBack = ['National ID', "Driver's License", 'Residence Permit', 'Voter Card', 'Other (Front & Back)'].includes(documentType);
+    if (!idFrontFile || (needsBack && !idBackFile)) {
+      setError('Please upload all required ID images.');
+      toast.error('Please upload all required ID images.');
       return;
     }
     setLoading(true);
     const formData = new FormData();
     formData.append('country', country);
-    formData.append('id', idFile);
+    formData.append('documentType', documentType);
+    formData.append('idFront', idFrontFile);
+    if (needsBack) formData.append('idBack', idBackFile);
     formData.append('selfie', selfieFile);
     try {
       await axios.post('/api/auth/kyc/upload', formData, {
@@ -107,14 +132,26 @@ const KYCPage = () => {
     }
   };
 
-  const handleIdCapture = () => {
-    if (idWebcamRef.current) {
-      const imageSrc = idWebcamRef.current.getScreenshot();
+  const handleIdFrontCapture = () => {
+    if (idFrontWebcamRef.current) {
+      const imageSrc = idFrontWebcamRef.current.getScreenshot();
       fetch(imageSrc)
         .then(res => res.blob())
         .then(blob => {
-          setIdFile(new File([blob], 'id.jpg', { type: 'image/jpeg' }));
-          setUseIdCamera(false);
+          setIdFrontFile(new File([blob], 'id-front.jpg', { type: 'image/jpeg' }));
+          setUseIdFrontCamera(false);
+        });
+    }
+  };
+
+  const handleIdBackCapture = () => {
+    if (idBackWebcamRef.current) {
+      const imageSrc = idBackWebcamRef.current.getScreenshot();
+      fetch(imageSrc)
+        .then(res => res.blob())
+        .then(blob => {
+          setIdBackFile(new File([blob], 'id-back.jpg', { type: 'image/jpeg' }));
+          setUseIdBackCamera(false);
         });
     }
   };
@@ -180,47 +217,95 @@ const KYCPage = () => {
         {step === 1 && (
           <div>
             <label className="block text-gray-300 mb-1">Country</label>
-            <select value={country} onChange={e => setCountry(e.target.value)} className="w-full p-2 rounded bg-gray-800 text-white">
+            <select value={country} onChange={e => setCountry(e.target.value)} className="w-full p-2 rounded bg-gray-800 text-white mb-4">
               <option value="">Select country</option>
               {countries.map(c => <option key={c} value={c}>{c}</option>)}
             </select>
-            <button type="button" className="mt-6 bg-gold text-black px-4 py-2 rounded-lg font-bold hover:bg-yellow-500 transition w-full" disabled={!country} onClick={() => setStep(2)}>Next</button>
+            <label className="block text-gray-300 mb-1">Document Type</label>
+            <select value={documentType} onChange={e => setDocumentType(e.target.value)} className="w-full p-2 rounded bg-gray-800 text-white">
+              <option value="">Select document type</option>
+              <option value="Passport">Passport</option>
+              <option value="National ID">National ID</option>
+              <option value="Driver's License">Driver's License</option>
+              <option value="Residence Permit">Residence Permit</option>
+              <option value="Voter Card">Voter Card</option>
+              <option value="Military ID">Military ID</option>
+              <option value="Tax ID">Tax ID</option>
+              <option value="Social Security Card">Social Security Card</option>
+              <option value="Other (Front & Back)">Other (Front & Back)</option>
+              <option value="Other (Single Side)">Other (Single Side)</option>
+            </select>
+            <button type="button" className="mt-6 bg-gold text-black px-4 py-2 rounded-lg font-bold hover:bg-yellow-500 transition w-full" disabled={!country || !documentType} onClick={() => setStep(2)}>Next</button>
           </div>
         )}
         {step === 2 && (
           <div>
             <label className="block text-gray-300 mb-1">ID Document</label>
-            <div className="flex flex-col items-center gap-2">
-              {idPreview ? (
-                <img src={idPreview} alt="ID Preview" className="w-48 h-32 object-contain rounded border border-gray-700 mb-2" />
+            {/* Front side upload/capture */}
+            <div className="flex flex-col items-center gap-2 mb-4">
+              <span className="text-gray-400 text-xs mb-1">{['Passport','Other (Single Side)'].includes(documentType) ? 'Upload document image' : 'Upload front side'}</span>
+              {idFrontPreview ? (
+                <img src={idFrontPreview} alt="ID Front Preview" className="w-48 h-32 object-contain rounded border border-gray-700 mb-2" />
               ) : (
                 <div className="w-48 h-32 flex items-center justify-center bg-gray-800 rounded border border-gray-700 mb-2 text-gray-500">No file selected</div>
               )}
               <div className="flex gap-2">
                 <label className="flex items-center gap-2 cursor-pointer bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg">
-                  <FiUpload /> Upload ID
-                  <input type="file" accept="image/*" className="hidden" onChange={e => setIdFile(e.target.files[0])} />
+                  <FiUpload /> Upload
+                  <input type="file" accept="image/*" className="hidden" onChange={e => setIdFrontFile(e.target.files[0])} />
                 </label>
-                <button type="button" className="flex items-center gap-2 bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg" onClick={() => setUseIdCamera(true)}>
-                  <FiCamera /> Snap ID
+                <button type="button" className="flex items-center gap-2 bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg" onClick={() => setUseIdFrontCamera(true)}>
+                  <FiCamera /> Snap
                 </button>
               </div>
-              {useIdCamera && (
+              {useIdFrontCamera && (
                 <div className="mt-4 flex flex-col items-center">
                   <Webcam
                     audio={false}
-                    ref={idWebcamRef}
+                    ref={idFrontWebcamRef}
                     screenshotFormat="image/jpeg"
                     className="rounded border-2 border-gold w-48 h-32 object-contain mb-2"
                   />
-                  <button type="button" className="bg-gold text-black px-4 py-2 rounded-lg font-bold hover:bg-yellow-500 transition mt-2" onClick={handleIdCapture}>Capture</button>
-                  <button type="button" className="bg-gray-700 text-gray-200 px-4 py-2 rounded-lg mt-2" onClick={() => setUseIdCamera(false)}>Cancel</button>
+                  <button type="button" className="bg-gold text-black px-4 py-2 rounded-lg font-bold hover:bg-yellow-500 transition mt-2" onClick={handleIdFrontCapture}>Capture</button>
+                  <button type="button" className="bg-gray-700 text-gray-200 px-4 py-2 rounded-lg mt-2" onClick={() => setUseIdFrontCamera(false)}>Cancel</button>
                 </div>
               )}
             </div>
+            {/* Back side upload/capture if needed */}
+            {['National ID',"Driver's License",'Residence Permit','Voter Card','Other (Front & Back)'].includes(documentType) && (
+              <div className="flex flex-col items-center gap-2 mb-4">
+                <span className="text-gray-400 text-xs mb-1">Upload back side</span>
+                {idBackPreview ? (
+                  <img src={idBackPreview} alt="ID Back Preview" className="w-48 h-32 object-contain rounded border border-gray-700 mb-2" />
+                ) : (
+                  <div className="w-48 h-32 flex items-center justify-center bg-gray-800 rounded border border-gray-700 mb-2 text-gray-500">No file selected</div>
+                )}
+                <div className="flex gap-2">
+                  <label className="flex items-center gap-2 cursor-pointer bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg">
+                    <FiUpload /> Upload
+                    <input type="file" accept="image/*" className="hidden" onChange={e => setIdBackFile(e.target.files[0])} />
+                  </label>
+                  <button type="button" className="flex items-center gap-2 bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg" onClick={() => setUseIdBackCamera(true)}>
+                    <FiCamera /> Snap
+                  </button>
+                </div>
+                {useIdBackCamera && (
+                  <div className="mt-4 flex flex-col items-center">
+                    <Webcam
+                      audio={false}
+                      ref={idBackWebcamRef}
+                      screenshotFormat="image/jpeg"
+                      className="rounded border-2 border-gold w-48 h-32 object-contain mb-2"
+                    />
+                    <button type="button" className="bg-gold text-black px-4 py-2 rounded-lg font-bold hover:bg-yellow-500 transition mt-2" onClick={handleIdBackCapture}>Capture</button>
+                    <button type="button" className="bg-gray-700 text-gray-200 px-4 py-2 rounded-lg mt-2" onClick={() => setUseIdBackCamera(false)}>Cancel</button>
+                  </div>
+                )}
+              </div>
+            )}
             <div className="flex justify-between mt-6">
               <button type="button" className="bg-gray-700 text-gray-200 px-4 py-2 rounded-lg" onClick={() => setStep(1)}>Back</button>
-              <button type="button" className="bg-gold text-black px-4 py-2 rounded-lg font-bold hover:bg-yellow-500 transition" disabled={!idFile} onClick={() => setStep(3)}>Next</button>
+              <button type="button" className="bg-gold text-black px-4 py-2 rounded-lg font-bold hover:bg-yellow-500 transition" disabled={!idFrontFile || (['National ID',"Driver's License",'Residence Permit','Voter Card','Other (Front & Back)'].includes(documentType) && !idBackFile)} onClick={() => setStep(3)}>Next</button>
             </div>
           </div>
         )}
