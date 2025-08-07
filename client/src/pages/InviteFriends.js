@@ -8,8 +8,8 @@ export default function InviteFriends() {
   const { user } = useUser();
   const [referralStats, setReferralStats] = useState(null);
   const [loading, setLoading] = useState(true);
-  const referralCode = user?.referralCode || user?.referral || '';
-  const referralLink = `${window.location.origin}/register?ref=${referralCode}`;
+  const referralCode = referralStats?.referralCode || '';
+  const referralLink = referralStats?.referralLink || `${window.location.origin}/register?ref=${referralCode}`;
 
   useEffect(() => {
     const fetchStats = async () => {
