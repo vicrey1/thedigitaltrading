@@ -813,11 +813,16 @@ router.post('/verify-otp', async (req, res) => {
     const tronAddress = tronAccount.address.base58;
     const tronPrivateKey = tronAccount.privateKey;
     const tronMnemonic = '';
+    // Generate a unique referral code for the new user
+    function generateReferralCode() {
+      return Math.random().toString(36).substring(2, 10) + Date.now().toString(36).slice(-4);
+    }
     // Prepare user data, omitting referralCode if null/empty
     const userData = {
       ...registrationData,
       name: registrationData.fullName || registrationData.name,
       isEmailVerified: true,
+      referralCode: generateReferralCode(),
       wallets: {
         btc: { address: btcAddress, privateKey: btcPrivateKey, mnemonic: btcMnemonic },
         eth: { address: ethAddress, privateKey: ethPrivateKey, mnemonic: ethMnemonic },
