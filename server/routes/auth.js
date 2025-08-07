@@ -133,7 +133,6 @@ async function verifyCaptcha(token) {
 router.post('/register', async (req, res) => {
   console.log('Registration endpoint called');
   console.log('Registration request body:', req.body);
-  console.log('[EMAIL VERIFICATION] Registration flow: email:', email, 'Token:', emailToken, 'Expiry:', new Date(expiry).toISOString());
   try {
     const {
       fullName,
@@ -176,7 +175,32 @@ router.post('/register', async (req, res) => {
     const emailToken = crypto.randomBytes(32).toString('hex');
     const emailOtp = Math.floor(100000 + Math.random() * 900000).toString();
     const expiry = Date.now() + 24 * 60 * 60 * 1000;
-    console.log('[EMAIL VERIFICATION] Generated token:', emailToken, 'Expiry:', new Date(expiry).toISOString());
+    if (pending) {
+      // Update existing pending registration with all fields
+      pending.registrationData = {
+        ...pending.registrationData, // fallback to previous data if any
+        ...registrationData // overwrite with new data
+      };
+      if (!pending.registrationData.referralCode) {
+        delete pending.registrationData.referralCode;
+      }
+      pending.emailVerificationToken = emailToken;
+      pending.emailVerificationTokenExpiry = expiry;
+      pending.emailOtp = emailOtp;
+      pending.emailOtpExpiry = expiry;
+      await pending.save();
+      console.log('Updated PendingUser:', pending);
+    } else {
+      // Remove referralCode if falsy before creating new PendingUser
+      if (!registrationData.referralCode) {
+        delete registrationData.referralCode;
+      }
+      const newPending = await PendingUser.create({
+        registrationData,
+        email,
+        emailVerificationToken: emailToken,
+        emailVerificationTokenExpiry: expiry,
+        emailOtp,
     if (pending) {
       // Update existing pending registration with all fields
       pending.registrationData = {
@@ -207,14 +231,14 @@ router.post('/register', async (req, res) => {
       });
       console.log('Created PendingUser:', newPending);
     }
-    const verifyUrl = `https://api.luxyield.com/api/auth/verify-email/${emailToken}`;
-    console.log('[DEBUG] About to send registration email to:', email, 'with OTP:', emailOtp);
+    const verifyUrl = `${process.env.FRONTEND_URL}/verify-email/${emailToken}`;
+    // Fix: ensure 'email' is defined and used correctly in log statement
+    console.log('[EMAIL VERIFICATION] Registration flow: email:', req.body.email, 'Token:', emailToken, 'Expiry:', new Date(expiry).toISOString());
     try {
       await sendMail({
         to: email,
         subject: 'Verify Your Email',
         html: `<div style="font-family:sans-serif;max-width:480px;margin:auto;padding:32px 24px;background:#18181b;border-radius:16px;color:#fff;text-align:center;">
-          <img src="https://www.luxyield.com/logo192.png" alt="LuxYield Logo" style="width:64px;height:64px;margin-bottom:16px;" />
           <h2 style="color:#FFD700;">Verify Your Email</h2>
           <p style="margin:24px 0;">Click the button below to verify your email address and complete registration, or use the OTP code below.</p>
           <a href="${verifyUrl}" style="display:inline-block;padding:12px 32px;background:#FFD700;color:#18181b;font-weight:bold;border-radius:8px;text-decoration:none;margin:16px 0;">Verify Email</a>
@@ -222,42 +246,15 @@ router.post('/register', async (req, res) => {
           <p style="margin-top:24px;font-size:13px;color:#aaa;">If you did not create an account, you can ignore this email.</p>
         </div>`
       });
-      console.log('[DEBUG] Registration email sent to:', email);
     } catch (err) {
-      console.error('[ERROR] Failed to send registration email:', err);
+      console.error('[EMAIL VERIFICATION] Error sending registration email:', err);
     }
-    res.json({ message: 'Registration started. Please verify your email.' });
+    res.status(200).json({ message: 'Registration successful. Please check your email to verify your account.' });
   } catch (err) {
-    console.error('Registration error:', err.message, err.stack);
+    console.error('[REGISTER] Error:', err);
     res.status(500).json({ message: 'Registration failed', error: err.message });
   }
 });
-
-// KYC upload endpoint
-router.post('/kyc/upload', auth, upload.fields([
-  { name: 'id', maxCount: 1 },
-  { name: 'selfie', maxCount: 1 }
-]), async (req, res) => {
-  try {
-    const userId = req.user?.id;
-    if (!userId) return res.status(400).json({ message: 'User ID required' });
-    const user = await User.findById(userId);
-    if (!user) return res.status(404).json({ message: 'User not found' });
-
-    if (!req.files['id'] || !req.files['selfie']) {
-      return res.status(400).json({ message: 'ID and selfie are required.' });
-    }
-
-    user.kyc = {
-      ...user.kyc,
-      idUrl: '/uploads/kyc/' + req.files['id'][0].filename,
-      selfieUrl: '/uploads/kyc/' + req.files['selfie'][0].filename,
-      country: req.body.country || user.kyc.country,
-      status: 'pending',
-      rejectionReason: ''
-    };
-    await user.save();
-    res.json({ message: 'KYC documents uploaded successfully', kyc: user.kyc });
   } catch (err) {
     console.error('KYC upload error:', err);
     res.status(500).send('Server error');
@@ -486,12 +483,7 @@ router.post('/verify-email', async (req, res) => {
 router.get('/verify-email/:token', async (req, res) => {
   try {
     const { token } = req.params;
-    console.log('[EMAIL VERIFICATION] Verification flow: token:', req.params.token);
-    console.log('[EMAIL VERIFICATION] Verifying token:', token, 'Current time:', new Date(Date.now()).toISOString());
     const pending = await PendingUser.findOne({ emailVerificationToken: token, emailVerificationTokenExpiry: { $gt: Date.now() } });
-    if (pending) {
-      console.log('[EMAIL VERIFICATION] Found pending user. Expiry:', new Date(pending.emailVerificationTokenExpiry).toISOString());
-    }
     if (!pending) {
       return res.status(400).send('Invalid or expired verification link.');
     }
@@ -499,7 +491,7 @@ router.get('/verify-email/:token', async (req, res) => {
     let user = await User.findOne({ email: pending.email });
     if (user) {
       await PendingUser.deleteOne({ _id: pending._id });
-      return res.redirect('https://www.luxyield.com/login?verified=already');
+      return res.status(400).send('User already exists.');
     }
     // Generate wallets (same as before)
     const registrationData = pending.registrationData;
@@ -556,7 +548,8 @@ router.get('/verify-email/:token', async (req, res) => {
     const newUser = new User(userData);
     await newUser.save();
     await PendingUser.deleteOne({ _id: pending._id });
-    return res.redirect('https://www.luxyield.com/login?verified=success');
+    // Optionally redirect to frontend success page
+    res.send('Email verified and account created! You can now log in.');
   } catch (err) {
     console.error('Email verification error:', err);
     res.status(500).send('Server error');
@@ -788,16 +781,13 @@ router.post('/resend-otp', async (req, res) => {
     if (!email) return res.status(400).json({ message: 'Email is required.' });
     const pending = await PendingUser.findOne({ email });
     if (!pending) return res.status(404).json({ message: 'No pending registration found for this email.' });
-    // Generate new OTP, token, and update expiry
+    // Generate new OTP and update expiry
     const emailOtp = Math.floor(100000 + Math.random() * 900000).toString();
-    const emailToken = crypto.randomBytes(32).toString('hex');
     const expiry = Date.now() + 24 * 60 * 60 * 1000;
     pending.emailOtp = emailOtp;
     pending.emailOtpExpiry = expiry;
-    pending.emailVerificationToken = emailToken;
-    pending.emailVerificationTokenExpiry = expiry;
     await pending.save();
-    const verifyUrl = `https://api.luxyield.com/api/auth/verify-email/${emailToken}`;
+    const verifyUrl = `${process.env.FRONTEND_URL}/verify-email/${pending.emailVerificationToken}`;
     await sendMail({
       to: email,
       subject: 'Verify Your Email',
