@@ -34,7 +34,7 @@ export default function LegalDisclaimerPage() {
       <h3>4. Limitation of Liability</h3>
       <p>In no event shall LUXYIELD be liable to you for anything arising out of or in any way connected with your use of this Site. LUXYIELD is not liable for any indirect, consequential, or special liability related to your use of this Site.</p>
       <h3>5. Governing Law & Jurisdiction</h3>
-      <p>These Terms will be governed by the laws of the State of Delaware, United States.</p>
+      <p>These Terms will be governed by the laws of Switzerland. Any disputes arising out of or in connection with these Terms shall be subject to the exclusive jurisdiction of the courts of Zürich, Switzerland.</p>
       <h3>6. Modification of Terms</h3>
       <p>LUXYIELD may revise these Terms at any time. By using this Site, you are expected to review such Terms on a regular basis.</p>
     </div>
