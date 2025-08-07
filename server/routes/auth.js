@@ -1,3 +1,8 @@
+// Log every request to this router for debugging
+router.use((req, res, next) => {
+  console.log(`[AUTH ROUTER] ${req.method} ${req.originalUrl} at ${new Date().toISOString()}`);
+  next();
+});
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');

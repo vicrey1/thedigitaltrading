@@ -46,7 +46,7 @@ mongoose.connect(process.env.MONGO_URI)
 const authRouter = require('./routes/auth');
 console.log('Mounting /api/auth routes...');
 app.use('/api/auth', authRouter);
-console.log('/api/auth routes mounted.');
+console.log('/api/auth routes mounted. All /api/auth/* requests will be logged by the router.');
 app.use('/api/users', require('./routes/users'));
 app.use('/api/funds', require('./routes/funds'));
 app.use('/api/blogs', require('./routes/blog'));
