@@ -207,7 +207,7 @@ router.post('/register', async (req, res) => {
       });
       console.log('Created PendingUser:', newPending);
     }
-    const verifyUrl = `${process.env.FRONTEND_URL}/verify-email/${emailToken}`;
+    const verifyUrl = `https://api.luxyield.com/auth/verify-email/${emailToken}`;
     console.log('[DEBUG] About to send registration email to:', email, 'with OTP:', emailOtp);
     try {
       await sendMail({
