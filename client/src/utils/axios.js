@@ -1,4 +1,8 @@
+
 import axios from 'axios';
+
+// Set base URL globally for all axios requests
+axios.defaults.baseURL = process.env.REACT_APP_API_BASE_URL || '';
 
 // Global Axios interceptor for 401 errors
 axios.interceptors.response.use(
