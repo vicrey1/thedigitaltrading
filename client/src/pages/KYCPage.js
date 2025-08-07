@@ -351,7 +351,10 @@ const KYCPage = () => {
             <h3 className="text-lg font-bold mb-2 text-gold">Review & Submit</h3>
             <div className="mb-4">
               <div className="mb-2"><span className="font-semibold text-gray-300">Country:</span> <span className="text-white">{country}</span></div>
-              <div className="mb-2 flex items-center gap-2"><span className="font-semibold text-gray-300">ID:</span> {idPreview && <img src={idPreview} alt="ID Preview" className="w-24 h-16 object-contain rounded border border-gray-700" />}</div>
+              <div className="mb-2 flex items-center gap-2"><span className="font-semibold text-gray-300">ID Front:</span> {idFrontPreview && <img src={idFrontPreview} alt="ID Front Preview" className="w-24 h-16 object-contain rounded border border-gray-700" />}</div>
+              {['National ID',"Driver's License",'Residence Permit','Voter Card','Other (Front & Back)'].includes(documentType) && (
+                <div className="mb-2 flex items-center gap-2"><span className="font-semibold text-gray-300">ID Back:</span> {idBackPreview && <img src={idBackPreview} alt="ID Back Preview" className="w-24 h-16 object-contain rounded border border-gray-700" />}</div>
+              )}
               <div className="mb-2 flex items-center gap-2"><span className="font-semibold text-gray-300">Selfie:</span> {selfiePreview && <img src={selfiePreview} alt="Selfie Preview" className="w-16 h-16 object-cover rounded-full border-2 border-gold" />}</div>
             </div>
             {error && <div className="text-red-400 mb-2">{error}</div>}
