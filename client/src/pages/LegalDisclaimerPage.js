@@ -4,9 +4,13 @@ export default function LegalDisclaimerPage() {
   return (
     <div className="max-w-3xl mx-auto py-16 px-4 text-brand-light/80 prose prose-invert prose-h2:text-brand-accent prose-h2:font-serif prose-h2:text-3xl prose-h3:text-brand-light prose-h3:font-serif prose-h3:text-2xl prose-a:text-brand-accent hover:prose-a:text-brand-light">
       <h2>Legal Disclaimer</h2>
-      <p>The information on this website is for informational purposes only and does not constitute an offer to sell, a solicitation to buy, or a recommendation for any security by LUXYIELD Capital Management, LP ("LUXYIELD"). An offer to invest in a LUXYIELD-managed fund may only be made to accredited investors and qualified purchasers pursuant to a confidential private placement memorandum and other related subscription documents.</p>
-      <p>Investing in securities involves a high degree of risk, including the possible loss of the entire principal amount invested. Past performance is not indicative of future results. Any performance data, forecasts, or returns presented on this site are for illustrative purposes only and are not a guarantee of future returns.</p>
-      <p>The investment strategies described herein, including the use of the proprietary AURA system, involve complex quantitative models. These models may have unforeseen limitations and may not be successful in identifying profitable investment opportunities or in preventing losses. No representation is being made that any investment will or is likely to achieve profits or losses similar to those shown.</p>
+      <h3>Disclaimer</h3>
+      <p>The information on this website is provided for general informational purposes only and does not constitute personalized financial advice.</p>
+      <p>LuxYield Capital Management, LP ("LuxYield") is a fully managed investment platform that allows individuals aged 18 and above to invest in professionally structured portfolios powered by proprietary systems, including the AURA engine.</p>
+      <p>While all investments involve some degree of market risk, LuxYield offers a principal protection mechanism on user-deposited funds. In the event of a loss due to market volatility or system-driven trades, LuxYield will absorb the financial loss and ensure that the user’s original invested capital is preserved.</p>
+      <p>This guarantee is made possible through LuxYield’s internal reserve structure, risk-balancing strategies, and performance-based insurance coverage, which is designed to cushion against short-term market downturns and systemic anomalies in the algorithmic model.</p>
+      <p>Please note: Returns on investment may vary, and performance is not guaranteed beyond the original capital amount. Withdrawals, early exits, or terms outside standard investment cycles may affect eligibility for principal protection.</p>
+      <p>By using the platform, investors agree to the terms of service and understand that LuxYield assumes full responsibility for loss mitigation under its risk-backed capital structure.</p>
       <hr className="my-12 border-brand-accent/20" />
       <h2>Privacy Policy</h2>
       <p><em>Last Updated: July 13, 2025</em></p>
