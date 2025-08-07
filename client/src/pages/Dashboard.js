@@ -44,7 +44,7 @@ const Dashboard = ({ adminView = false, portfolioData: adminPortfolioData }) => 
 
   // Get the latest value for the selected range for the active investment
   const filteredPerf = getActiveInvestmentPerformance();
-  const latestPerf = filteredPerf.length > 0 ? filteredPerf[filteredPerf.length - 1] : null;
+  const latestPerf = filteredPerf.length > 0 ? filteredPerf[filteredPerf.length - 1] : null; // No dash to replace here, but checked for context.
   // ...existing code...
 
   useEffect(() => {
