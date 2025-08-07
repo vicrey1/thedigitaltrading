@@ -1,3 +1,8 @@
+// Health check/test route
+router.get('/ping', (req, res) => {
+  console.log('[PING] /api/auth/ping hit');
+  res.json({ message: 'pong' });
+});
 
 const express = require('express');
 const router = express.Router();
