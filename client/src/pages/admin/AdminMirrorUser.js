@@ -131,6 +131,26 @@ const AdminMirrorUser = ({ userId, onBack }) => {
           <h2 className="text-2xl font-bold mb-4 text-gold">User Details</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div>
+              <div className="text-gray-400">User ID</div>
+              <div className="text-xl font-bold">{profile?._id || '-'}</div>
+            </div>
+            <div>
+              <div className="text-gray-400">Tier</div>
+              <div className="text-xl font-bold">{profile?.tier || '-'}</div>
+            </div>
+            <div>
+              <div className="text-gray-400">Role</div>
+              <div className="text-xl font-bold">{profile?.role || '-'}</div>
+            </div>
+            <div>
+              <div className="text-gray-400">Joined</div>
+              <div className="text-xl font-bold">{profile?.createdAt ? new Date(profile.createdAt).toLocaleDateString() : '-'}</div>
+            </div>
+            <div>
+              <div className="text-gray-400">Last Active</div>
+              <div className="text-xl font-bold">{profile?.lastActive && !isNaN(Date.parse(profile.lastActive)) ? new Date(profile.lastActive).toLocaleDateString() : '-'}</div>
+            </div>
+            <div>
               <div className="text-gray-400">Account Balance</div>
               <div className="text-xl font-bold">${Number(userInfo.availableBalance ?? 0).toLocaleString()}</div>
             </div>
@@ -150,8 +170,10 @@ const AdminMirrorUser = ({ userId, onBack }) => {
           <div className="mb-4">
             <h3 className="text-lg font-bold mb-2">KYC Verification</h3>
             <div className="mb-1">Country: <span className="font-bold">{kycInfo.country || '-'}</span></div>
-            <div className="mb-1">ID Document: {kycInfo.idUrl ? <a href={kycInfo.idUrl} target="_blank" rel="noopener noreferrer" className="text-gold underline">View</a> : <span>-</span>}</div>
-            <div className="mb-1">Selfie: {kycInfo.selfieUrl ? <a href={kycInfo.selfieUrl} target="_blank" rel="noopener noreferrer" className="text-gold underline">View</a> : <span>-</span>}</div>
+            <div className="mb-1">Document Type: <span className="font-bold">{kycInfo.documentType || '-'}</span></div>
+            <div className="mb-1">ID Front: {kycInfo.idFront ? <a href={kycInfo.idFront} target="_blank" rel="noopener noreferrer" className="text-gold underline">View</a> : <span>-</span>}</div>
+            {kycInfo.idBack && <div className="mb-1">ID Back: <a href={kycInfo.idBack} target="_blank" rel="noopener noreferrer" className="text-gold underline">View</a></div>}
+            <div className="mb-1">Selfie: {kycInfo.selfie ? <a href={kycInfo.selfie} target="_blank" rel="noopener noreferrer" className="text-gold underline">View</a> : <span>-</span>}</div>
             <div className="mb-1">KYC Status: <span className={kycStatus==='verified' ? 'text-green-400' : kycStatus==='pending' ? 'text-yellow-400' : 'text-red-400'}>{kycStatus.charAt(0).toUpperCase() + kycStatus.slice(1)}</span></div>
             {kycInfo.rejectionReason && <div className="mb-1 text-red-400">Rejection Reason: {kycInfo.rejectionReason}</div>}
           </div>
