@@ -350,7 +350,7 @@ router.get('/referral-stats', auth, async (req, res) => {
     const referredUsers = await User.find({ referredBy: user._id });
     // For each referred user, sum their investment profits
     const Investment = require('../models/Investment');
-    let totalRewards = 0;
+    let totalEarnings = 0;
     let referredDetails = [];
     for (const refUser of referredUsers) {
       const investments = await Investment.find({ user: refUser._id });
@@ -359,22 +359,23 @@ router.get('/referral-stats', auth, async (req, res) => {
         const profit = (inv.currentValue || 0) - (inv.amount || 0);
         if (profit > 0) userTotalProfit += profit;
       }
+      // Referral reward is a fixed 10% of profit (not a percentage string)
       const reward = userTotalProfit * 0.10;
-      totalRewards += reward;
+      totalEarnings += reward;
       referredDetails.push({
         name: refUser.name,
         email: refUser.email,
         totalInvested: investments.reduce((sum, inv) => sum + (inv.amount || 0), 0),
         totalProfit: userTotalProfit,
-        reward: reward
+        reward: Math.round(reward * 100) / 100
       });
     }
     res.json({
       referralCode: user.referralCode,
       referralLink: `${process.env.BASE_URL}/register?ref=${user.referralCode}`,
-      totalInvited: referredUsers.length,
-      referredDetails,
-      totalRewards: Math.round(totalRewards * 100) / 100,
+      referredCount: referredUsers.length,
+      referredUsers: referredDetails,
+      totalEarnings: Math.round(totalEarnings * 100) / 100,
       activeReferrals: referredUsers.length
     });
   } catch (err) {
