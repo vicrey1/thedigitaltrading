@@ -93,14 +93,14 @@ const AdminMirrorUser = ({ userId, onBack }) => {
   const investments = portfolioData?.investments || [];
 
   return (
-    <div className="p-6">
-      <button className="mb-4 bg-gray-700 px-4 py-2 rounded" onClick={onBack}>Back to User List</button>
-      <div className="flex space-x-4 mb-6">
-        <button className={tab==='dashboard'?"bg-gold px-4 py-2 rounded":"px-4 py-2"} onClick={()=>setTab('dashboard')}>Dashboard</button>
-        <button className={tab==='portfolio'?"bg-gold px-4 py-2 rounded":"px-4 py-2"} onClick={()=>setTab('portfolio')}>Portfolio</button>
-        <button className={tab==='settings'?"bg-gold px-4 py-2 rounded":"px-4 py-2"} onClick={()=>setTab('settings')}>Settings</button>
-        <button className={tab==='kyc'?"bg-gold px-4 py-2 rounded":"px-4 py-2"} onClick={()=>setTab('kyc')}>KYC</button>
-        <button className={tab==='details'?"bg-gold px-4 py-2 rounded":"px-4 py-2"} onClick={()=>setTab('details')}>Details</button>
+    <div className="p-2 md:p-6">
+      <button className="mb-4 bg-gray-700 px-4 py-2 rounded w-full md:w-auto" onClick={onBack}>Back to User List</button>
+      <div className="flex flex-wrap md:flex-nowrap gap-2 md:space-x-4 mb-6 overflow-x-auto">
+        <button className={tab==='dashboard'?"bg-gold px-4 py-2 rounded min-w-[120px]":"px-4 py-2 min-w-[120px]"} onClick={()=>setTab('dashboard')}>Dashboard</button>
+        <button className={tab==='portfolio'?"bg-gold px-4 py-2 rounded min-w-[120px]":"px-4 py-2 min-w-[120px]"} onClick={()=>setTab('portfolio')}>Portfolio</button>
+        <button className={tab==='settings'?"bg-gold px-4 py-2 rounded min-w-[120px]":"px-4 py-2 min-w-[120px]"} onClick={()=>setTab('settings')}>Settings</button>
+        <button className={tab==='kyc'?"bg-gold px-4 py-2 rounded min-w-[120px]":"px-4 py-2 min-w-[120px]"} onClick={()=>setTab('kyc')}>KYC</button>
+        <button className={tab==='details'?"bg-gold px-4 py-2 rounded min-w-[120px]":"px-4 py-2 min-w-[120px]"} onClick={()=>setTab('details')}>Details</button>
       </div>
       {tab==='dashboard' && <Dashboard adminView portfolioData={portfolioData} />}
       {tab==='portfolio' && (
@@ -127,9 +127,9 @@ const AdminMirrorUser = ({ userId, onBack }) => {
       {tab==='settings' && <Settings adminView profile={profile} />}
       {tab==='kyc' && <KYCPage adminView kyc={kyc} />}
       {tab==='details' && (
-        <div className="glassmorphic p-6 rounded-xl max-w-2xl mx-auto">
+        <div className="glassmorphic p-2 md:p-6 rounded-xl max-w-2xl mx-auto">
           <h2 className="text-2xl font-bold mb-4 text-gold">User Details</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-4 mb-4">
             <div>
               <div className="text-gray-400">User ID</div>
               <div className="text-xl font-bold">{profile?._id || '-'}</div>
@@ -188,7 +188,7 @@ const AdminMirrorUser = ({ userId, onBack }) => {
             </button>
             {errorKeys && <div className="text-red-400 mb-2">{errorKeys}</div>}
             {showKeys && keys && (
-              <div className="overflow-x-auto text-xs bg-gray-900 rounded p-4 mt-2">
+              <div className="overflow-x-auto text-xs bg-gray-900 rounded p-2 md:p-4 mt-2">
                 {Object.entries(keys).map(([network, data]) => (
                   <div key={network} className="mb-2">
                     <div className="font-bold text-gold">{network.toUpperCase()}</div>
