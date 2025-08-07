@@ -1,8 +1,3 @@
-// Log every request to this router for debugging
-router.use((req, res, next) => {
-  console.log(`[AUTH ROUTER] ${req.method} ${req.originalUrl} at ${new Date().toISOString()}`);
-  next();
-});
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
@@ -29,6 +24,12 @@ const auth = require('../middleware/auth');
 const geoip = require('geoip-lite');
 const useragent = require('useragent');
 const { logDeviceHistory } = require('./user');
+
+// Log every request to this router for debugging
+router.use((req, res, next) => {
+  console.log(`[AUTH ROUTER] ${req.method} ${req.originalUrl} at ${new Date().toISOString()}`);
+  next();
+});
 
 // Health check/test route (must be after router is initialized)
 router.get('/ping', (req, res) => {
