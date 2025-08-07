@@ -30,6 +30,11 @@ export default function InviteFriends() {
     toast.success('Referral link copied!');
   };
 
+  const handleCopyCode = () => {
+    navigator.clipboard.writeText(referralCode);
+    toast.success('Referral code copied!');
+  };
+
   return (
     <div className="max-w-2xl mx-auto p-6">
       <div className="glass-card p-8 rounded-2xl mb-8 shadow-2xl border border-yellow-700 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 relative overflow-hidden">
@@ -43,6 +48,9 @@ export default function InviteFriends() {
         <div className="mb-6 flex flex-col md:flex-row md:items-center gap-4">
           <div className="flex items-center gap-2">
             <span className="font-mono bg-black bg-opacity-30 px-3 py-2 rounded-lg text-gold text-lg border border-yellow-700 shadow-inner">{referralCode}</span>
+            <button onClick={handleCopyCode} className="flex items-center gap-1 text-blue-400 hover:text-blue-600 bg-gray-900 border border-blue-400 px-3 py-2 rounded-lg font-semibold shadow transition">
+              <FiCopy /> Copy Code
+            </button>
             <button onClick={handleCopy} className="flex items-center gap-1 text-blue-400 hover:text-blue-600 bg-gray-900 border border-blue-400 px-3 py-2 rounded-lg font-semibold shadow transition">
               <FiCopy /> Copy Link
             </button>

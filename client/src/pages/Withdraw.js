@@ -151,7 +151,7 @@ const Withdraw = () => {
 
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text);
-    // You could add a toast notification here
+    if (window.toast) window.toast.success('Copied!');
   };
 
   // Helper: Validate wallet address for each network

@@ -582,8 +582,8 @@ const Dashboard = ({ adminView = false, portfolioData: adminPortfolioData }) => 
             <>
               <div className="mb-2">Your Referral Link:</div>
               <div className="flex items-center gap-2 mb-2">
-                <input className="bg-gray-900 rounded px-2 py-1 text-xs w-48" value={referralStats.referralLink} readOnly />
-                <button className="bg-gold text-black px-2 py-1 rounded text-xs flex items-center gap-1 glass-card scale-100 hover:scale-105 active:scale-95 shadow focus:outline-none focus:ring-2 focus:ring-gold focus:ring-opacity-50" onClick={() => {navigator.clipboard.writeText(referralStats.referralLink)}}><FiCopy /> Copy</button>
+            <input className="bg-gray-900 rounded px-2 py-1 text-xs w-48" value={referralStats.referralLink} readOnly />
+            <button className="bg-gold text-black px-2 py-1 rounded text-xs flex items-center gap-1 glass-card scale-100 hover:scale-105 active:scale-95 shadow focus:outline-none focus:ring-2 focus:ring-gold focus:ring-opacity-50" onClick={() => {navigator.clipboard.writeText(referralStats.referralLink); window.toast && window.toast.success('Referral link copied!')}}><FiCopy /> Copy</button>
               </div>
               <div className="mb-2">Total Referred Users: <span className="font-bold">{referralStats.referredCount}</span></div>
               <div className="mb-2">Total Earned: <span className="font-bold">${referralStats.totalEarnings}</span></div>
@@ -621,7 +621,7 @@ const Dashboard = ({ adminView = false, portfolioData: adminPortfolioData }) => 
             <button
               className="w-full bg-blue-500 text-white py-6 rounded-xl font-bold text-lg flex items-center justify-center gap-3 shadow-lg hover:bg-blue-600 transition"
               style={{ minHeight: '72px' }}
-              onClick={() => window.location.href = '/support-chat'}
+              onClick={() => window.location.href = '/dashboard/support'}
             >
               <FiMessageCircle className="h-7 w-7" />
               Support Chat
