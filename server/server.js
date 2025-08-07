@@ -1,6 +1,9 @@
 
 require('dotenv').config({ path: __dirname + '/.env' });
+console.log('==============================');
+console.log('LuxYield Backend Server Starting');
 console.log('[DEBUG] MONGO_URI:', process.env.MONGO_URI);
+console.log('==============================');
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -40,7 +43,10 @@ mongoose.connect(process.env.MONGO_URI)
   .catch(err => console.log(err));
 
 // Routes
-app.use('/api/auth', require('./routes/auth'));
+const authRouter = require('./routes/auth');
+console.log('Mounting /api/auth routes...');
+app.use('/api/auth', authRouter);
+console.log('/api/auth routes mounted.');
 app.use('/api/users', require('./routes/users'));
 app.use('/api/funds', require('./routes/funds'));
 app.use('/api/blogs', require('./routes/blog'));

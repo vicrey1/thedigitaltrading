@@ -27,7 +27,11 @@ const { logDeviceHistory } = require('./user');
 
 // Health check/test route (must be after router is initialized)
 router.get('/ping', (req, res) => {
-  console.log('[PING] /api/auth/ping hit');
+  console.log('[PING] /api/auth/ping hit', {
+    time: new Date().toISOString(),
+    ip: req.ip,
+    headers: req.headers
+  });
   res.json({ message: 'pong' });
 });
 
@@ -35,22 +39,27 @@ router.get('/ping', (req, res) => {
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
-    console.log('[LOGIN] Attempt for email:', email);
+    console.log('[LOGIN] Attempt', {
+      email,
+      time: new Date().toISOString(),
+      ip: req.ip,
+      headers: req.headers
+    });
     // Find user by email
     const user = await User.findOne({ email });
     if (!user) {
-      console.log('[LOGIN] User not found for email:', email);
+      console.log('[LOGIN] User not found', { email });
       return res.status(401).json({ message: 'Invalid credentials' });
     }
     // Check password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      console.log('[LOGIN] Password mismatch for email:', email);
+      console.log('[LOGIN] Password mismatch', { email });
       return res.status(401).json({ message: 'Invalid credentials' });
     }
     // Check if email is verified
     if (!user.isEmailVerified) {
-      console.log('[LOGIN] Email not verified for email:', email);
+      console.log('[LOGIN] Email not verified', { email });
       return res.status(403).json({ message: 'Please verify your email before logging in.' });
     }
     // Generate JWT token
@@ -59,10 +68,10 @@ router.post('/login', async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
-    console.log('[LOGIN] Success for email:', email);
+    console.log('[LOGIN] Success', { email });
     res.json({ token, message: 'Login successful' });
   } catch (err) {
-    console.error('Login error:', err);
+    console.error('[LOGIN] Error', { error: err, time: new Date().toISOString() });
     res.status(500).json({ message: 'Server error' });
   }
 });
