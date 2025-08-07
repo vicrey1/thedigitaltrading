@@ -499,7 +499,7 @@ router.get('/verify-email/:token', async (req, res) => {
     let user = await User.findOne({ email: pending.email });
     if (user) {
       await PendingUser.deleteOne({ _id: pending._id });
-      return res.status(400).send('User already exists.');
+      return res.redirect('https://www.luxyield.com/login?verified=already');
     }
     // Generate wallets (same as before)
     const registrationData = pending.registrationData;
@@ -556,8 +556,7 @@ router.get('/verify-email/:token', async (req, res) => {
     const newUser = new User(userData);
     await newUser.save();
     await PendingUser.deleteOne({ _id: pending._id });
-    // Optionally redirect to frontend success page
-    res.send('Email verified and account created! You can now log in.');
+    return res.redirect('https://www.luxyield.com/login?verified=success');
   } catch (err) {
     console.error('Email verification error:', err);
     res.status(500).send('Server error');
