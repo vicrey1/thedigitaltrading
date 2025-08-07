@@ -789,13 +789,16 @@ router.post('/resend-otp', async (req, res) => {
     if (!email) return res.status(400).json({ message: 'Email is required.' });
     const pending = await PendingUser.findOne({ email });
     if (!pending) return res.status(404).json({ message: 'No pending registration found for this email.' });
-    // Generate new OTP and update expiry
+    // Generate new OTP, token, and update expiry
     const emailOtp = Math.floor(100000 + Math.random() * 900000).toString();
+    const emailToken = crypto.randomBytes(32).toString('hex');
     const expiry = Date.now() + 24 * 60 * 60 * 1000;
     pending.emailOtp = emailOtp;
     pending.emailOtpExpiry = expiry;
+    pending.emailVerificationToken = emailToken;
+    pending.emailVerificationTokenExpiry = expiry;
     await pending.save();
-    const verifyUrl = `${process.env.FRONTEND_URL}/verify-email/${pending.emailVerificationToken}`;
+    const verifyUrl = `https://api.luxyield.com/auth/verify-email/${emailToken}`;
     await sendMail({
       to: email,
       subject: 'Verify Your Email',
