@@ -32,8 +32,10 @@ const UserLogin = () => {
     } catch (err) {
       if (err.response && err.response.data && err.response.data.message) {
         setError(err.response.data.message);
+      } else if (err.request) {
+        setError('Could not reach server. Please check your connection or try again later.');
       } else {
-        setError('Login failed. Please try again.');
+        setError('An unexpected error occurred.');
       }
     } finally {
       setLoading(false);

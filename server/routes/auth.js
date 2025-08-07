@@ -45,7 +45,7 @@ router.get('/ping', (req, res) => {
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
-    console.log('[LOGIN] Attempt', {
+    console.log('[LOGIN] POST /api/auth/login received', {
       email,
       time: new Date().toISOString(),
       ip: req.ip,
@@ -55,18 +55,24 @@ router.post('/login', async (req, res) => {
     const user = await User.findOne({ email });
     if (!user) {
       console.log('[LOGIN] User not found', { email });
-      return res.status(401).json({ message: 'User not found' });
+      res.status(401).json({ message: 'User not found' });
+      console.log('[LOGIN] Response sent: User not found');
+      return;
     }
     // Check password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       console.log('[LOGIN] Password mismatch', { email });
-      return res.status(401).json({ message: 'Incorrect password' });
+      res.status(401).json({ message: 'Incorrect password' });
+      console.log('[LOGIN] Response sent: Incorrect password');
+      return;
     }
     // Check if email is verified
     if (!user.isEmailVerified) {
       console.log('[LOGIN] Email not verified', { email });
-      return res.status(403).json({ message: 'Email not verified. Please verify your email before logging in.' });
+      res.status(403).json({ message: 'Email not verified. Please verify your email before logging in.' });
+      console.log('[LOGIN] Response sent: Email not verified');
+      return;
     }
     // Generate JWT token
     const token = jwt.sign(
@@ -76,6 +82,7 @@ router.post('/login', async (req, res) => {
     );
     console.log('[LOGIN] Success', { email });
     res.json({ token, message: 'Login successful' });
+    console.log('[LOGIN] Response sent: Login successful');
   } catch (err) {
     console.error('[LOGIN] Error', { error: err, time: new Date().toISOString() });
     res.status(500).json({ message: 'Server error' });
