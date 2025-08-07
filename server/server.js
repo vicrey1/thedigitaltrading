@@ -12,6 +12,13 @@ const socketio = require('socket.io');
 const { startRoiCron } = require('./utils/roiCalculator');
 
 const app = express();
+// Trust proxy headers (needed for WebSocket support on Render and similar hosts)
+app.set('trust proxy', 1);
+// Log all /socket.io/ requests for debugging WebSocket handshake issues
+app.use('/socket.io', (req, res, next) => {
+  console.log(`[SOCKET.IO] ${req.method} ${req.originalUrl} at ${new Date().toISOString()}`);
+  next();
+});
 const server = http.createServer(app);
 
 const io = socketio(server, { cors: { origin: ['https://luxyield.com', 'https://www.luxyield.com', 'https://api.luxyield.com'], credentials: true } });
