@@ -612,8 +612,6 @@ const Dashboard = ({ adminView = false, portfolioData: adminPortfolioData }) => 
           <h3 className="text-lg font-bold mb-2">KYC & Security</h3>
           <KYCStatus />
 
-          <div className="mb-1">2FA: <span className="font-bold text-green-400">Enabled</span></div>
-
         </div>
         <div className="glassmorphic p-6 rounded-xl mb-6">
           <h3 className="text-lg font-bold mb-2">Chat & Support</h3>
