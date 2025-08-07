@@ -57,9 +57,23 @@ router.post('/deposit', auth, async (req, res) => {
 
     await newInvestment.save();
 
+    // Referral bonus logic: credit 10% of first investment to referrer
+    if (user.referredBy) {
+      const previousInvestments = await Investment.find({ user: user._id });
+      if (previousInvestments.length === 1) { // This is the first investment
+        const referrer = await User.findById(user.referredBy);
+        if (referrer) {
+          const bonus = 0.10 * parseFloat(amount);
+          referrer.referralEarnings = (referrer.referralEarnings || 0) + bonus;
+          await referrer.save();
+          // Optionally, log the transaction
+          console.log(`[REFERRAL BONUS] Credited $${bonus} to referrer ${referrer._id} for user ${user._id}'s first investment.`);
+        }
+      }
+    }
+
     // Return success
     const transactionId = `TX-${Math.random().toString(36).substr(2, 10).toUpperCase()}`;
-    
     res.json({
       success: true,
       transactionId,
