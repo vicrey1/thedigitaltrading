@@ -1,5 +1,6 @@
 // src/pages/Register.js
 import React, { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import axios from 'axios';
@@ -15,6 +16,7 @@ function SafeString({ value }) {
 
 const Register = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [showVerifyModal, setShowVerifyModal] = useState(false);
   const [registeredEmail, setRegisteredEmail] = useState('');
   const [otp, setOtp] = useState("");
@@ -23,6 +25,10 @@ const Register = () => {
   const [isVerifying, setIsVerifying] = useState(false);
   const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
   const AUTH_PATH = `${API_BASE_URL}/api/auth`;
+
+  // Get referral code from ?ref= query param
+  const searchParams = new URLSearchParams(location.search);
+  const referralFromUrl = searchParams.get('ref') || '';
 
   const formik = useFormik({
     initialValues: {
@@ -35,7 +41,7 @@ const Register = () => {
       securityAnswer: '',
       password: '',
       confirmPassword: '',
-      referralCode: '',
+      referralCode: referralFromUrl,
     },
     validationSchema: Yup.object({
       fullName: Yup.string().required('Required'),
