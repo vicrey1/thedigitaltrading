@@ -575,6 +575,9 @@ const Dashboard = ({ adminView = false, portfolioData: adminPortfolioData }) => 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         <div className="glassmorphic p-6 rounded-xl">
           <h3 className="text-lg font-bold mb-2">Referral Program</h3>
+          <div className="text-xs text-gray-300 mb-4">
+            How it works: Share your referral link. When friends sign up and invest, you earn <span className="text-gold font-bold">10% of their investment profits</span> as a cash bonus. The more you invite, the more you earn!
+          </div>
           {referralStats ? (
             <>
               <div className="mb-2">Your Referral Link:</div>
