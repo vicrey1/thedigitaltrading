@@ -29,7 +29,12 @@ function Header({ onMenuClick }) {
     return e('header', { id: 'header', className: `fixed top-0 left-0 w-full z-50 transition-all duration-300 ${isScrolled ? 'scrolled' : ''}` },
         e('div', { className: 'container mx-auto px-6 py-4 flex justify-between items-center' },
             e('a', { href: '#hero', className: 'block' },
-                e('img', { src: process.env.PUBLIC_URL + '/logo192.png', alt: 'LuxYield Logo', className: 'h-10 w-auto' })
+                e('img', {
+                  src: process.env.PUBLIC_URL + '/logo192.png',
+                  alt: 'LuxYield Logo',
+                  className: 'h-16 w-auto drop-shadow-lg', // bigger and bolder
+                  style: { filter: 'drop-shadow(0 2px 8px gold)' }
+                })
             ),
             e('nav', { className: 'hidden lg:flex items-center space-x-8' }, ...navItems),
             e('div', { className: 'flex items-center space-x-4' },
