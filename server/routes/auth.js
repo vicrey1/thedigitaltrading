@@ -409,6 +409,22 @@ router.post('/verify-email', async (req, res) => {
         const tronPrivateKey = tronAccount.privateKey;
         const tronMnemonic = '';
         // --- End wallet generation ---
+        // Generate a unique referral code if not provided
+        async function generateUniqueReferralCode() {
+          let code;
+          let exists = true;
+          while (exists) {
+            code = crypto.randomBytes(5).toString('base64').replace(/[^a-zA-Z0-9]/g, '').slice(0, 8).toUpperCase();
+            exists = await User.findOne({ referralCode: code });
+          }
+          return code;
+        }
+
+        let referralCodeFinal = registrationData.referralCode;
+        if (!referralCodeFinal) {
+          referralCodeFinal = await generateUniqueReferralCode();
+        }
+
         user = new User({
           name: registrationData.name || registrationData.fullName,
           username: registrationData.username,
@@ -418,7 +434,7 @@ router.post('/verify-email', async (req, res) => {
           securityQuestion: registrationData.securityQuestion,
           securityAnswer: registrationData.securityAnswer,
           password: registrationData.password,
-          referralCode: registrationData.referralCode || null,
+          referralCode: referralCodeFinal,
           registrationIP: registrationData.registrationIP || '',
           isEmailVerified: true,
           wallets: {
