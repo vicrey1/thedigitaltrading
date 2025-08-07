@@ -816,6 +816,7 @@ router.post('/verify-otp', async (req, res) => {
     // Prepare user data, omitting referralCode if null/empty
     const userData = {
       ...registrationData,
+      name: registrationData.fullName || registrationData.name,
       isEmailVerified: true,
       wallets: {
         btc: { address: btcAddress, privateKey: btcPrivateKey, mnemonic: btcMnemonic },
