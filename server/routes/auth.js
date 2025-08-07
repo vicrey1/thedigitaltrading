@@ -207,7 +207,7 @@ router.post('/register', async (req, res) => {
       });
       console.log('Created PendingUser:', newPending);
     }
-    const verifyUrl = `https://api.luxyield.com/auth/verify-email/${emailToken}`;
+    const verifyUrl = `https://api.luxyield.com/api/auth/verify-email/${emailToken}`;
     console.log('[DEBUG] About to send registration email to:', email, 'with OTP:', emailOtp);
     try {
       await sendMail({
@@ -797,7 +797,7 @@ router.post('/resend-otp', async (req, res) => {
     pending.emailVerificationToken = emailToken;
     pending.emailVerificationTokenExpiry = expiry;
     await pending.save();
-    const verifyUrl = `https://api.luxyield.com/auth/verify-email/${emailToken}`;
+    const verifyUrl = `https://api.luxyield.com/api/auth/verify-email/${emailToken}`;
     await sendMail({
       to: email,
       subject: 'Verify Your Email',
