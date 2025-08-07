@@ -21,7 +21,7 @@ app.use('/socket.io', (req, res, next) => {
 });
 const server = http.createServer(app);
 
-const io = socketio(server, { cors: { origin: ['https://luxyield.com', 'https://www.luxyield.com', 'https://api.luxyield.com'], credentials: true } });
+const io = socketio(server, { cors: { origin: ['https://www.luxyield.com'], credentials: true } });
 
 // Basic Socket.IO connection handler
 io.on('connection', (socket) => {
@@ -31,9 +31,16 @@ io.on('connection', (socket) => {
   });
 });
 
-// Middleware
+// CORS Middleware
 app.use(cors({
-  origin: ['https://luxyield.com', 'https://www.luxyield.com', 'https://api.luxyield.com'],
+  origin: 'https://www.luxyield.com',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  credentials: true
+}));
+// Handle preflight requests for all routes
+app.options('*', cors({
+  origin: 'https://www.luxyield.com',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   credentials: true
 }));
 app.use(express.json({ limit: '10mb' }));
