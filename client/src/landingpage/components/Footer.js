@@ -11,7 +11,7 @@ function Footer() {
                     e('a', { href: '#hero', className: 'block mb-4' },
                         e('img', { src: 'https://images.stockcake.com/public/f/e/5/fe542cbf-1df2-4cb8-ae53-f967466b5d89_medium/geometric-eagle-warrior-stockcake.jpg', alt: 'Luxyield Logo', className: 'h-12 w-auto' })
                     ),
-                    e('p', { className: 'text-sm' }, '101 Park Avenue', e('br'), 'New York, NY 10178'),
+                    e('p', { className: 'text-sm' }, 'Feldstrasse 20', e('br'), '8004 Zürich, Switzerland'),
                     e('p', { className: 'text-sm mt-4' }, '© 2025 LUXYIELD Capital.', e('br'), 'All Rights Reserved.')
                 ),
                 e('div', null,

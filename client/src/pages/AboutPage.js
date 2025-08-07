@@ -35,6 +35,31 @@ function AboutPage() {
                     e('h4', { className: 'text-2xl font-serif text-brand-accent mb-3' }, value.name),
                     e('p', { className: 'text-brand-light/70' }, value.description)
                 ))
+            ),
+            // Legal section with address
+            e('div', { className: 'mt-16' },
+                e('h3', { className: 'text-2xl font-serif text-brand-accent mb-4' }, 'Legal'),
+                e('p', { className: 'text-brand-light/80' }, 'Office Address: Feldstrasse 20, 8004 Zürich, Switzerland')
+            ),
+            // Partnership section with address and Google Map
+            e('div', { className: 'mt-16' },
+                e('h3', { className: 'text-2xl font-serif text-brand-accent mb-4' }, 'Partnership'),
+                e('p', { className: 'text-brand-light/80 mb-4' }, 'We view our clients as partners. Our success is inextricably linked to theirs, and we cultivate deep, long-term relationships built on mutual respect and shared objectives.'),
+                e('div', { className: 'mb-4' },
+                    e('strong', null, 'Office Address: '),
+                    'Feldstrasse 20, 8004 Zürich, Switzerland'
+                ),
+                e('div', { className: 'mb-8' },
+                    e('iframe', {
+                        src: 'https://maps.google.com/maps?q=Feldstrasse%2020%2C%208004%20Z%C3%BCrich%2C%20Switzerland&t=&z=15&ie=UTF8&iwloc=&output=embed',
+                        width: '100%',
+                        height: '300',
+                        style: { border: 0 },
+                        allowFullScreen: true,
+                        loading: 'lazy',
+                        referrerPolicy: 'no-referrer-when-downgrade'
+                    })
+                )
             )
         )
     );
