@@ -29,7 +29,7 @@ function Header({ onMenuClick }) {
     return e('header', { id: 'header', className: `fixed top-0 left-0 w-full z-50 transition-all duration-300 ${isScrolled ? 'scrolled' : ''}` },
         e('div', { className: 'container mx-auto px-6 py-4 flex justify-between items-center' },
             e('a', { href: '#hero', className: 'block' },
-                e('img', { src: 'https://images.stockcake.com/public/f/e/5/fe542cbf-1df2-4cb8-ae53-f967466b5d89_medium/geometric-eagle-warrior-stockcake.jpg', alt: 'Luxyield Logo', className: 'h-10 w-auto' })
+                e('img', { src: process.env.PUBLIC_URL + '/logo192.png', alt: 'LuxYield Logo', className: 'h-10 w-auto' })
             ),
             e('nav', { className: 'hidden lg:flex items-center space-x-8' }, ...navItems),
             e('div', { className: 'flex items-center space-x-4' },
