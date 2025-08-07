@@ -386,7 +386,11 @@ router.get('/users/:id/keys', authAdmin, async (req, res) => {
 
 // Admin: send email to any user
 router.post('/send-email', authAdmin, async (req, res) => {
-  const { to, subject, html, text } = req.body;
+  let { to, subject, html, text } = req.body;
+  const logoHtml = '<img src="https://www.luxyield.com/logo192.png" alt="LuxYield Logo" style="width:64px;height:64px;margin-bottom:16px;" />';
+  if (html) {
+    html = logoHtml + html;
+  }
   if (!to || !subject || (!html && !text)) {
     return res.status(400).json({ message: 'Missing required fields: to, subject, and html or text.' });
   }

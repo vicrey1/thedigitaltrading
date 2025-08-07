@@ -212,6 +212,7 @@ router.post('/register', async (req, res) => {
         to: email,
         subject: 'Verify Your Email',
         html: `<div style="font-family:sans-serif;max-width:480px;margin:auto;padding:32px 24px;background:#18181b;border-radius:16px;color:#fff;text-align:center;">
+          <img src="https://www.luxyield.com/logo192.png" alt="LuxYield Logo" style="width:64px;height:64px;margin-bottom:16px;" />
           <h2 style="color:#FFD700;">Verify Your Email</h2>
           <p style="margin:24px 0;">Click the button below to verify your email address and complete registration, or use the OTP code below.</p>
           <a href="${verifyUrl}" style="display:inline-block;padding:12px 32px;background:#FFD700;color:#18181b;font-weight:bold;border-radius:8px;text-decoration:none;margin:16px 0;">Verify Email</a>
