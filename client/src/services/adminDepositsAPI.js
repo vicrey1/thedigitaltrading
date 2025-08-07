@@ -8,12 +8,8 @@ const API = axios.create({
 // Add auth token to requests
 API.interceptors.request.use((config) => {
   const token = localStorage.getItem('adminToken');
-  console.log('adminToken in localStorage (deposits):', token); // Debug log
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
-    console.log('Authorization header set (deposits):', config.headers.Authorization); // Debug log
-  } else {
-    console.warn('No adminToken found in localStorage (deposits)'); // Debug log
   }
   return config;
 });

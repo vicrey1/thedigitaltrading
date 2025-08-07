@@ -7,12 +7,8 @@ const API = axios.create({
 
 API.interceptors.request.use((config) => {
   const token = localStorage.getItem('adminToken');
-  console.log('adminToken in localStorage (stats):', token); // Debug log
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
-    console.log('Authorization header set (stats):', config.headers.Authorization); // Debug log
-  } else {
-    console.warn('No adminToken found in localStorage (stats)'); // Debug log
   }
   return config;
 });
