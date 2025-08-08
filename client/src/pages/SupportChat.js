@@ -21,84 +21,10 @@ export default function SupportChat() {
   const [sessionExpired, setSessionExpired] = useState(false);
   const chatEndRef = useRef(null);
   const { user } = useUser();
-
-  // Restore sessionStart from localStorage only once on mount
-  useEffect(() => {
-    if (sessionStart === null) {
-      const storedStart = localStorage.getItem('supportSessionStart');
-      if (storedStart) {
-        setSessionStart(Number(storedStart));
-      }
-    }
-  }, [sessionStart]);
-
-  // Set sessionStart from messages only if not already set
-  useEffect(() => {
-    if (sessionStart) return;
-    if (messages.length > 0) {
-      const firstUserMsg = messages.find(m => m.sender === 'user');
-      if (firstUserMsg) {
-        setSessionStart(firstUserMsg.timestamp);
-      }
-    }
-  }, [messages, sessionStart]);
-
-  // Persist sessionStart in localStorage
-  useEffect(() => {
-    if (sessionStart) {
-      localStorage.setItem('supportSessionStart', sessionStart);
-    }
-  }, [sessionStart]);
-
-  // Expiration check only runs when sessionStart is valid
-  useEffect(() => {
-    if (!sessionStart) return;
-    const checkExpiration = () => {
-      const now = Date.now();
-      if (now - sessionStart >= 30 * 60 * 1000) {
-        setSessionExpired(true);
-        localStorage.setItem('supportSessionExpired', 'true');
-      } else {
-        setSessionExpired(false);
-        localStorage.removeItem('supportSessionExpired');
-      }
-    };
-    checkExpiration();
-    const interval = setInterval(checkExpiration, 10000);
-    return () => clearInterval(interval);
-  }, [sessionStart]);
-
-  // Restore sessionExpired from localStorage
-  useEffect(() => {
-    const storedExpired = localStorage.getItem('supportSessionExpired');
-    if (storedExpired === 'true') {
-      setSessionExpired(true);
-    }
-  }, []);
-
-  // Clear messages when session expires or is ended by admin
-  useEffect(() => {
-    if (sessionExpired) {
-      setMessages([]);
-      localStorage.removeItem('supportSessionStart');
-      localStorage.removeItem('supportSessionExpired');
-    }
-  }, [sessionExpired]);
-
-  // On mount, if session is expired, do not load old messages
-  useEffect(() => {
-    const storedExpired = localStorage.getItem('supportSessionExpired');
-    if (storedExpired === 'true') {
-      setMessages([]);
-  return (
-    <>
-      <div className="max-w-screen-xl mx-auto px-2 md:px-6 py-8 space-y-8">
-        <div className="glass-card p-6 rounded-xl shadow-2xl border border-yellow-700 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 relative overflow-hidden mb-8 w-full max-w-full">
-          {/* ...existing code... */}
-        </div>
-      </div>
-    </>
-  );
+  // ...existing hooks and logic...
+  // All hooks and logic go here
+  // ...existing code...
+  // Place the return statement at the end, after all hooks
 
   useEffect(() => {
     // Socket.IO: listen for new messages and typing
@@ -483,6 +409,6 @@ export default function SupportChat() {
           </form>
         )}
       </div>
-    </>
+    </div>
   );
 }
