@@ -209,7 +209,7 @@ const Portfolio = ({ adminView = false, portfolioData: adminPortfolioData }) => 
   const hasActiveInvestment = filteredInvestments.some(inv => inv.status === 'active');
 
   return (
-    <div className="space-y-8 max-w-screen-xl mx-auto px-2 md:px-6 py-8">
+    <div className="space-y-8 max-w-screen-xl mx-auto px-2 md:px-6 py-8 overflow-x-hidden">
       {/* Portfolio Header */}
       <div className="flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-0">
         <h1 className="text-2xl font-bold">Investment Portfolio</h1>
@@ -232,7 +232,7 @@ const Portfolio = ({ adminView = false, portfolioData: adminPortfolioData }) => 
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 w-full max-w-full">
         <div className="glassmorphic p-6 rounded-xl">
           <div className="flex justify-between items-start">
             <div>
@@ -290,7 +290,7 @@ const Portfolio = ({ adminView = false, portfolioData: adminPortfolioData }) => 
       </div>
 
       {/* Charts Row */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 w-full max-w-full">
         {/* Performance Chart */}
         <div className="glassmorphic p-6 rounded-xl">
           <h3 className="text-xl font-bold mb-4">Portfolio Growth</h3>
@@ -367,7 +367,7 @@ const Portfolio = ({ adminView = false, portfolioData: adminPortfolioData }) => 
       </div>
 
       {/* Investments Table */}
-      <div className="glassmorphic p-6 rounded-xl">
+      <div className="glassmorphic p-6 rounded-xl w-full max-w-full">
         <div className="flex flex-col sm:flex-row justify-between items-center mb-4 sm:mb-6 gap-4 sm:gap-0">
           <h3 className="text-xl font-bold">Your Investments</h3>
           <div className="flex space-x-2">
@@ -399,7 +399,7 @@ const Portfolio = ({ adminView = false, portfolioData: adminPortfolioData }) => 
         </div>
 
         <div className="overflow-x-auto rounded-lg border border-gray-800">
-          <table className="w-full text-xs xs:text-sm sm:text-base">
+          <table className="w-full max-w-full text-xs xs:text-sm sm:text-base">
             <thead>
               <tr className="border-b border-gray-800 text-gray-400 text-left">
                 <th className="pb-4">Fund</th>
@@ -472,7 +472,7 @@ const Portfolio = ({ adminView = false, portfolioData: adminPortfolioData }) => 
       </div>
 
       {/* Investment Plans Section */}
-      <div className="glassmorphic p-2 xs:p-4 sm:p-6 rounded-xl mb-8">
+      <div className="glassmorphic p-2 xs:p-4 sm:p-6 rounded-xl mb-8 w-full max-w-full">
           <h2 className="text-xl font-bold mb-4">Investment Plans</h2>
         {investmentPlans.length === 0 ? (
           <div className="text-center py-8 text-gray-400">No plans available</div>
