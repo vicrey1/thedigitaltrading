@@ -48,19 +48,39 @@ const Sidebar = ({ collapsed = false, setCollapsed = () => {}, hasNewAnnouncemen
 
   return (
     <>
+      {/* Hamburger button for mobile */}
+      <button
+        className="fixed top-4 left-4 z-50 bg-gold text-black p-2 rounded-full shadow-lg md:hidden"
+        onClick={() => setMobileOpen(true)}
+        aria-label="Open sidebar"
+      >
+        <FiMenu size={24} />
+      </button>
+      {/* Sidebar for desktop and mobile */}
       <div
         className={`bg-black bg-opacity-70 text-white glassmorphic transition-all duration-500 ease-in-out
           ${collapsed ? 'w-20' : 'w-64'}
-          h-screen md:h-auto min-h-full flex flex-col scrollbar-thin scrollbar-thumb-gold scrollbar-track-gray-900/60 sidebar-scrollbar`}
-        style={{ minHeight: '100vh', height: '100%', overflowY: 'auto', position: 'relative', left: 0, zIndex: 10, transition: 'width 0.5s cubic-bezier(0.4,0,0.2,1)' }}
+          h-screen md:h-auto min-h-full flex flex-col scrollbar-thin scrollbar-thumb-gold scrollbar-track-gray-900/60 sidebar-scrollbar
+          fixed md:static top-0 left-0 z-40
+          ${mobileOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0
+        `}
+        style={{ minHeight: '100vh', height: '100%', overflowY: 'auto', transition: 'width 0.5s cubic-bezier(0.4,0,0.2,1)' }}
       >
-        {/* Collapse/Expand button above Dashboard icon */}
+        {/* Collapse/Expand button above Dashboard icon (desktop only) */}
         <div className="pt-6 pl-2 pr-2">
           <button
             onClick={handleCollapse}
             className="hidden md:block mb-4 bg-gold text-black p-2 rounded-full shadow-lg transition-transform duration-300 hover:scale-110"
           >
             {collapsed ? <FiMenu size={22} /> : <FiX size={22} />}
+          </button>
+          {/* Close button for mobile */}
+          <button
+            onClick={() => setMobileOpen(false)}
+            className="md:hidden mb-4 bg-red-600 text-white p-2 rounded-full shadow-lg"
+            aria-label="Close sidebar"
+          >
+            <FiX size={22} />
           </button>
         </div>
         <nav className="flex-1">
@@ -69,7 +89,8 @@ const Sidebar = ({ collapsed = false, setCollapsed = () => {}, hasNewAnnouncemen
               <li key={index} className="mb-2 w-full transition-all duration-300">
                 <Link
                   to={item.path}
-                  className={`flex items-center p-3 rounded-lg hover:bg-gold hover:bg-opacity-20 hover:text-gold transition-all duration-300 ${collapsed ? 'justify-center' : 'justify-start'} w-full`}
+                  className={`flex items-center p-4 sm:p-3 rounded-lg hover:bg-gold hover:bg-opacity-20 hover:text-gold transition-all duration-300 ${collapsed ? 'justify-center' : 'justify-start'} w-full text-lg sm:text-base`}
+                  onClick={() => setMobileOpen(false)}
                 >
                   <span className="mr-3 text-xl flex-shrink-0 transition-transform duration-300 group-hover:scale-110">{item.icon}</span>
                   {!collapsed && <span className="transition-opacity duration-300">{item.label}</span>}
@@ -81,7 +102,7 @@ const Sidebar = ({ collapsed = false, setCollapsed = () => {}, hasNewAnnouncemen
         {/* Sign Out Button */}
         <button
           onClick={handleLogout}
-          className={`flex items-center justify-center md:justify-${collapsed ? 'center' : 'start'} p-3 mb-6 mx-4 rounded-lg bg-red-600 hover:bg-red-700 text-white font-bold transition-all duration-300 w-[calc(100%-2rem)]`}
+          className={`flex items-center justify-center md:justify-${collapsed ? 'center' : 'start'} p-4 sm:p-3 mb-6 mx-4 rounded-lg bg-red-600 hover:bg-red-700 text-white font-bold transition-all duration-300 w-[calc(100%-2rem)] text-lg sm:text-base`}
           style={{ minWidth: 0 }}
         >
           <span className="mr-3 text-xl flex-shrink-0"><FiLogOut /></span>
@@ -91,8 +112,8 @@ const Sidebar = ({ collapsed = false, setCollapsed = () => {}, hasNewAnnouncemen
       {/* Overlay for mobile */}
       {mobileOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-20 md:hidden"
-          onClick={handleMobile}
+          className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden"
+          onClick={() => setMobileOpen(false)}
         ></div>
       )}
     </>
