@@ -200,7 +200,7 @@ const Withdraw = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
+      <div className="flex justify-center items-center h-64 p-4 sm:p-8">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gold"></div>
       </div>
     );
@@ -208,7 +208,7 @@ const Withdraw = () => {
 
   if (kycStatus !== 'verified') {
     return (
-      <div className="glassmorphic p-8 rounded-xl text-center mt-10">
+      <div className="glassmorphic p-4 sm:p-8 rounded-xl text-center mt-6 sm:mt-10 overflow-auto">
         <h2 className="text-2xl font-bold text-yellow-400 mb-4">KYC Required</h2>
         <p className="text-white mb-4">You must complete KYC verification before you can withdraw funds.</p>
         <a href="/dashboard/kyc" className="bg-gold text-black px-4 py-2 rounded-lg font-bold hover:bg-yellow-500 transition">Go to KYC Verification</a>
@@ -217,9 +217,9 @@ const Withdraw = () => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-4">
+    <div className="max-w-4xl w-full mx-auto p-2 sm:p-4 overflow-auto">
       {/* Navigation Header */}
-      <div className="flex items-center mb-6">
+      <div className="flex flex-col sm:flex-row items-center mb-4 sm:mb-6 gap-2 sm:gap-0">
         {step > 1 && (
           <button 
             onClick={() => setStep(step - 1)}
@@ -228,7 +228,7 @@ const Withdraw = () => {
             <FiArrowLeft size={20} />
           </button>
         )}
-        <h1 className="text-2xl font-bold">
+        <h1 className="text-xl sm:text-2xl font-bold text-center w-full">
           {step === 1 && 'Withdraw Funds'}
           {step === 2 && 'Confirm Withdrawal'}
           {step === 3 && 'Withdrawal Submitted'}
