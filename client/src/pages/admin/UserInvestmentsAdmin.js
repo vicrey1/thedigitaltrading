@@ -44,14 +44,14 @@ const UserInvestmentsAdmin = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
+      <div className="max-w-4xl w-full mx-auto p-2 sm:p-6 overflow-auto">
       <h1 className="text-2xl font-bold mb-4">User Investments Admin</h1>
       <div className="mb-4 flex gap-2">
         <input className="p-2 border rounded bg-gray-800 text-white border-gray-700 focus:border-gold outline-none" placeholder="User ID" value={userId} onChange={e => setUserId(e.target.value)} />
         <button className="bg-gold text-black px-4 py-2 rounded font-semibold hover:bg-yellow-400 transition" onClick={fetchInvestments}>Fetch Investments</button>
       </div>
       <div className="overflow-x-auto rounded-lg border border-gray-700 mb-6">
-        <table className="w-full text-sm">
+        <table className="w-full text-sm overflow-auto">
           <thead>
             <tr className="border-b border-gray-700 bg-gray-900 text-left">
               <th className="py-3 px-4 font-semibold">ID</th>

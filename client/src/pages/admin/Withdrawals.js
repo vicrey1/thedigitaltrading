@@ -40,15 +40,16 @@ const AdminWithdrawals = () => {
 
   if (loading) {
     return <div className="p-6">Loading withdrawals...</div>;
+    return <div className="p-2 sm:p-4 md:p-6 overflow-auto w-full">Loading withdrawals...</div>;
   }
 
   return (
-    <div className="w-full max-w-5xl mx-auto px-2 md:px-6 py-6 font-sans text-base text-gray-900">
+      <div className="w-full max-w-5xl mx-auto px-2 sm:px-6 py-4 sm:py-6 font-sans text-base text-gray-900 overflow-auto">
       <div className="flex flex-col gap-4 mb-6 md:flex-row md:items-center md:justify-between">
-        <h1 className="text-2xl font-bold whitespace-nowrap">Withdrawal Management</h1>
+        <h1 className="text-xl sm:text-2xl font-bold whitespace-nowrap">Withdrawal Management</h1>
         <span className="text-sm text-gray-400">Showing: {withdrawals.filter(w => w.status === 'pending').length} pending</span>
       </div>
-      <div className="bg-gray-800 rounded-xl p-2 md:p-6">
+      <div className="bg-gray-800 rounded-xl p-2 sm:p-6 w-full overflow-auto">
         <WithdrawalList 
           withdrawals={withdrawals} 
           filters={filters}
