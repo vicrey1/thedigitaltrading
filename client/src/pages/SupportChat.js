@@ -409,6 +409,5 @@ export default function SupportChat() {
           </form>
         )}
       </div>
-    </div>
   );
 }
