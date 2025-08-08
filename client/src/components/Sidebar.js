@@ -48,13 +48,13 @@ const Sidebar = ({ collapsed = false, setCollapsed = () => {}, hasNewAnnouncemen
 
   return (
     <>
-      {/* Hamburger button for mobile */}
+      {/* Hamburger button for mobile (toggle open/close) */}
       <button
         className="fixed top-4 left-4 z-50 bg-gold text-black p-2 rounded-full shadow-lg md:hidden"
-        onClick={() => setMobileOpen(true)}
-        aria-label="Open sidebar"
+        onClick={() => setMobileOpen((prev) => !prev)}
+        aria-label={mobileOpen ? "Close sidebar" : "Open sidebar"}
       >
-        <FiMenu size={24} />
+        {mobileOpen ? <FiX size={24} /> : <FiMenu size={24} />}
       </button>
       {/* Sidebar for desktop and mobile */}
       <div
@@ -74,14 +74,7 @@ const Sidebar = ({ collapsed = false, setCollapsed = () => {}, hasNewAnnouncemen
           >
             {collapsed ? <FiMenu size={22} /> : <FiX size={22} />}
           </button>
-          {/* Close button for mobile */}
-          <button
-            onClick={() => setMobileOpen(false)}
-            className="md:hidden mb-4 bg-red-600 text-white p-2 rounded-full shadow-lg"
-            aria-label="Close sidebar"
-          >
-            <FiX size={22} />
-          </button>
+          {/* Remove close button for mobile, handled by hamburger toggle above */}
         </div>
         <nav className="flex-1">
           <ul className="flex flex-col items-start w-full">
