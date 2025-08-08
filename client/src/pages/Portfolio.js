@@ -209,7 +209,7 @@ const Portfolio = ({ adminView = false, portfolioData: adminPortfolioData }) => 
   const hasActiveInvestment = filteredInvestments.some(inv => inv.status === 'active');
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8 px-2 sm:px-4 w-full max-w-screen-xl mx-auto">
       {/* Portfolio Header */}
       <div className="flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-0">
         <h1 className="text-2xl font-bold">Investment Portfolio</h1>
@@ -232,7 +232,7 @@ const Portfolio = ({ adminView = false, portfolioData: adminPortfolioData }) => 
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
         <div className="glassmorphic p-6 rounded-xl">
           <div className="flex justify-between items-start">
             <div>
@@ -290,7 +290,7 @@ const Portfolio = ({ adminView = false, portfolioData: adminPortfolioData }) => 
       </div>
 
       {/* Charts Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 xs:grid-cols-2 gap-4 sm:gap-6">
         {/* Performance Chart */}
         <div className="glassmorphic p-6 rounded-xl">
           <h3 className="text-xl font-bold mb-4">Portfolio Growth</h3>
@@ -399,7 +399,7 @@ const Portfolio = ({ adminView = false, portfolioData: adminPortfolioData }) => 
         </div>
 
         <div className="overflow-x-auto rounded-lg border border-gray-800">
-          <table className="w-full text-sm sm:text-base">
+          <table className="w-full text-xs xs:text-sm sm:text-base">
             <thead>
               <tr className="border-b border-gray-800 text-gray-400 text-left">
                 <th className="pb-4">Fund</th>
@@ -472,13 +472,13 @@ const Portfolio = ({ adminView = false, portfolioData: adminPortfolioData }) => 
       </div>
 
       {/* Investment Plans Section */}
-      <div className="glassmorphic p-4 sm:p-6 rounded-xl mb-8">
+      <div className="glassmorphic p-2 xs:p-4 sm:p-6 rounded-xl mb-8">
         <h2 className="text-xl font-bold mb-4">Investment Plans</h2>
         {investmentPlans.length === 0 ? (
           <div className="text-center py-8 text-gray-400">No plans available</div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 xs:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 xs:grid-cols-2 gap-4">
               {investmentPlans.slice(0,2).map(plan => (
                 <div key={plan.name} className="bg-gray-900 rounded-xl p-4 flex flex-col items-center border-2" style={{ borderColor: plan.color || '#D4AF37' }}>
                   <div className="text-2xl font-bold mb-2" style={{ color: plan.color || '#D4AF37' }}>{plan.name}</div>
@@ -493,7 +493,7 @@ const Portfolio = ({ adminView = false, portfolioData: adminPortfolioData }) => 
                 </div>
               ))}
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4 sm:mt-0">
+            <div className="grid grid-cols-1 xs:grid-cols-2 gap-4 mt-4 sm:mt-0">
               {investmentPlans.slice(2,4).map(plan => (
                 <div key={plan.name} className="bg-gray-900 rounded-xl p-4 flex flex-col items-center border-2" style={{ borderColor: plan.color || '#D4AF37' }}>
                   <div className="text-2xl font-bold mb-2" style={{ color: plan.color || '#D4AF37' }}>{plan.name}</div>
@@ -512,7 +512,7 @@ const Portfolio = ({ adminView = false, portfolioData: adminPortfolioData }) => 
       {/* Plan Modal */}
       {showPlanModal && selectedPlan && (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 px-2">
-          <div className="bg-gray-900 rounded-xl p-4 sm:p-8 w-full max-w-md relative">
+          <div className="bg-gray-900 rounded-xl p-2 xs:p-4 sm:p-8 w-full max-w-md relative">
             <button className="absolute top-2 right-2 text-gold" onClick={() => setShowPlanModal(false)}>✕</button>
             <h2 className="text-xl font-bold mb-4">Invest in {selectedPlan.name} Plan</h2>
             {/* Available Balance Display */}
