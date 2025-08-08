@@ -90,13 +90,15 @@ export default function SupportChat() {
     const storedExpired = localStorage.getItem('supportSessionExpired');
     if (storedExpired === 'true') {
       setMessages([]);
-      return;
-    }
-    // Fetch chat history from backend
-    axios.get('/api/support/messages').then(res => {
-      setMessages(res.data);
-    });
-  }, [user]);
+  return (
+    <>
+      <div className="max-w-screen-xl mx-auto px-2 md:px-6 py-8 space-y-8">
+        <div className="glass-card p-6 rounded-xl shadow-2xl border border-yellow-700 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 relative overflow-hidden mb-8 w-full max-w-full">
+          {/* ...existing code... */}
+        </div>
+      </div>
+    </>
+  );
 
   useEffect(() => {
     // Socket.IO: listen for new messages and typing
@@ -481,6 +483,6 @@ export default function SupportChat() {
           </form>
         )}
       </div>
-    </div>
+    </>
   );
 }
