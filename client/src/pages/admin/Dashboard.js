@@ -24,12 +24,12 @@ const AdminDashboard = () => {
   }, []);
 
   return (
-    <div className="max-w-6xl mx-auto p-8 md:p-12 lg:p-16 xl:p-20 2xl:p-24 font-sans text-base text-gray-100 bg-black rounded-xl shadow-lg">
-      <div className="space-y-8">
+    <div className="max-w-screen-xl mx-auto p-2 sm:p-4 md:p-8 font-sans text-base text-gray-100 bg-black rounded-xl shadow-lg overflow-x-hidden overflow-y-auto">
+      <div className="space-y-8 w-full max-w-full">
         <h1 className="text-2xl font-bold">Admin Dashboard</h1>
         
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 w-full max-w-full overflow-x-auto">
           {stats.map((stat, index) => (
             <AdminCard 
               key={index}

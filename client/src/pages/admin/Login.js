@@ -30,8 +30,8 @@ const AdminLogin = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-900 p-4">
-      <div className="w-full max-w-md bg-gray-800 rounded-xl shadow-lg p-8">
+    <div className="min-h-screen flex items-center justify-center bg-gray-900 p-2 sm:p-4 overflow-x-hidden overflow-y-auto">
+      <div className="w-full max-w-sm bg-gray-800 rounded-xl shadow-lg p-4 sm:p-6 md:p-8 mx-auto">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gold mb-2">LUXYIELD</h1>
           <h2 className="text-xl text-white">Admin Portal</h2>
