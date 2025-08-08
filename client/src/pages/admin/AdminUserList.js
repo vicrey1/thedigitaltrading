@@ -20,7 +20,7 @@ const AdminUserList = ({ onSelectUser }) => {
   const filtered = users.filter(u => u.email.toLowerCase().includes(search.toLowerCase()));
 
   return (
-    <div className="p-6">
+    <div className="p-2 sm:p-4 md:p-6 max-w-full sm:max-w-4xl mx-auto overflow-x-auto">
       <h1 className="text-2xl font-bold mb-4">All Users</h1>
       <input
         className="mb-4 p-2 rounded bg-gray-800 text-white w-full border border-gray-700 focus:border-gold outline-none"

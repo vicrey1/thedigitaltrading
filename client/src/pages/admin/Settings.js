@@ -67,7 +67,7 @@ const Settings = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-8 bg-black bg-opacity-60 rounded-xl shadow-lg text-white">
+    <div className="max-w-full sm:max-w-2xl mx-auto p-2 sm:p-6 md:p-8 bg-black bg-opacity-60 rounded-xl shadow-lg text-white overflow-x-auto">
       <h1 className="text-3xl font-bold mb-8 text-gold">Account Settings</h1>
       {/* Profile Section */}
       <div className="mb-8">

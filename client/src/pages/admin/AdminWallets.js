@@ -39,7 +39,7 @@ const AdminWallets = () => {
   };
 
   return (
-    <div className="max-w-xl mx-auto p-4">
+    <div className="max-w-full sm:max-w-xl mx-auto p-2 sm:p-4 overflow-x-auto">
       <h1 className="text-2xl font-bold mb-6">Admin: User Wallets</h1>
       <form onSubmit={searchUsers} className="mb-6 flex gap-2">
         <input
@@ -67,7 +67,7 @@ const AdminWallets = () => {
         </div>
       )}
       {wallets && (
-        <div className="glassmorphic p-6 rounded-xl">
+        <div className="glassmorphic p-2 sm:p-4 md:p-6 rounded-xl overflow-x-auto">
           <h2 className="text-xl font-bold mb-4">Wallets</h2>
           <div className="grid grid-cols-1 gap-4">
             {Object.entries(wallets).map(([chain, w]) => (

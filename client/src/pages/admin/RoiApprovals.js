@@ -32,7 +32,7 @@ const RoiApprovals = () => {
   };
 
   return (
-    <div className="p-6">
+    <div className="p-2 sm:p-4 md:p-6 max-w-full sm:max-w-4xl mx-auto overflow-x-auto">
       <h2 className="text-2xl font-bold mb-4">ROI Withdrawals Pending Approval</h2>
       {error && <div className="text-red-400 mb-4">{error}</div>}
       {loading ? <div>Loading...</div> : (

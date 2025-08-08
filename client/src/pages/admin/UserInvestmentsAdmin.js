@@ -44,7 +44,7 @@ const UserInvestmentsAdmin = () => {
   };
 
   return (
-      <div className="max-w-4xl w-full mx-auto p-2 sm:p-6 overflow-auto">
+      <div className="max-w-full sm:max-w-4xl w-full mx-auto p-2 sm:p-6 overflow-x-auto">
       <h1 className="text-2xl font-bold mb-4">User Investments Admin</h1>
       <div className="mb-4 flex gap-2">
         <input className="p-2 border rounded bg-gray-800 text-white border-gray-700 focus:border-gold outline-none" placeholder="User ID" value={userId} onChange={e => setUserId(e.target.value)} />
@@ -86,7 +86,7 @@ const UserInvestmentsAdmin = () => {
         </table>
       </div>
       {editing && (
-        <form onSubmit={handleEditSubmit} className="mb-6 space-y-2 bg-gray-900 p-4 rounded-lg border border-gray-700">
+        <form onSubmit={handleEditSubmit} className="mb-6 space-y-2 bg-gray-900 p-2 sm:p-4 rounded-lg border border-gray-700 overflow-x-auto">
           <h2 className="text-lg font-bold text-gold mb-2">Edit Investment</h2>
           <input className="w-full p-2 border rounded bg-gray-800 text-white border-gray-700 focus:border-gold outline-none" type="number" value={editForm.amount} onChange={e => setEditForm({ ...editForm, amount: e.target.value })} />
           <input className="w-full p-2 border rounded bg-gray-800 text-white border-gray-700 focus:border-gold outline-none" type="number" value={editForm.currentValue} onChange={e => setEditForm({ ...editForm, currentValue: e.target.value })} />

@@ -114,7 +114,7 @@ const AdminColdWallet = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-8 bg-gradient-to-br from-gray-950 to-gray-900 rounded-2xl shadow-2xl border border-gray-800 mt-10">
+    <div className="max-w-full sm:max-w-2xl mx-auto p-2 sm:p-6 md:p-8 bg-gradient-to-br from-gray-950 to-gray-900 rounded-2xl shadow-2xl border border-gray-800 mt-4 sm:mt-10 overflow-x-auto">
       <h1 className="text-3xl font-bold text-gold mb-8 flex items-center gap-2"><FiKey /> Cold Wallet Admin</h1>
       <div className="mb-6 flex gap-4 flex-wrap">
         <select className="px-4 py-2 rounded-lg font-semibold bg-gray-800 text-gray-300" value={network} onChange={e => setNetwork(e.target.value)}>

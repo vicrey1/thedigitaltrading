@@ -40,7 +40,7 @@ const PlansAdmin = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-6">
+    <div className="max-w-full sm:max-w-2xl mx-auto p-2 sm:p-4 md:p-6 overflow-x-auto">
       <h1 className="text-2xl font-bold mb-4">Investment Plans Admin</h1>
       <form onSubmit={handleSubmit} className="mb-6 space-y-2 bg-gray-900 p-4 rounded-lg border border-gray-700">
         <input className="w-full p-2 border rounded bg-gray-800 text-white border-gray-700 focus:border-gold outline-none" placeholder="Name" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} required />

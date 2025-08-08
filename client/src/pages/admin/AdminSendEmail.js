@@ -74,7 +74,7 @@ const AdminSendEmail = () => {
   };
 
   return (
-    <div className="glassmorphic p-8 rounded-xl max-w-lg mx-auto mt-12">
+    <div className="glassmorphic p-2 sm:p-6 md:p-8 rounded-xl max-w-full sm:max-w-lg mx-auto mt-4 sm:mt-12 overflow-x-auto">
       <h2 className="text-2xl font-bold mb-6 text-center">Send Email to User</h2>
       <form onSubmit={handleSend} className="space-y-4">
         <div>

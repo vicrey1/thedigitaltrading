@@ -123,10 +123,10 @@ const AdminAnnouncements = () => {
   };
 
   return (
-    <div className="p-6 max-w-3xl mx-auto">
+    <div className="p-2 sm:p-4 md:p-6 max-w-full sm:max-w-3xl mx-auto overflow-x-auto">
       <h2 className="text-3xl font-bold text-gold mb-6 text-center">Admin Announcements</h2>
       {/* Post form */}
-      <div className="glassmorphic p-8 rounded-xl mb-10">
+      <div className="glassmorphic p-2 sm:p-6 md:p-8 rounded-xl mb-6 sm:mb-10 overflow-x-auto">
         <h3 className="text-2xl font-bold mb-6 text-center">Post Announcement</h3>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -154,9 +154,9 @@ const AdminAnnouncements = () => {
         </form>
       </div>
       {/* Announcements list */}
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         {announcements.filter(a => a._id).map((a) => (
-          <div key={a._id} className="glassmorphic p-6 rounded-xl relative">
+          <div key={a._id} className="glassmorphic p-2 sm:p-4 md:p-6 rounded-xl relative overflow-x-auto">
             <div className="flex items-center mb-2">
               <FiInfo className="text-gold mr-2" />
               <span className="font-bold text-lg text-gold">{a.title}</span>

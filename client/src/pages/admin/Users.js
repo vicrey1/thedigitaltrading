@@ -40,12 +40,11 @@ const AdminUsers = () => {
   };
 
   if (loading) {
-    return <div className="p-6">Loading users...</div>;
-    return <div className="p-2 sm:p-4 md:p-6 overflow-auto w-full">Loading users...</div>;
+    return <div className="p-2 sm:p-4 md:p-6 max-w-full sm:max-w-6xl mx-auto overflow-x-auto">Loading users...</div>;
   }
 
   return (
-      <div className="max-w-6xl w-full mx-auto p-4 sm:p-8 md:p-12 lg:p-16 xl:p-20 2xl:p-24 font-sans text-base text-gray-100 bg-black rounded-xl shadow-lg overflow-auto">
+      <div className="max-w-full sm:max-w-6xl w-full mx-auto p-2 sm:p-4 md:p-8 lg:p-16 xl:p-20 2xl:p-24 font-sans text-base text-gray-100 bg-black rounded-xl shadow-lg overflow-x-auto">
       <div className="space-y-6">
         <h1 className="text-2xl font-bold">User Management</h1>
         
