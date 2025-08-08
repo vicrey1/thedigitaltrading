@@ -93,13 +93,13 @@ const Register = () => {
 
   return (
     <React.Fragment>
-      <div className="min-h-screen flex items-center justify-center bg-dark p-4">
-        <div className="glassmorphic p-8 rounded-xl w-full max-w-2xl">
+      <div className="min-h-screen flex items-center justify-center bg-dark p-2 sm:p-4">
+        <div className="glassmorphic p-4 sm:p-8 rounded-xl w-full max-w-2xl">
           {/* ...Logo and other UI... */}
           <>
             <h2 className="text-2xl text-gold mb-6">Create Your Account</h2>
             <form onSubmit={formik.handleSubmit}>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4 mb-2 sm:mb-4 w-full">
                 <div>
                   <label htmlFor="register-fullName" className="block mb-2">Full Name</label>
                   <input
@@ -110,7 +110,7 @@ const Register = () => {
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
                     value={formik.values.fullName}
-                    className="w-full bg-dark border border-gray-700 rounded p-3"
+                    className="w-full bg-dark border border-gray-700 rounded p-2 sm:p-3"
                   />
                   {formik.touched.fullName && (
                     <div className="text-red-500 text-sm"><SafeString value={formik.errors.fullName} /></div>

@@ -159,7 +159,7 @@ const KYCPage = () => {
   // Status banners
   if (success || kycStatus === 'pending') {
     return (
-      <div className="max-w-md mx-auto p-8 glassmorphic rounded-xl mt-10 text-center">
+      <div className="max-w-md w-full mx-auto p-4 sm:p-8 glassmorphic rounded-xl mt-6 sm:mt-10 text-center overflow-auto">
         <ToastContainer />
         <FiAlertCircle className="mx-auto text-yellow-400 text-4xl mb-2" />
         <h2 className="text-2xl font-bold mb-4 text-gold">KYC Verification</h2>
@@ -169,7 +169,7 @@ const KYCPage = () => {
   }
   if (kycStatus === 'verified') {
     return (
-      <div className="max-w-md mx-auto p-8 glassmorphic rounded-xl mt-10 text-center">
+      <div className="max-w-md w-full mx-auto p-4 sm:p-8 glassmorphic rounded-xl mt-6 sm:mt-10 text-center overflow-auto">
         <ToastContainer />
         <FiCheckCircle className="mx-auto text-green-400 text-4xl mb-2" />
         <h2 className="text-2xl font-bold mb-4 text-gold">KYC Verification</h2>
@@ -179,7 +179,7 @@ const KYCPage = () => {
   }
   if (kycStatus === 'rejected') {
     return (
-      <div className="max-w-md mx-auto p-8 glassmorphic rounded-xl mt-10 text-center">
+      <div className="max-w-md w-full mx-auto p-4 sm:p-8 glassmorphic rounded-xl mt-6 sm:mt-10 text-center overflow-auto">
         <ToastContainer />
         <FiAlertCircle className="mx-auto text-red-400 text-4xl mb-2" />
         <h2 className="text-2xl font-bold mb-4 text-gold">KYC Verification</h2>

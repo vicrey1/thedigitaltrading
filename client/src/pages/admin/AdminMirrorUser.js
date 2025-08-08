@@ -93,9 +93,9 @@ const AdminMirrorUser = ({ userId, onBack }) => {
   const investments = portfolioData?.investments || [];
 
   return (
-    <div className="p-2 md:p-6">
+    <div className="p-2 sm:p-4 md:p-6 overflow-auto w-full">
       <button className="mb-4 bg-gray-700 px-4 py-2 rounded w-full md:w-auto" onClick={onBack}>Back to User List</button>
-      <div className="flex flex-wrap md:flex-nowrap gap-2 md:space-x-4 mb-6 overflow-x-auto">
+      <div className="flex flex-wrap sm:flex-nowrap gap-2 sm:space-x-4 mb-4 sm:mb-6 overflow-x-auto w-full">
         <button className={tab==='dashboard'?"bg-gold px-4 py-2 rounded min-w-[120px]":"px-4 py-2 min-w-[120px]"} onClick={()=>setTab('dashboard')}>Dashboard</button>
         <button className={tab==='portfolio'?"bg-gold px-4 py-2 rounded min-w-[120px]":"px-4 py-2 min-w-[120px]"} onClick={()=>setTab('portfolio')}>Portfolio</button>
         <button className={tab==='settings'?"bg-gold px-4 py-2 rounded min-w-[120px]":"px-4 py-2 min-w-[120px]"} onClick={()=>setTab('settings')}>Settings</button>
