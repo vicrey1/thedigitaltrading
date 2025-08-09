@@ -17,7 +17,6 @@ export default function SupportChat() {
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [file, setFile] = useState(null);
-  const [sessionStart, setSessionStart] = useState(null);
   const [sessionExpired, setSessionExpired] = useState(false);
   const chatEndRef = useRef(null);
   const { user } = useUser();
@@ -25,9 +24,7 @@ export default function SupportChat() {
   useEffect(() => {
     // Socket.IO: listen for new messages and typing
     const handleNewMessage = (msg) => {
-      if (msg.sender === 'support') {
-        setMessages((prev) => [...prev, msg]);
-      }
+      setMessages((prev) => [...prev, msg]);
     };
     const handleAdminTyping = ({ userId }) => {
       if ((user?._id || user?.id) === userId) setIsTyping(true);
@@ -109,12 +106,9 @@ export default function SupportChat() {
 
   const handleNewSession = () => {
     setMessages([]);
-    setSessionStart(null);
     setSessionExpired(false);
     setInput('');
     setFile(null);
-    localStorage.removeItem('supportSessionStart');
-    localStorage.removeItem('supportSessionExpired');
   };
 
   const adminHasReplied = messages.some(m => m.sender === 'support' && m.content !== 'Thank you for contacting support! An agent will reply soon.');
@@ -123,7 +117,7 @@ export default function SupportChat() {
     : messages;
 
   return (
-    <div className="max-w-screen-xl mx-auto px-2 md:px-6 py-8 space-y-8 support-chat-responsive">
+    <div className="max-w-screen-xl mx-auto px-2 md:px-6 py-8 space-y-8 support-chat-responsive" style={{ minHeight: '100vh' }}>
       <div className="glass-card p-4 md:p-6 rounded-xl shadow-2xl border border-yellow-700 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 relative overflow-hidden mb-8 w-full max-w-full">
         <div className="flex flex-col md:flex-row items-center gap-3 p-3 md:p-4 bg-gradient-to-r from-yellow-100 to-blue-100 border-b border-gray-200 shadow-none rounded-t-xl">
           <button
@@ -149,16 +143,14 @@ export default function SupportChat() {
                 {m.sender === 'support' && <img src={AVATAR_SUPPORT} alt="Support" className="w-8 h-8 md:w-9 md:h-9 rounded-full mr-2 border-2 border-yellow-400" />}
                 <div className={`max-w-[90vw] md:max-w-[70%] px-3 md:px-4 py-2 rounded-2xl ${m.sender === 'user' ? 'bg-blue-100 text-blue-900 rounded-br-none font-semibold' : 'bg-yellow-200 text-gray-900 rounded-bl-none'} shadow-md relative`}>
                   {m.type === 'file' && m.attachment && m.content && m.content !== m.attachment ? (
-                    <>
-                      {m.attachment.match(/\.(jpg|jpeg|png|gif)$/i) ? (
-                        <>
-                          <img src={m.attachment} alt={m.content} className="max-w-[150px] md:max-w-[200px] max-h-[150px] md:max-h-[200px] rounded mb-2 border" />
-                          <span className="block mt-2 font-bold text-lg text-blue-900 text-center">{m.content}</span>
-                        </>
-                      ) : (
-                        <a href={m.attachment} download={m.content} className="text-blue-600 underline break-all" target="_blank" rel="noopener noreferrer">{m.content}</a>
-                      )}
-                    </>
+                    m.attachment.match(/\.(jpg|jpeg|png|gif)$/i) ? (
+                      <>
+                        <img src={m.attachment} alt={m.content} className="max-w-[150px] md:max-w-[200px] max-h-[150px] md:max-h-[200px] rounded mb-2 border" />
+                        <span className="block mt-2 font-bold text-lg text-blue-900 text-center">{m.content}</span>
+                      </>
+                    ) : (
+                      <a href={m.attachment} download={m.content} className="text-blue-600 underline break-all" target="_blank" rel="noopener noreferrer">{m.content}</a>
+                    )
                   ) : m.type === 'file' && m.attachment && m.attachment.match(/\.(jpg|jpeg|png|gif)$/i) ? (
                     <img src={m.attachment} alt={m.content} className="max-w-[150px] md:max-w-[200px] max-h-[150px] md:max-h-[200px] rounded mb-2 border" />
                   ) : m.type === 'file' && m.attachment ? (
@@ -170,7 +162,7 @@ export default function SupportChat() {
                     <span>{m.sender === 'user' ? 'You' : 'Support'}</span>
                     <span className="flex items-center gap-1">
                       {formatTime(m.timestamp)}
-                      {m.sender === (user.isAdmin ? 'support' : 'user') && (
+                      {(user && user.isAdmin ? m.sender === 'support' : m.sender === 'user') && (
                         <FaCheckDouble className={m.status === 'seen' ? 'text-blue-500 ml-1' : 'text-gray-400 ml-1'} title={m.status === 'seen' ? 'Seen' : 'Sent'} />
                       )}
                     </span>
