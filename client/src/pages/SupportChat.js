@@ -161,7 +161,7 @@ export default function SupportChat() {
                         onError={e => { e.target.onerror = null; e.target.src = 'https://ui-avatars.com/api/?name=Image+Not+Found&background=cccccc&color=555'; e.target.alt = 'Image not found'; }}
                       />
                       {(!m.attachment || m.attachment === 'https://ui-avatars.com/api/?name=Image+Not+Found&background=cccccc&color=555') && (
-                        <div className="text-xs text-red-600 mt-2">File not found or upload failed.</div>
+                        <div className="text-xs text-red-600 mt-2">File not found or upload failed. <button className="ml-2 px-2 py-1 bg-blue-500 text-white rounded" onClick={() => document.getElementById('file-upload').click()}>Re-upload</button></div>
                       )}
                     </>
                   ) : m.type === 'file' && m.attachment ? (
