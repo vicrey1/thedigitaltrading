@@ -29,10 +29,11 @@ router.post('/message', async (req, res) => {
   const { sender, userId, content, type, timestamp, attachment, name, username } = req.body;
   let msg = { sender, content, type, timestamp, attachment, status: 'sent' };
 
-  // If message is from user, ensure name and username are included
+  // If message is from user, ensure name, username, and avatar are included
   if (sender === 'user' && userId) {
     let userName = name;
     let userUsername = username;
+    let userAvatar = null;
     try {
       // Only fetch if missing or 'Unknown'
       if (!userName || userName === 'Unknown' || !userUsername || userUsername === 'unknown') {
@@ -40,12 +41,14 @@ router.post('/message', async (req, res) => {
         if (user) {
           userName = user.name;
           userUsername = user.username || user.email;
+          userAvatar = user.avatar || null;
         }
       }
     } catch (e) { /* ignore */ }
     msg.userId = userId;
     msg.name = userName || 'Unknown';
     msg.username = userUsername || 'unknown';
+    msg.avatar = userAvatar || null;
   } else if (userId) {
     msg.userId = userId;
     if (name) msg.name = name;
