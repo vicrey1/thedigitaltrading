@@ -145,14 +145,14 @@ export default function SupportChat() {
                   {m.type === 'file' && m.attachment && m.content && m.content !== m.attachment ? (
                     m.attachment.match(/\.(jpg|jpeg|png|gif)$/i) ? (
                       <>
-                        <img src={m.attachment} alt={m.content} className="max-w-[150px] md:max-w-[200px] max-h-[150px] md:max-h-[200px] rounded mb-2 border" />
+                        <img src={m.attachment} alt={m.content} className="max-w-[150px] md:max-w-[200px] max-h-[150px] md:max-h-[200px] rounded mb-2 border" onError={e => { e.target.onerror = null; e.target.src = 'https://ui-avatars.com/api/?name=Image+Not+Found&background=cccccc&color=555'; }} />
                         <span className="block mt-2 font-bold text-lg text-blue-900 text-center">{m.content}</span>
                       </>
                     ) : (
                       <a href={m.attachment} download={m.content} className="text-blue-600 underline break-all" target="_blank" rel="noopener noreferrer">{m.content}</a>
                     )
                   ) : m.type === 'file' && m.attachment && m.attachment.match(/\.(jpg|jpeg|png|gif)$/i) ? (
-                    <img src={m.attachment} alt={m.content} className="max-w-[150px] md:max-w-[200px] max-h-[150px] md:max-h-[200px] rounded mb-2 border" />
+                    <img src={m.attachment} alt={m.content} className="max-w-[150px] md:max-w-[200px] max-h-[150px] md:max-h-[200px] rounded mb-2 border" onError={e => { e.target.onerror = null; e.target.src = 'https://ui-avatars.com/api/?name=Image+Not+Found&background=cccccc&color=555'; }} />
                   ) : m.type === 'file' && m.attachment ? (
                     <a href={m.attachment} download={m.content} className="text-blue-600 underline break-all" target="_blank" rel="noopener noreferrer">{m.content}</a>
                   ) : (
