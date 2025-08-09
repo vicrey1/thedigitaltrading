@@ -251,11 +251,11 @@ export default function SupportChat() {
   useEffect(() => {
     if (!user) return;
     // Find the latest message from the other party that is not seen
-    const unseen = messages.filter(m => m.sender !== (user.isAdmin ? 'support' : 'user') && m.status !== 'seen');
+    const unseen = messages.filter(m => m.sender !== ((user && user.isAdmin) ? 'support' : 'user') && m.status !== 'seen');
     if (unseen.length > 0) {
       axios.post('/api/support/message-seen', {
         userId: user._id || user.id,
-        sender: user.isAdmin ? 'support' : 'user',
+        sender: (user && user.isAdmin) ? 'support' : 'user',
       });
     }
   }, [messages, user]);
@@ -326,7 +326,7 @@ export default function SupportChat() {
                   <span className="flex items-center gap-1">
                     {formatTime(m.timestamp)}
                     {/* Double tick: grey for sent, blue for seen */}
-                    {m.sender === (user.isAdmin ? 'support' : 'user') && (
+                    {m.sender === ((user && user.isAdmin) ? 'support' : 'user') && (
                       <FaCheckDouble className={m.status === 'seen' ? 'text-blue-500 ml-1' : 'text-gray-400 ml-1'} title={m.status === 'seen' ? 'Seen' : 'Sent'} />
                     )}
                   </span>
