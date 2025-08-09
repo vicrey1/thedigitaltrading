@@ -152,7 +152,17 @@ export default function SupportChat() {
                       <a href={m.attachment} download={m.content} className="text-blue-600 underline break-all" target="_blank" rel="noopener noreferrer">{m.content}</a>
                     )
                   ) : m.type === 'file' && m.attachment && m.attachment.match(/\.(jpg|jpeg|png|gif)$/i) ? (
-                    <img src={m.attachment} alt={m.content} className="max-w-[150px] md:max-w-[200px] max-h-[150px] md:max-h-[200px] rounded mb-2 border" onError={e => { e.target.onerror = null; e.target.src = 'https://ui-avatars.com/api/?name=Image+Not+Found&background=cccccc&color=555'; }} />
+                    <>
+                      <img 
+                        src={m.attachment} 
+                        alt={m.content} 
+                        className="max-w-[150px] md:max-w-[200px] max-h-[150px] md:max-h-[200px] rounded mb-2 border" 
+                        onError={e => { e.target.onerror = null; e.target.src = 'https://ui-avatars.com/api/?name=Image+Not+Found&background=cccccc&color=555'; e.target.alt = 'Image not found'; }}
+                      />
+                      {(!m.attachment || m.attachment === 'https://ui-avatars.com/api/?name=Image+Not+Found&background=cccccc&color=555') && (
+                        <div className="text-xs text-red-600 mt-2">File not found or upload failed.</div>
+                      )}
+                    </>
                   ) : m.type === 'file' && m.attachment ? (
                     <a href={m.attachment} download={m.content} className="text-blue-600 underline break-all" target="_blank" rel="noopener noreferrer">{m.content}</a>
                   ) : (

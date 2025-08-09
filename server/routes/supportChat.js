@@ -96,8 +96,15 @@ router.post('/message-seen', (req, res) => {
 // Upload a file
 router.post('/upload', upload.single('file'), (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
-  const fileUrl = `/uploads/support/${req.file.filename}`;
-  res.json({ fileUrl, originalName: req.file.originalname });
+  const filePath = path.join(__dirname, '../uploads/support', req.file.filename);
+  // Check if file exists before returning URL
+  fs.access(filePath, fs.constants.F_OK, (err) => {
+    if (err) {
+      return res.status(500).json({ error: 'File not found after upload' });
+    }
+    const fileUrl = `/uploads/support/${req.file.filename}`;
+    res.json({ fileUrl, originalName: req.file.originalname });
+  });
 });
 
 // Admin: clear chat (for demo)
