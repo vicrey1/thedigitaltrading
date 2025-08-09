@@ -138,20 +138,21 @@ export default function SupportChat() {
             {messages.length === 0 && (
               <div className="text-center text-gray-400 my-8">No messages yet. Start the conversation below!</div>
             )}
+            {/* User Info Display */}
+            <div className="flex items-center gap-3 mb-4">
+              <img src={user?.avatar || AVATAR_USER} alt="User Avatar" className="w-10 h-10 rounded-full border-2 border-blue-400" />
+              <div>
+                <div className="font-bold text-blue-900">{user?.name || 'You'}</div>
+                <div className="text-xs text-gray-500">{user?.username || user?.email || 'No username'}</div>
+              </div>
+            </div>
+            {/* Message Formatting */}
             {filteredMessages.map((m, i) => (
               <div key={i} className={`flex mb-3 ${m.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
                 {m.sender === 'support' && <img src={AVATAR_SUPPORT} alt="Support" className="w-8 h-8 md:w-9 md:h-9 rounded-full mr-2 border-2 border-yellow-400" />}
                 <div className={`max-w-[90vw] md:max-w-[70%] px-3 md:px-4 py-2 rounded-2xl ${m.sender === 'user' ? 'bg-blue-100 text-blue-900 rounded-br-none font-semibold' : 'bg-yellow-200 text-gray-900 rounded-bl-none'} shadow-md relative`}>
-                  {m.type === 'file' && m.attachment && m.content && m.content !== m.attachment ? (
-                    m.attachment.match(/\.(jpg|jpeg|png|gif)$/i) ? (
-                      <>
-                        <img src={m.attachment} alt={m.content} className="max-w-[150px] md:max-w-[200px] max-h-[150px] md:max-h-[200px] rounded mb-2 border" onError={e => { e.target.onerror = null; e.target.src = 'https://ui-avatars.com/api/?name=Image+Not+Found&background=cccccc&color=555'; }} />
-                        <span className="block mt-2 font-bold text-lg text-blue-900 text-center">{m.content}</span>
-                      </>
-                    ) : (
-                      <a href={m.attachment} download={m.content} className="text-blue-600 underline break-all" target="_blank" rel="noopener noreferrer">{m.content}</a>
-                    )
-                  ) : m.type === 'file' && m.attachment && m.attachment.match(/\.(jpg|jpeg|png|gif)$/i) ? (
+                  <div className="mb-1 text-xs text-gray-400">{m.sender === 'user' ? user?.name || 'You' : 'Support'} • {formatTime(m.timestamp)}</div>
+                  {m.type === 'file' && m.attachment && m.attachment.match(/\.(jpg|jpeg|png|gif)$/i) ? (
                     <>
                       <img 
                         src={m.attachment} 
@@ -168,17 +169,8 @@ export default function SupportChat() {
                   ) : (
                     <span>{m.content}</span>
                   )}
-                  <div className="text-xs text-gray-700 mt-1 flex justify-between items-center">
-                    <span>{m.sender === 'user' ? 'You' : 'Support'}</span>
-                    <span className="flex items-center gap-1">
-                      {formatTime(m.timestamp)}
-                      {(user && user.isAdmin ? m.sender === 'support' : m.sender === 'user') && (
-                        <FaCheckDouble className={m.status === 'seen' ? 'text-blue-500 ml-1' : 'text-gray-400 ml-1'} title={m.status === 'seen' ? 'Seen' : 'Sent'} />
-                      )}
-                    </span>
-                  </div>
                 </div>
-                {m.sender === 'user' && <img src={AVATAR_USER} alt="User" className="w-8 h-8 md:w-9 md:h-9 rounded-full ml-2 border-2 border-blue-400" />}
+                {m.sender === 'user' && <img src={user?.avatar || AVATAR_USER} alt="User" className="w-8 h-8 md:w-9 md:h-9 rounded-full ml-2 border-2 border-blue-400" />}
               </div>
             ))}
             {isTyping && (
@@ -197,6 +189,7 @@ export default function SupportChat() {
             <button onClick={handleNewSession} className="bg-blue-600 text-white px-5 py-2 rounded-full hover:bg-blue-700">Start New Chat</button>
           </div>
         ) : (
+          /* File Upload UI */
           <form className="flex flex-col md:flex-row items-center gap-2 p-3 md:p-4 border-t border-gray-200 bg-white rounded-b-xl" onSubmit={handleSend}>
             <input
               type="text"
@@ -215,7 +208,10 @@ export default function SupportChat() {
               name="file-upload"
               onChange={e => setFile(e.target.files[0])}
             />
-            <label htmlFor="file-upload" className="cursor-pointer bg-gray-200 px-3 py-2 rounded-full hover:bg-gray-300 text-xl">📎</label>
+            <label htmlFor="file-upload" className="cursor-pointer bg-gray-200 px-3 py-2 rounded-full hover:bg-gray-300 text-xl flex items-center gap-2">
+              <span role="img" aria-label="Attach">📎</span>
+              <span className="text-xs text-gray-600">Attach file</span>
+            </label>
             {file && (
               <span className="ml-2 text-xs text-blue-700 bg-blue-100 px-2 py-1 rounded-full font-semibold truncate max-w-[120px]" title={file.name}>
                 {file.name}
