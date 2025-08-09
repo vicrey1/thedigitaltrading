@@ -1,0 +1,27 @@
+/* Responsive Design for Mobile Devices */
+@media (max-width: 600px) {
+  .glass-card {
+    border-radius: 12px;
+    padding: 10px;
+  }
+  .glass-button {
+    font-size: 14px;
+    padding: 8px 16px;
+  }
+  .gradient-text {
+    font-size: 1.1em;
+  }
+  html, body {
+    font-size: 15px;
+    padding: 0 4px;
+  }
+  img, .container, .content {
+    max-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .row, .columns {
+    flex-direction: column !important;
+    width: 100%;
+  }
+}
