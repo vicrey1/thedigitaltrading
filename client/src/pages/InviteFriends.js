@@ -36,7 +36,7 @@ export default function InviteFriends() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-6">
+    <div className="w-full max-w-full px-2 sm:px-4 py-6">
       <div className="glass-card p-8 rounded-2xl mb-8 shadow-2xl border border-yellow-700 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 relative overflow-hidden">
         <div className="absolute -top-10 -right-10 opacity-10 rotate-12 pointer-events-none select-none">
           <FiGift size={120} className="text-gold" />
