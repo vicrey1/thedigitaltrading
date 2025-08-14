@@ -212,7 +212,7 @@ export default function Settings() {
       />
       <h1 className="text-3xl font-bold text-gold-gradient mb-8 flex items-center gap-2"><FiSettings /> Settings</h1>
       {/* Profile Section */}
-      <div className="glassmorphic p-4 sm:p-6 rounded-xl w-full">
+      <div className="glassmorphic p-4 sm:p-6 rounded-xl w-full max-w-full overflow-x-auto">
         <div className="flex items-center gap-4 mb-4">
           <FiUser className="text-2xl text-gold" />
           <span className="font-semibold text-lg">Profile</span>
@@ -261,7 +261,7 @@ export default function Settings() {
         </div>
       </div>
       {/* Withdrawal PIN Section */}
-      <div className="glassmorphic p-4 sm:p-6 rounded-xl w-full">
+      <div className="glassmorphic p-4 sm:p-6 rounded-xl w-full max-w-full overflow-x-auto">
         <div className="flex items-center gap-4 mb-4">
           <FiLock className="text-2xl text-gold" />
           <span className="font-semibold text-lg">Withdrawal PIN</span>
@@ -330,7 +330,7 @@ export default function Settings() {
         )}
       </div>
       {/* Change Password with code confirmation Section */}
-      <div className="glassmorphic p-4 sm:p-6 rounded-xl w-full">
+      <div className="glassmorphic p-4 sm:p-6 rounded-xl w-full max-w-full overflow-x-auto">
         <div className="flex items-center gap-4 mb-4">
           <FiKey className="text-2xl text-gold" />
           <span className="font-semibold text-lg">Change Password (with Email Code)</span>
@@ -432,7 +432,7 @@ export default function Settings() {
         {changePassMsg && <span className={`text-sm mt-2 ${changePassMsg.includes('success') ? 'text-green-400' : 'text-red-400'}`}>{changePassMsg}</span>}
       </div>
       {/* Security Section */}
-      <div className="glassmorphic p-4 sm:p-6 rounded-xl w-full">
+      <div className="glassmorphic p-4 sm:p-6 rounded-xl w-full max-w-full overflow-x-auto">
         <div className="flex items-center gap-4 mb-4">
           <FiLock className="text-2xl text-gold" />
           <span className="font-semibold text-lg">Security</span>
@@ -442,7 +442,7 @@ export default function Settings() {
         </div>
       </div>
       {/* Preferences Section */}
-      <div className="glassmorphic p-4 sm:p-6 rounded-xl w-full">
+      <div className="glassmorphic p-4 sm:p-6 rounded-xl w-full max-w-full overflow-x-auto">
         <div className="flex items-center gap-4 mb-4">
           <FiGlobe className="text-2xl text-gold" />
           <span className="font-semibold text-lg">Preferences</span>
@@ -483,7 +483,7 @@ export default function Settings() {
         </div>
       </div>
       {/* Referral & Support Section */}
-      <div className="glassmorphic p-4 sm:p-6 rounded-xl w-full">
+      <div className="glassmorphic p-4 sm:p-6 rounded-xl w-full max-w-full overflow-x-auto">
         <div className="flex items-center gap-4 mb-4">
           <FiGift className="text-2xl text-gold" />
           <span className="font-semibold text-lg">Referral & Support</span>
@@ -533,7 +533,7 @@ export default function Settings() {
         </div>
       )}
       {/* Advanced Security Controls */}
-      <div className="glassmorphic p-4 sm:p-6 rounded-xl w-full">
+      <div className="glassmorphic p-4 sm:p-6 rounded-xl w-full max-w-full overflow-x-auto">
         <div className="flex items-center gap-4 mb-4">
           <FiSmartphone className="text-2xl text-gold" />
           <span className="font-semibold text-lg">Active Sessions</span>
@@ -560,7 +560,7 @@ export default function Settings() {
           )}
         </div>
       </div>
-      <div className="glassmorphic p-4 sm:p-6 rounded-xl w-full">
+      <div className="glassmorphic p-4 sm:p-6 rounded-xl w-full max-w-full overflow-x-auto">
         <div className="flex items-center gap-4 mb-4">
           <FiActivity className="text-2xl text-gold" />
           <span className="font-semibold text-lg">Recent Login History</span>
@@ -610,7 +610,7 @@ export default function Settings() {
         </div>
       </div>
       {/* Account Management */}
-      <div className="glassmorphic p-4 sm:p-6 rounded-xl w-full">
+      <div className="glassmorphic p-4 sm:p-6 rounded-xl w-full max-w-full overflow-x-auto">
         <div className="flex items-center gap-4 mb-4">
           <FiUserX className="text-2xl text-gold" />
           <span className="font-semibold text-lg">Account Management</span>
