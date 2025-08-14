@@ -36,8 +36,8 @@ export default function InviteFriends() {
   };
 
   return (
-    <div className="w-full max-w-full px-2 py-4 mx-auto">
-      <div className="glass-card p-4 sm:p-8 rounded-2xl mb-8 shadow-2xl border border-yellow-700 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 relative overflow-hidden w-full max-w-full">
+    <div className="w-full min-w-0 px-2 py-4 mx-auto">
+      <div className="glass-card p-2 sm:p-4 rounded-2xl mb-8 shadow-2xl border border-yellow-700 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 relative overflow-hidden w-full min-w-0">
         <div className="absolute -top-10 -right-10 opacity-10 rotate-12 pointer-events-none select-none">
           <FiGift size={120} className="text-gold" />
         </div>
@@ -70,7 +70,7 @@ export default function InviteFriends() {
             <div className="text-gray-400">Loading...</div>
           ) : referralStats ? (
             <>
-              <div className="flex flex-col md:flex-row gap-4 sm:gap-6 mt-4 w-full max-w-full">
+              <div className="flex flex-col md:flex-row gap-2 sm:gap-4 mt-4 w-full min-w-0">
                 <div className="flex flex-col items-center bg-gray-800 bg-opacity-60 rounded-xl p-4 shadow border border-gray-700 min-w-[140px]">
                   <FiUsers className="text-3xl text-blue-400 mb-1" />
                   <div className="text-lg font-bold text-white">{referralStats.totalInvited}</div>
@@ -90,8 +90,8 @@ export default function InviteFriends() {
               <div className="mt-8">
                 <span className="font-semibold text-yellow-200">Referred Users:</span>
                 {referralStats.referredDetails && referralStats.referredDetails.length > 0 ? (
-                  <div className="overflow-x-auto mt-4 rounded-xl border border-gray-800 shadow-lg w-full max-w-full">
-                    <table className="min-w-[400px] w-full text-xs sm:text-sm bg-gray-900 rounded-lg">
+                  <div className="overflow-x-auto mt-4 rounded-xl border border-gray-800 shadow-lg w-full min-w-0">
+                    <table className="min-w-0 w-full text-xs sm:text-sm bg-gray-900 rounded-lg">
                       <thead>
                         <tr className="text-gold bg-gray-800">
                           <th className="p-3 text-left">Name</th>
