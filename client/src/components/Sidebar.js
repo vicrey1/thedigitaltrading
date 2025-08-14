@@ -77,7 +77,7 @@ const Sidebar = ({ collapsed = false, setCollapsed = () => {}, hasNewAnnouncemen
           {/* Remove close button for mobile, handled by hamburger toggle above */}
         </div>
         <nav className="flex-1">
-      <ul className="flex flex-col items-start w-full">
+      <ul className="flex flex-col items-start w-full pb-24 md:pb-0">
         {navItems.map((item, index) => (
           <li key={index} className="mb-2 w-full transition-all duration-300">
             <Link
