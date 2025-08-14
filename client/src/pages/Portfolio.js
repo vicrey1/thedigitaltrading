@@ -209,11 +209,11 @@ const Portfolio = ({ adminView = false, portfolioData: adminPortfolioData }) => 
   const hasActiveInvestment = filteredInvestments.some(inv => inv.status === 'active');
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 px-2 sm:px-4 md:px-6 py-6 sm:py-8">
       {/* Portfolio Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0">
         <h1 className="text-2xl font-bold">Investment Portfolio</h1>
-        <div className="flex items-center space-x-2">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-2">
           <button className="flex items-center text-sm bg-gray-800 bg-opacity-50 hover:bg-opacity-70 px-3 py-2 rounded-lg transition">
             <FiRefreshCw className="mr-2" /> Refresh
           </button>
@@ -232,8 +232,8 @@ const Portfolio = ({ adminView = false, portfolioData: adminPortfolioData }) => 
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="glassmorphic p-6 rounded-xl">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+        <div className="glassmorphic p-4 sm:p-6 rounded-xl">
           <div className="flex justify-between items-start">
             <div>
               <p className="text-gray-400">Total Invested</p>
@@ -244,7 +244,7 @@ const Portfolio = ({ adminView = false, portfolioData: adminPortfolioData }) => 
             </div>
           </div>
         </div>
-        <div className="glassmorphic p-6 rounded-xl">
+        <div className="glassmorphic p-4 sm:p-6 rounded-xl">
           <div className="flex justify-between items-start">
             <div>
               <p className="text-gray-400">Current Value</p>
@@ -255,7 +255,7 @@ const Portfolio = ({ adminView = false, portfolioData: adminPortfolioData }) => 
             </div>
           </div>
         </div>
-        <div className="glassmorphic p-6 rounded-xl">
+        <div className="glassmorphic p-4 sm:p-6 rounded-xl">
           <div className="flex justify-between items-start">
             <div>
               <p className="text-gray-400">Total ROI (Expected)</p>
@@ -276,7 +276,7 @@ const Portfolio = ({ adminView = false, portfolioData: adminPortfolioData }) => 
             </div>
           </div>
         </div>
-        <div className="glassmorphic p-6 rounded-xl">
+        <div className="glassmorphic p-4 sm:p-6 rounded-xl">
           <div className="flex justify-between items-start">
             <div>
               <p className="text-gray-400">Active Investments</p>
@@ -290,9 +290,9 @@ const Portfolio = ({ adminView = false, portfolioData: adminPortfolioData }) => 
       </div>
 
       {/* Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {/* Performance Chart */}
-        <div className="glassmorphic p-6 rounded-xl">
+        <div className="glassmorphic p-4 sm:p-6 rounded-xl overflow-x-auto">
           <h3 className="text-xl font-bold mb-4">Portfolio Growth</h3>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
@@ -335,7 +335,7 @@ const Portfolio = ({ adminView = false, portfolioData: adminPortfolioData }) => 
           </div>
         </div>
         {/* Asset Allocation Chart */}
-        <div className="glassmorphic p-6 rounded-xl">
+        <div className="glassmorphic p-4 sm:p-6 rounded-xl overflow-x-auto">
           <h3 className="text-xl font-bold mb-4">Asset Allocation</h3>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
@@ -367,10 +367,10 @@ const Portfolio = ({ adminView = false, portfolioData: adminPortfolioData }) => 
       </div>
 
       {/* Investments Table */}
-      <div className="glassmorphic p-6 rounded-xl">
+      <div className="glassmorphic p-4 sm:p-6 rounded-xl overflow-x-auto">
         <div className="flex justify-between items-center mb-6">
           <h3 className="text-xl font-bold">Your Investments</h3>
-          <div className="flex space-x-2">
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-2">
             <button
               onClick={() => setActiveTab('all')}
               className={`px-4 py-2 rounded-lg text-sm ${
@@ -472,7 +472,7 @@ const Portfolio = ({ adminView = false, portfolioData: adminPortfolioData }) => 
       </div>
 
       {/* Investment Plans Section */}
-      <div className="glassmorphic p-6 rounded-xl mb-8">
+      <div className="glassmorphic p-4 sm:p-6 rounded-xl mb-8">
         <h2 className="text-xl font-bold mb-4">Investment Plans</h2>
         {investmentPlans.length === 0 ? (
           <div className="text-center py-8 text-gray-400">No plans available</div>
@@ -581,7 +581,7 @@ const Portfolio = ({ adminView = false, portfolioData: adminPortfolioData }) => 
       )}
 
       {/* Recent Activity Section */}
-      <div className="glassmorphic p-6 rounded-xl">
+      <div className="glassmorphic p-4 sm:p-6 rounded-xl overflow-x-auto">
         <h3 className="text-xl font-bold mb-4">Recent Activity</h3>
         <div className="space-y-4 max-h-80 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gold scrollbar-track-gray-900/60">
           {portfolioData.recentActivity && portfolioData.recentActivity.length > 0 ? (
