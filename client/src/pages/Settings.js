@@ -212,7 +212,7 @@ export default function Settings() {
       />
       <h1 className="text-3xl font-bold text-gold-gradient mb-8 flex items-center gap-2"><FiSettings /> Settings</h1>
       {/* Profile Section */}
-      <div className="glass-card p-6 rounded-xl mb-6 shadow-lg">
+      <div className="glass-card p-4 sm:p-6 rounded-xl mb-6 shadow-lg w-full max-w-full">
         <div className="flex items-center gap-4 mb-4">
           <FiUser className="text-2xl text-gold" />
           <span className="font-semibold text-lg">Profile</span>
@@ -261,7 +261,7 @@ export default function Settings() {
         </div>
       </div>
       {/* Withdrawal PIN Section */}
-      <div className="glass-card p-6 rounded-xl mb-6 shadow-lg">
+      <div className="glass-card p-4 sm:p-6 rounded-xl mb-6 shadow-lg w-full max-w-full">
         <div className="flex items-center gap-4 mb-4">
           <FiLock className="text-2xl text-gold" />
           <span className="font-semibold text-lg">Withdrawal PIN</span>
@@ -330,7 +330,7 @@ export default function Settings() {
         )}
       </div>
       {/* Change Password with code confirmation Section */}
-      <div className="glass-card p-6 rounded-xl mb-6 shadow-lg">
+      <div className="glass-card p-4 sm:p-6 rounded-xl mb-6 shadow-lg w-full max-w-full">
         <div className="flex items-center gap-4 mb-4">
           <FiKey className="text-2xl text-gold" />
           <span className="font-semibold text-lg">Change Password (with Email Code)</span>
@@ -432,7 +432,7 @@ export default function Settings() {
         {changePassMsg && <span className={`text-sm mt-2 ${changePassMsg.includes('success') ? 'text-green-400' : 'text-red-400'}`}>{changePassMsg}</span>}
       </div>
       {/* Security Section */}
-      <div className="glass-card p-6 rounded-xl mb-6 shadow-lg">
+      <div className="glass-card p-4 sm:p-6 rounded-xl mb-6 shadow-lg w-full max-w-full">
         <div className="flex items-center gap-4 mb-4">
           <FiLock className="text-2xl text-gold" />
           <span className="font-semibold text-lg">Security</span>
