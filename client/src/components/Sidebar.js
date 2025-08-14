@@ -77,30 +77,32 @@ const Sidebar = ({ collapsed = false, setCollapsed = () => {}, hasNewAnnouncemen
           {/* Remove close button for mobile, handled by hamburger toggle above */}
         </div>
         <nav className="flex-1">
-          <ul className="flex flex-col items-start w-full">
-            {navItems.map((item, index) => (
-              <li key={index} className="mb-2 w-full transition-all duration-300">
-                <Link
-                  to={item.path}
-                  className={`flex items-center p-4 sm:p-3 rounded-lg hover:bg-gold hover:bg-opacity-20 hover:text-gold transition-all duration-300 ${collapsed ? 'justify-center' : 'justify-start'} w-full text-lg sm:text-base`}
-                  onClick={() => setMobileOpen(false)}
-                >
-                  <span className="mr-3 text-xl flex-shrink-0 transition-transform duration-300 group-hover:scale-110">{item.icon}</span>
-                  {!collapsed && <span className="transition-opacity duration-300">{item.label}</span>}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
-        {/* Sign Out Button */}
-        <button
-          onClick={handleLogout}
-          className={`flex items-center justify-center md:justify-${collapsed ? 'center' : 'start'} p-4 sm:p-3 mb-6 mx-4 rounded-lg bg-red-600 hover:bg-red-700 text-white font-bold transition-all duration-300 w-[calc(100%-2rem)] text-lg sm:text-base`}
-          style={{ minWidth: 0 }}
-        >
-          <span className="mr-3 text-xl flex-shrink-0"><FiLogOut /></span>
-          {!collapsed && <span>Sign Out</span>}
-        </button>
+      <ul className="flex flex-col items-start w-full">
+        {navItems.map((item, index) => (
+          <li key={index} className="mb-2 w-full transition-all duration-300">
+            <Link
+              to={item.path}
+              className={`flex items-center p-4 sm:p-3 rounded-lg hover:bg-gold hover:bg-opacity-20 hover:text-gold transition-all duration-300 ${collapsed ? 'justify-center' : 'justify-start'} w-full text-lg sm:text-base`}
+              onClick={() => setMobileOpen(false)}
+            >
+              <span className="mr-3 text-xl flex-shrink-0 transition-transform duration-300 group-hover:scale-110">{item.icon}</span>
+              {!collapsed && <span className="transition-opacity duration-300">{item.label}</span>}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </nav>
+    {/* Sticky Sign Out Button for mobile */}
+    <div className="md:static md:mb-6 md:mx-4 md:relative md:w-auto w-full fixed bottom-0 left-0 z-50 px-4 pb-4 bg-black bg-opacity-80 md:bg-opacity-0">
+      <button
+        onClick={handleLogout}
+        className={`flex items-center justify-center md:justify-${collapsed ? 'center' : 'start'} p-4 sm:p-3 rounded-lg bg-red-600 hover:bg-red-700 text-white font-bold transition-all duration-300 w-full text-lg sm:text-base`}
+        style={{ minWidth: 0 }}
+      >
+        <span className="mr-3 text-xl flex-shrink-0"><FiLogOut /></span>
+        {!collapsed && <span>Sign Out</span>}
+      </button>
+    </div>
       </div>
       {/* Overlay for mobile */}
       {mobileOpen && (
