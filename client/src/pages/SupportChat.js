@@ -255,15 +255,7 @@ export default function SupportChat() {
   };
 
   // Only clear session on new session or admin end, not on refresh
-  const handleNewSession = () => {
-    setMessages([]);
-    setSessionStart(null);
-    setSessionExpired(false);
-    setInput('');
-    setFile(null);
-    localStorage.removeItem('supportSessionStart');
-    localStorage.removeItem('supportSessionExpired');
-  };
+  // Removed duplicate handleNewSession definition
 
   useEffect(() => {
     document.body.classList.add('support-chat-open');
