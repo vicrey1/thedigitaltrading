@@ -278,9 +278,10 @@ export default function SupportChat() {
   }, [user]);
 
   return (
-    <div className="min-h-screen w-full flex flex-col items-center justify-center bg-white px-2 sm:px-0 overflow-x-hidden">
-      <div className="w-full max-w-full flex flex-col h-[90vh] sm:h-[80vh] rounded-lg shadow-lg border border-gray-200 bg-white overflow-hidden">
-        <div className="flex items-center gap-3 p-4 bg-gradient-to-r from-yellow-100 to-blue-100 border-b border-gray-200 shadow-none w-full">
+    <div className="min-h-screen w-full flex flex-col items-center justify-center bg-gradient-to-br from-yellow-50 via-blue-50 to-white px-2 sm:px-0 overflow-x-hidden">
+      <div className="w-full max-w-lg sm:max-w-xl md:max-w-2xl lg:max-w-3xl xl:max-w-4xl flex flex-col h-[90vh] sm:h-[80vh] rounded-2xl shadow-2xl border border-yellow-200 bg-white overflow-hidden">
+        {/* Header */}
+        <div className="flex items-center gap-3 p-4 bg-gradient-to-r from-yellow-100 to-blue-100 border-b border-yellow-200 shadow w-full">
           <button
             className="mr-2 p-2 rounded-full hover:bg-yellow-200 focus:outline-none"
             onClick={() => window.location.href = '/dashboard'}
@@ -294,14 +295,15 @@ export default function SupportChat() {
             <div className="text-xs sm:text-sm text-gray-500 truncate">Chat with our support team. Attach files if needed.</div>
           </div>
         </div>
-        <div className="flex-1 overflow-y-auto p-2 sm:p-4 bg-white scrollbar-thin scrollbar-thumb-gold scrollbar-track-gray-900/60 space-y-4" style={{ minHeight: 0 }}>
+        {/* Chat Area */}
+        <div className="flex-1 overflow-y-auto p-3 sm:p-6 bg-white space-y-4 scrollbar-thin scrollbar-thumb-gold scrollbar-track-gray-900/60" style={{ minHeight: 0 }}>
           {messages.length === 0 && (
             <div className="text-center text-gray-400 my-8">No messages yet. Start the conversation below!</div>
           )}
           {filteredMessages.map((m, i) => (
             <div key={i} className={`flex mb-3 ${m.sender === 'user' ? 'justify-end' : 'justify-start'} w-full`}>
-              {m.sender === 'support' && <img src={AVATAR_SUPPORT} alt="Support" className="w-8 h-8 sm:w-9 sm:h-9 rounded-full mr-2 border-2 border-yellow-400" />}
-              <div className={`w-full sm:max-w-[70%] px-2 sm:px-4 py-2 rounded-2xl ${m.sender === 'user' ? 'bg-blue-100 text-blue-900 rounded-br-none font-semibold' : 'bg-yellow-200 text-gray-900 rounded-bl-none'} shadow-md relative`}>
+              {m.sender === 'support' && <img src={AVATAR_SUPPORT} alt="Support" className="w-8 h-8 sm:w-9 sm:h-9 rounded-full mr-2 border-2 border-yellow-400 shadow" />}
+              <div className={`w-full sm:max-w-[70%] px-3 py-2 rounded-2xl ${m.sender === 'user' ? 'bg-blue-100 text-blue-900 rounded-br-none font-semibold' : 'bg-yellow-100 text-gray-900 rounded-bl-none'} shadow-md border border-yellow-100 relative`}>
                 {/* Show both file and text if both are present, with text under image */}
                 {m.type === 'file' && m.attachment && m.content && m.content !== m.attachment ? (
                   <>
@@ -332,25 +334,26 @@ export default function SupportChat() {
                   </span>
                 </div>
               </div>
-              {m.sender === 'user' && <img src={AVATAR_USER} alt="User" className="w-8 h-8 sm:w-9 sm:h-9 rounded-full ml-2 border-2 border-blue-400" />}
+              {m.sender === 'user' && <img src={AVATAR_USER} alt="User" className="w-8 h-8 sm:w-9 sm:h-9 rounded-full ml-2 border-2 border-blue-400 shadow" />}
             </div>
           ))}
           {isTyping && (
             <div className="flex mb-2 justify-start items-center w-full">
-              <img src={AVATAR_SUPPORT} alt="Support" className="w-8 h-8 sm:w-9 sm:h-9 rounded-full mr-2 border-2 border-yellow-400" />
-              <div className="bg-yellow-200 px-2 sm:px-4 py-2 rounded-2xl shadow text-left text-gray-700 w-full">Support is typing...</div>
+              <img src={AVATAR_SUPPORT} alt="Support" className="w-8 h-8 sm:w-9 sm:h-9 rounded-full mr-2 border-2 border-yellow-400 shadow" />
+              <div className="bg-yellow-100 px-3 py-2 rounded-2xl shadow text-left text-gray-700 w-full">Support is typing...</div>
             </div>
           )}
           <div ref={chatEndRef} />
         </div>
+        {/* Input Area / Session Expired */}
         {sessionExpired ? (
-          <div className="flex flex-col items-center justify-center p-6 bg-red-50 border-t border-gray-200 w-full space-y-4">
+          <div className="flex flex-col items-center justify-center p-6 bg-red-50 border-t border-yellow-200 w-full space-y-4">
             <div className="text-red-600 font-bold text-base sm:text-lg mb-2">Session expired</div>
             <div className="text-gray-700 mb-4 text-xs sm:text-base text-center">Your support chat session has ended after 30 minutes. Please start a new chat if you need further assistance.</div>
             <button onClick={handleNewSession} className="bg-blue-600 text-white px-4 sm:px-5 py-2 rounded-full hover:bg-blue-700 w-full max-w-xs">Start New Chat</button>
           </div>
         ) : (
-          <form className="flex flex-col sm:flex-row items-center gap-2 p-2 sm:p-4 border-t border-gray-200 bg-white w-full" onSubmit={handleSend}>
+          <form className="flex flex-col sm:flex-row items-center gap-2 p-3 sm:p-4 border-t border-yellow-200 bg-white w-full" onSubmit={handleSend}>
             <input
               type="text"
               id="support-chat-input"
