@@ -606,7 +606,7 @@ export default function Settings() {
                 <div className="text-xs text-gray-400">Location: <span className="text-white">{s.location || '-'}</span></div>
               </div>
             ))
-          }
+          )}
         </div>
       </div>
       {/* Account Management */}
