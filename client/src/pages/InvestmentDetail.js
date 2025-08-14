@@ -107,9 +107,9 @@ const InvestmentDetail = () => {
   const performanceData = generatePerformanceData();
   
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 px-2 sm:px-4 md:px-6 py-6 sm:py-8">
       {/* Header */}
-      <div className="glassmorphic p-6 rounded-xl">
+      <div className="glassmorphic p-4 sm:p-6 rounded-xl">
         <div className="flex justify-between items-start">
           <div>
             <h1 className="text-3xl font-bold mb-2">{investment.fundType}</h1>
@@ -126,8 +126,8 @@ const InvestmentDetail = () => {
       </div>
       
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="glassmorphic p-6 rounded-xl">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+        <div className="glassmorphic p-4 sm:p-6 rounded-xl">
           <div className="flex justify-between items-start">
             <div>
               <p className="text-gray-400">Initial Investment</p>
@@ -140,7 +140,7 @@ const InvestmentDetail = () => {
             </div>
           </div>
         </div>
-        <div className="glassmorphic p-6 rounded-xl">
+        <div className="glassmorphic p-4 sm:p-6 rounded-xl">
           <div className="flex justify-between items-start">
             <div>
               <p className="text-gray-400">Current Value</p>
@@ -165,7 +165,7 @@ const InvestmentDetail = () => {
             </div>
           </div>
         </div>
-        <div className="glassmorphic p-6 rounded-xl">
+        <div className="glassmorphic p-4 sm:p-6 rounded-xl">
           <div className="flex justify-between items-start">
             <div>
               <p className="text-gray-400">Duration</p>
@@ -184,7 +184,7 @@ const InvestmentDetail = () => {
       </div>
       
       {/* Performance Chart */}
-      <div className="glassmorphic p-6 rounded-xl">
+      <div className="glassmorphic p-4 sm:p-6 rounded-xl overflow-x-auto">
         <h3 className="text-xl font-bold mb-4">Performance History</h3>
         <div className="h-64">
           <ResponsiveContainer width="100%" height="100%">
@@ -213,7 +213,7 @@ const InvestmentDetail = () => {
       </div>
       
       {/* Action Buttons */}
-      <div className="flex space-x-4">
+      <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
         <button 
           onClick={() => setShowWithdraw(true)}
           className="px-6 py-3 bg-red-500 bg-opacity-20 text-red-400 rounded-lg hover:bg-opacity-30 transition"
@@ -226,7 +226,7 @@ const InvestmentDetail = () => {
       </div>
       
       {/* Transaction History */}
-      <div className="glassmorphic p-6 rounded-xl">
+      <div className="glassmorphic p-4 sm:p-6 rounded-xl">
         <h3 className="text-xl font-bold mb-4">Transaction History</h3>
         <div className="space-y-4">
           <div className="flex justify-between items-center p-3 border-b border-gray-800">
@@ -260,9 +260,9 @@ const InvestmentDetail = () => {
       )}
       
       {/* Testimonials Section */}
-      <div className="glassmorphic p-6 rounded-xl">
+      <div className="glassmorphic p-4 sm:p-6 rounded-xl">
         <h3 className="text-xl font-bold mb-4">What Investors Say</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-2 sm:gap-4">
           {simulateTestimonials(3).map((t, idx) => (
             <div key={idx} className="bg-gray-800 bg-opacity-60 rounded-lg p-4 shadow">
               <div className="text-gold font-bold mb-2">{t.name}</div>
@@ -273,7 +273,7 @@ const InvestmentDetail = () => {
         </div>
       </div>
       {/* Activity Feed Section */}
-      <div className="glassmorphic p-6 rounded-xl">
+      <div className="glassmorphic p-4 sm:p-6 rounded-xl">
         <h3 className="text-xl font-bold mb-4">Recent Activity</h3>
         <ul className="divide-y divide-gray-700">
           {simulateActivity(5).map((a, idx) => (
