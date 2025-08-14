@@ -199,7 +199,7 @@ export default function Settings() {
   }
 
   return (
-    <div className="w-full max-w-full px-2 sm:px-4 py-6 min-h-screen overflow-x-auto overflow-y-auto box-border space-y-8">
+    <div className="w-full max-w-full px-2 sm:px-4 py-6 min-h-screen overflow-x-auto overflow-y-auto box-border space-y-8 pb-8">
       <ToastContainer />
       <ConfirmModal
         isOpen={showDeleteModal}
@@ -284,8 +284,8 @@ export default function Settings() {
         {pinError && <div className="mt-2 text-red-400">{pinError}</div>}
         {/* PIN Reset Modal */}
         {showPinReset && (
-          <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
-            <div className="bg-gray-900 p-8 rounded-xl shadow-lg w-full max-w-sm">
+          <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 overflow-y-auto">
+            <div className="bg-gray-900 p-4 sm:p-8 rounded-xl shadow-lg w-full max-w-sm mx-2">
               <h2 className="text-xl font-bold mb-4">Reset Withdrawal PIN</h2>
               {resetStep === 1 && (
                 <>
@@ -494,8 +494,8 @@ export default function Settings() {
           <button onClick={handleContactSupport} className="flex items-center gap-2 text-yellow-400 hover:text-yellow-600"><FiHelpCircle /> Contact Support</button>
         </div>
         {showLinkedAccounts && (
-          <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
-            <div className="bg-gray-900 rounded-xl p-8 w-full max-w-md relative">
+          <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 overflow-y-auto">
+            <div className="bg-gray-900 rounded-xl p-4 sm:p-8 w-full max-w-md relative mx-2">
               <button className="absolute top-2 right-2 text-gold" onClick={() => setShowLinkedAccounts(false)}>✕</button>
               <h2 className="text-xl font-bold mb-4">Manage Linked Accounts</h2>
               <div className="mb-4 text-gray-300">View and manage your linked accounts (e.g., Google, Facebook, Apple, or other logins). Unlink or add new accounts for easier access and security.</div>
@@ -521,7 +521,7 @@ export default function Settings() {
       </div>
       {/* Email Verification Section (only for non-admins and if not verified) */}
       {profile && profile.isEmailVerified === false && user?.role !== 'admin' && (
-        <div className="glassmorphic p-4 sm:p-6 rounded-xl w-full">
+        <div className="glassmorphic p-4 sm:p-6 rounded-xl w-full max-w-full">
           <EmailVerification
             email={profile.email}
             onVerified={async () => {
