@@ -8,6 +8,7 @@ import { getReferralStats } from '../services/referralAPI';
 import KYCStatus from '../components/KYCStatus';
 import { useUserDataRefresh } from '../contexts/UserDataRefreshContext';
 import WalletIcon from '../components/WalletIcon';
+import TopRightBar from '../components/TopRightBar'; // Import TopRightBar
 // Removed unused import: GoalsDashboard
 dayjs.extend(relativeTime);
 
@@ -291,11 +292,12 @@ const Dashboard = ({ adminView = false, portfolioData: adminPortfolioData }) => 
   }
 
   return (
-    <div className="space-y-8 max-w-screen-xl mx-auto px-2 sm:px-4 md:px-6 py-6 sm:py-8">
+    <div className="space-y-8 max-w-screen-xl mx-auto px-2 md:px-6 py-8">
+      <TopRightBar /> {/* Add TopRightBar component */}
       {/* Top: Welcome + Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         {/* Welcome tab (2 columns) */}
-        <div className="glassmorphic p-4 sm:p-6 rounded-xl col-span-1 md:col-span-2 flex flex-col justify-center">
+        <div className="glassmorphic p-6 rounded-xl col-span-2 flex flex-col justify-center">
           <h1 className="text-3xl font-bold mb-2">Welcome back, <span className="text-gold">{portfolioData.userInfo?.name || 'Investor'}</span></h1>
           <div className="flex items-center gap-4 mt-2">
             {portfolioData.userInfo?.tier === 'Starter' ? (
@@ -341,7 +343,7 @@ const Dashboard = ({ adminView = false, portfolioData: adminPortfolioData }) => 
           </div>
         </div>
         {/* Available Balance tab (1 column) */}
-        <div className="glassmorphic p-4 sm:p-6 rounded-xl flex flex-col justify-center items-center relative overflow-hidden shadow-xl border-2 border-yellow-700">
+        <div className="glassmorphic p-6 rounded-xl flex flex-col justify-center items-center relative overflow-hidden shadow-xl border-2 border-yellow-700">
           <div className="absolute -top-6 -right-6 opacity-10 rotate-12">
             <WalletIcon size={90} />
           </div>
@@ -355,8 +357,8 @@ const Dashboard = ({ adminView = false, portfolioData: adminPortfolioData }) => 
       </div>
 
       {/* Performance & Allocation Row */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
-        <div className="glassmorphic p-4 sm:p-6 rounded-xl">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div className="glassmorphic p-6 rounded-xl">
           <div className="flex justify-between items-center mb-2">
             <h3 className="text-xl font-bold">Performance</h3>
             <select value={range} onChange={e => setRange(e.target.value)} className="bg-gray-800 text-sm rounded px-2 py-1">
@@ -393,7 +395,7 @@ const Dashboard = ({ adminView = false, portfolioData: adminPortfolioData }) => 
             </ResponsiveContainer>
           </div>
         </div>
-        <div className="glassmorphic p-4 sm:p-6 rounded-xl">
+        <div className="glassmorphic p-6 rounded-xl">
           <h3 className="text-xl font-bold mb-4">Asset Allocation</h3>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
@@ -411,8 +413,8 @@ const Dashboard = ({ adminView = false, portfolioData: adminPortfolioData }) => 
       </div>
 
       {/* Key Actions Row */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
-        <div className="glassmorphic p-4 sm:p-6 rounded-xl">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="glassmorphic p-6 rounded-xl">
           <h3 className="text-lg font-bold mb-2">Available Balance</h3>
           <div className="text-2xl font-bold mb-2">
             {typeof portfolioData.userInfo?.availableBalance === 'number' ? portfolioData.userInfo.availableBalance.toLocaleString() : '0'}
@@ -433,7 +435,7 @@ const Dashboard = ({ adminView = false, portfolioData: adminPortfolioData }) => 
           </div>
           <div className="text-xs text-gray-400">Deposit via: BTC, ETH, USDT</div>
         </div>
-        <div className="glassmorphic p-4 sm:p-6 rounded-xl overflow-x-auto">
+        <div className="glassmorphic p-6 rounded-xl">
           <h3 className="text-lg font-bold mb-2">Withdrawal History</h3>
           <table className="min-w-full text-xs">
             <thead>
@@ -460,7 +462,7 @@ const Dashboard = ({ adminView = false, portfolioData: adminPortfolioData }) => 
           <div className="text-xs text-gray-400 mt-2">Next Eligible Withdrawal: {/* TODO: backend value */}</div>
         </div>
         {activeInvestment ? (
-          <div className="glassmorphic p-4 sm:p-6 rounded-xl">
+          <div className="glassmorphic p-6 rounded-xl">
             <h3 className="text-lg font-bold mb-2">Performance Metrics</h3>
             <div className="grid grid-cols-2 gap-2">
               <div className="bg-gray-900 rounded-lg p-3 text-center">
@@ -494,7 +496,7 @@ const Dashboard = ({ adminView = false, portfolioData: adminPortfolioData }) => 
             </div>
           </div>
         ) : (
-          <div className="glassmorphic p-4 sm:p-6 rounded-xl text-center text-gray-400">
+          <div className="glassmorphic p-6 rounded-xl text-center text-gray-400">
             <h3 className="text-lg font-bold mb-2">Performance Metrics</h3>
             <div>No active investment. Performance metrics are only available for active investments.</div>
           </div>
@@ -502,8 +504,8 @@ const Dashboard = ({ adminView = false, portfolioData: adminPortfolioData }) => 
       </div>
 
       {/* Recent Activity & Market Updates */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
-        <div className="glassmorphic p-4 sm:p-6 rounded-xl">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div className="glassmorphic p-6 rounded-xl">
           <h2 className="text-xl font-bold mb-4">Recent Activity</h2>
           <div className="space-y-4 max-h-80 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gold scrollbar-track-gray-900/60">
             {portfolioData.recentActivity && portfolioData.recentActivity.length > 0 ? (
@@ -573,7 +575,7 @@ const Dashboard = ({ adminView = false, portfolioData: adminPortfolioData }) => 
 
       {/* Referral & Fund Info Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <div className="glassmorphic p-4 sm:p-6 rounded-xl">
+        <div className="glassmorphic p-6 rounded-xl">
           <h3 className="text-lg font-bold mb-2">Referral Program</h3>
           <div className="text-xs text-gray-300 mb-4">
             How it works: Share your referral link. When friends sign up and invest, you earn <span className="text-gold font-bold">10% of their investment profits</span> as a cash bonus. The more you invite, the more you earn!
@@ -607,13 +609,13 @@ const Dashboard = ({ adminView = false, portfolioData: adminPortfolioData }) => 
       </div>
 
       {/* KYC, Chat, Multilingual, Activity, Market Updates */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
-        <div className="glassmorphic p-4 sm:p-6 rounded-xl mb-4 sm:mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div className="glassmorphic p-6 rounded-xl mb-6">
           <h3 className="text-lg font-bold mb-2">KYC & Security</h3>
           <KYCStatus />
 
         </div>
-        <div className="glassmorphic p-4 sm:p-6 rounded-xl mb-4 sm:mb-6">
+        <div className="glassmorphic p-6 rounded-xl mb-6">
           <h3 className="text-lg font-bold mb-2">Chat & Support</h3>
           <div className="flex flex-col gap-4 mb-2">
             <button
@@ -634,7 +636,7 @@ const Dashboard = ({ adminView = false, portfolioData: adminPortfolioData }) => 
       </div>
 
       {/* Multilingual & Statement Download */}
-      <div className="glassmorphic p-4 sm:p-6 rounded-xl flex flex-col md:flex-row md:items-center md:justify-between gap-2 sm:gap-4 mb-6 sm:mb-8">
+      <div className="glassmorphic p-6 rounded-xl flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
         <div className="flex items-center gap-2">
           <FiGlobe />
           <select value={lang} onChange={e => setLang(e.target.value)} className="bg-gray-900 text-xs rounded px-2 py-1">

@@ -17,7 +17,6 @@ import InvestmentDetail from '../components/InvestmentDetail';
 import { useUser } from '../contexts/UserContext';
 import { useUserDataRefresh } from '../contexts/UserDataRefreshContext';
 import '../custom-scrollbar.css';
-import TopRightBar from '../components/TopRightBar';
 
 // API endpoint for plans
 const PLANS_API = '/api/plans';
@@ -211,7 +210,6 @@ const Portfolio = ({ adminView = false, portfolioData: adminPortfolioData }) => 
 
   return (
     <div className="space-y-8 px-2 sm:px-4 md:px-6 py-6 sm:py-8 w-full max-w-full overflow-x-auto">
-      <TopRightBar />
       {/* Portfolio Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0">
         <h1 className="text-2xl font-bold">Investment Portfolio</h1>
