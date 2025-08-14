@@ -44,15 +44,17 @@ router.get('/ping', (req, res) => {
 // User login route (must be after router is initialized)
 router.post('/login', async (req, res) => {
   try {
-    const { email, password } = req.body;
+    let { email, password } = req.body;
+    // Normalize email: trim and lowercase
+    email = (email || '').trim().toLowerCase();
     console.log('[LOGIN] POST /api/auth/login received', {
       email,
       time: new Date().toISOString(),
       ip: req.ip,
       headers: req.headers
     });
-    // Find user by email
-    const user = await User.findOne({ email });
+    // Find user by normalized email (case-insensitive)
+    const user = await User.findOne({ email: { $regex: `^${email}$`, $options: 'i' } });
     if (!user) {
       console.log('[LOGIN] User not found', { email });
       res.status(401).json({ message: 'User not found' });
