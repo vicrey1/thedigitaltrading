@@ -565,7 +565,8 @@ export default function Settings() {
           <FiActivity className="text-2xl text-gold" />
           <span className="font-semibold text-lg">Recent Login History</span>
         </div>
-        <div className="overflow-x-auto">
+        {/* Desktop Table */}
+        <div className="overflow-x-auto hidden md:block">
           <table className="w-full text-sm">
             <thead>
               <tr className="text-gold">
@@ -589,6 +590,25 @@ export default function Settings() {
               ))}
             </tbody>
           </table>
+        </div>
+        {/* Mobile Card Layout */}
+        <div className="block md:hidden">
+          {loginHistory.length === 0 ? (
+            <div className="text-center text-gray-400 py-6">No login history found</div>
+          ) : (
+            <div className="flex flex-col gap-4">
+              {loginHistory.map((s, i) => (
+                <div key={i} className="bg-gray-900 rounded-lg shadow p-4 border border-gray-800">
+                  <div className="flex justify-between mb-2">
+                    <span className="font-semibold text-gold">{s.date || s.lastActive}</span>
+                    <span className={`font-bold ${s.status === 'Success' ? 'text-green-400' : 'text-red-400'}`}>{s.status || 'Success'}</span>
+                  </div>
+                  <div className="text-xs text-gray-400 mb-1">IP: <span className="text-white">{s.ip || '-'}</span></div>
+                  <div className="text-xs text-gray-400">Location: <span className="text-white">{s.location || '-'}</span></div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
       {/* Account Management */}
