@@ -398,17 +398,17 @@ const Portfolio = ({ adminView = false, portfolioData: adminPortfolioData }) => 
           </div>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full">
+        <div className="overflow-x-auto w-full">
+          <table className="min-w-[600px] w-full text-xs sm:text-sm">
             <thead>
               <tr className="border-b border-gray-800 text-gray-400 text-left">
-                <th className="pb-4">Fund</th>
-                <th className="pb-4">Plan</th>
-                <th className="pb-4 text-right">Invested</th>
-                <th className="pb-4 text-right">Current Value</th>
-                <th className="pb-4 text-right">ROI (Expected)</th>
-                <th className="pb-4">Duration</th>
-                <th className="pb-4 text-right">Actions</th>
+                <th className="pb-2 sm:pb-4 whitespace-nowrap">Fund</th>
+                <th className="pb-2 sm:pb-4 whitespace-nowrap">Plan</th>
+                <th className="pb-2 sm:pb-4 text-right whitespace-nowrap">Invested</th>
+                <th className="pb-2 sm:pb-4 text-right whitespace-nowrap">Current Value</th>
+                <th className="pb-2 sm:pb-4 text-right whitespace-nowrap">ROI (Expected)</th>
+                <th className="pb-2 sm:pb-4 whitespace-nowrap">Duration</th>
+                <th className="pb-2 sm:pb-4 text-right whitespace-nowrap">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -418,19 +418,19 @@ const Portfolio = ({ adminView = false, portfolioData: adminPortfolioData }) => 
                 const { value } = getCurrentRoiAndValue(investment);
                 return (
                   <tr key={investment.id} className="border-b border-gray-800 hover:bg-gray-800 hover:bg-opacity-30 transition">
-                    <td className="py-4">
+                    <td className="py-2 sm:py-4 whitespace-nowrap">
                       <div className="font-medium">{investment.fundName}</div>
                       <div className="text-sm text-gray-400">ID: {investment.id}</div>
                     </td>
-                    <td className="py-4">
+                    <td className="py-2 sm:py-4 whitespace-nowrap">
                       <div className="font-medium">{investment.planName}</div>
                       <div className="text-sm text-gray-400">
                         {investment.status === 'active' ? 'Active' : 'Completed'}
                       </div>
                     </td>
-                    <td className="py-4 text-right font-mono">${investment.initialAmount.toLocaleString()}</td>
-                    <td className="py-4 text-right font-mono">${Number(value).toLocaleString(undefined, {maximumFractionDigits: 2})}</td>
-                    <td className="py-4 text-right font-mono text-gold">
+                    <td className="py-2 sm:py-4 text-right font-mono whitespace-nowrap">${investment.initialAmount.toLocaleString()}</td>
+                    <td className="py-2 sm:py-4 text-right font-mono whitespace-nowrap">${Number(value).toLocaleString(undefined, {maximumFractionDigits: 2})}</td>
+                    <td className="py-2 sm:py-4 text-right font-mono text-gold whitespace-nowrap">
                       {(() => {
                         const planKey = (investment.planName || '').trim();
                         const planConfigKey = Object.keys(planConfig).find(
@@ -439,7 +439,7 @@ const Portfolio = ({ adminView = false, portfolioData: adminPortfolioData }) => 
                         return planConfigKey ? planConfig[planConfigKey].roi + '%' : '--';
                       })()}
                     </td>
-                    <td className="py-4">
+                    <td className="py-2 sm:py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <FiCalendar className="mr-2 text-gray-400" />
                         <span className="text-sm">
@@ -448,7 +448,7 @@ const Portfolio = ({ adminView = false, portfolioData: adminPortfolioData }) => 
                         </span>
                       </div>
                     </td>
-                    <td className="py-4 text-right">
+                    <td className="py-2 sm:py-4 text-right whitespace-nowrap">
                       <button 
                         onClick={() => setSelectedInvestment(investment)}
                         className="text-gold hover:underline text-sm font-medium"
