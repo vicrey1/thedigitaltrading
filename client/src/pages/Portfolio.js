@@ -209,7 +209,7 @@ const Portfolio = ({ adminView = false, portfolioData: adminPortfolioData }) => 
   const hasActiveInvestment = filteredInvestments.some(inv => inv.status === 'active');
 
   return (
-    <div className="space-y-8 max-w-screen-xl mx-auto px-2 md:px-6 py-8 overflow-x-hidden">
+    <div className="min-h-screen w-full space-y-8 max-w-screen-xl mx-auto px-2 sm:px-4 md:px-6 py-6 sm:py-8 overflow-x-hidden bg-white">
       {/* Portfolio Header */}
       <div className="flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-0">
         <h1 className="text-2xl font-bold">Investment Portfolio</h1>
