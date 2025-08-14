@@ -41,27 +41,29 @@ export default function InviteFriends() {
         <div className="absolute -top-10 -right-10 opacity-10 rotate-12 pointer-events-none select-none">
           <FiGift size={120} className="text-gold" />
         </div>
-        <div className="flex items-center gap-4 mb-6">
-          <FiGift className="text-3xl text-gold drop-shadow-lg" />
-          <span className="font-extrabold text-2xl tracking-wide text-yellow-300">Invite Friends & Earn Rewards</span>
+        <div className="flex flex-col gap-4 mb-6 w-full">
+          <div className="flex items-center gap-4">
+            <FiGift className="text-3xl text-gold drop-shadow-lg" />
+            <span className="font-extrabold text-2xl tracking-wide text-yellow-300">Invite Friends & Earn Rewards</span>
+          </div>
         </div>
         <div className="mb-6 flex flex-col md:flex-row md:items-center gap-4 w-full">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full">
             <span className="font-mono bg-black bg-opacity-30 px-3 py-2 rounded-lg text-gold text-lg border border-yellow-700 shadow-inner">{referralCode}</span>
-            <button onClick={handleCopyCode} className="flex items-center gap-1 text-blue-400 hover:text-blue-600 bg-gray-900 border border-blue-400 px-3 py-2 rounded-lg font-semibold shadow transition">
+            <button onClick={handleCopyCode} className="flex items-center gap-1 text-blue-400 hover:text-blue-600 bg-gray-900 border border-blue-400 px-3 py-2 rounded-lg font-semibold shadow transition w-full sm:w-auto">
               <FiCopy /> Copy Code
             </button>
-            <button onClick={handleCopy} className="flex items-center gap-1 text-blue-400 hover:text-blue-600 bg-gray-900 border border-blue-400 px-3 py-2 rounded-lg font-semibold shadow transition">
+            <button onClick={handleCopy} className="flex items-center gap-1 text-blue-400 hover:text-blue-600 bg-gray-900 border border-blue-400 px-3 py-2 rounded-lg font-semibold shadow transition w-full sm:w-auto">
               <FiCopy /> Copy Link
             </button>
           </div>
-          <div className="text-sm text-gray-400 mt-1 md:mt-0">Share your code and earn bonuses when friends join and invest!</div>
+          <div className="text-sm text-gray-400 mt-1 md:mt-0 w-full">Share your code and earn bonuses when friends join and invest!</div>
         </div>
         <div className="mb-6 w-full">
           <span className="font-semibold text-yellow-200">Your Referral Link:</span>
-          <div className="flex items-center gap-2 mt-2 w-full">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 mt-2 w-full">
             <input type="text" value={referralLink} readOnly className="w-full p-3 rounded-lg bg-gray-800 text-white border-2 border-yellow-700 focus:border-gold outline-none font-mono text-base shadow-inner" />
-            <button onClick={handleCopy} className="flex items-center gap-1 text-blue-400 hover:text-blue-600 bg-gray-900 border border-blue-400 px-3 py-2 rounded-lg font-semibold shadow transition"><FiCopy /></button>
+            <button onClick={handleCopy} className="flex items-center gap-1 text-blue-400 hover:text-blue-600 bg-gray-900 border border-blue-400 px-3 py-2 rounded-lg font-semibold shadow transition w-full sm:w-auto"><FiCopy /></button>
           </div>
         </div>
         <div className="mb-6 w-full">
