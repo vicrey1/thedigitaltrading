@@ -199,7 +199,7 @@ export default function Settings() {
   }
 
   return (
-    <div className="w-full max-w-full px-2 py-4 mx-auto">
+    <div className="w-full min-w-0 flex flex-col px-4 py-4 mx-auto">
       <ToastContainer />
       <ConfirmModal
         isOpen={showDeleteModal}
@@ -261,7 +261,7 @@ export default function Settings() {
         </div>
       </div>
       {/* Withdrawal PIN Section */}
-      <div className="glass-card p-4 sm:p-6 rounded-xl mb-6 shadow-lg w-full max-w-full">
+      <div className="glass-card p-4 sm:p-6 rounded-xl mb-6 shadow-lg w-full min-w-0">
         <div className="flex items-center gap-4 mb-4">
           <FiLock className="text-2xl text-gold" />
           <span className="font-semibold text-lg">Withdrawal PIN</span>
@@ -330,7 +330,7 @@ export default function Settings() {
         )}
       </div>
       {/* Change Password with code confirmation Section */}
-      <div className="glass-card p-4 sm:p-6 rounded-xl mb-6 shadow-lg w-full max-w-full">
+      <div className="glass-card p-4 sm:p-6 rounded-xl mb-6 shadow-lg w-full min-w-0">
         <div className="flex items-center gap-4 mb-4">
           <FiKey className="text-2xl text-gold" />
           <span className="font-semibold text-lg">Change Password (with Email Code)</span>
@@ -432,7 +432,7 @@ export default function Settings() {
         {changePassMsg && <span className={`text-sm mt-2 ${changePassMsg.includes('success') ? 'text-green-400' : 'text-red-400'}`}>{changePassMsg}</span>}
       </div>
       {/* Security Section */}
-      <div className="glass-card p-4 sm:p-6 rounded-xl mb-6 shadow-lg w-full max-w-full">
+      <div className="glass-card p-4 sm:p-6 rounded-xl mb-6 shadow-lg w-full min-w-0">
         <div className="flex items-center gap-4 mb-4">
           <FiLock className="text-2xl text-gold" />
           <span className="font-semibold text-lg">Security</span>
@@ -483,7 +483,7 @@ export default function Settings() {
         </div>
       </div>
       {/* Referral & Support Section */}
-      <div className="glass-card p-6 rounded-xl mb-6 shadow-lg">
+      <div className="glass-card p-6 rounded-xl mb-6 shadow-lg w-full min-w-0">
         <div className="flex items-center gap-4 mb-4">
           <FiGift className="text-2xl text-gold" />
           <span className="font-semibold text-lg">Referral & Support</span>
@@ -533,7 +533,7 @@ export default function Settings() {
         </div>
       )}
       {/* Advanced Security Controls */}
-      <div className="glass-card p-6 rounded-xl mb-6 shadow-lg">
+      <div className="glass-card p-6 rounded-xl mb-6 shadow-lg w-full min-w-0">
         <div className="flex items-center gap-4 mb-4">
           <FiSmartphone className="text-2xl text-gold" />
           <span className="font-semibold text-lg">Active Sessions</span>
@@ -560,7 +560,7 @@ export default function Settings() {
           )}
         </div>
       </div>
-      <div className="glass-card p-6 rounded-xl mb-6 shadow-lg">
+      <div className="glass-card p-6 rounded-xl mb-6 shadow-lg w-full min-w-0">
         <div className="flex items-center gap-4 mb-4">
           <FiActivity className="text-2xl text-gold" />
           <span className="font-semibold text-lg">Recent Login History</span>
@@ -612,7 +612,7 @@ export default function Settings() {
         </div>
       </div>
       {/* Account Management */}
-      <div className="glass-card p-6 rounded-xl mb-6 shadow-lg">
+      <div className="glass-card p-6 rounded-xl mb-6 shadow-lg w-full min-w-0">
         <div className="flex items-center gap-4 mb-4">
           <FiUserX className="text-2xl text-gold" />
           <span className="font-semibold text-lg">Account Management</span>
