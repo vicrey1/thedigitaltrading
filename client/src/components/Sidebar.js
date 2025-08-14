@@ -30,8 +30,8 @@ const Sidebar = ({ collapsed = false, setCollapsed = () => {}, hasNewAnnouncemen
       ), label: 'Announcements', path: '/dashboard/announcements' },
     { icon: <FiMessageSquare />, label: 'Support Chat', path: '/dashboard/support' },
     { icon: <FiTarget />, label: 'My Goals', path: '/dashboard/goals' },
-    { icon: <FiBook />, label: 'Education Center', path: '/dashboard/education' },
     { icon: <FiSettings />, label: 'Settings', path: '/dashboard/settings' },
+    { icon: <FiBook />, label: 'Education Center', path: '/dashboard/education' },
   ];
 
   // Desktop collapse/expand
