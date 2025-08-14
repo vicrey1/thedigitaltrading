@@ -280,8 +280,8 @@ export default function SupportChat() {
   return (
     <div className="min-h-screen w-full flex flex-col items-center justify-center bg-gradient-to-br from-yellow-50 via-blue-50 to-white px-2 sm:px-0 overflow-x-hidden">
       <div className="w-full max-w-lg sm:max-w-xl md:max-w-2xl lg:max-w-3xl xl:max-w-4xl flex flex-col h-[90vh] sm:h-[80vh] rounded-2xl shadow-2xl border border-yellow-200 bg-white overflow-hidden">
-        {/* Header */}
-        <div className="flex items-center gap-3 p-4 bg-gradient-to-r from-yellow-100 to-blue-100 border-b border-yellow-200 shadow w-full">
+        {/* Header with session info and timer */}
+        <div className="flex items-center gap-3 p-4 bg-gradient-to-r from-yellow-100 to-blue-100 border-b border-yellow-200 shadow w-full relative">
           <button
             className="mr-2 p-2 rounded-full hover:bg-yellow-200 focus:outline-none"
             onClick={() => window.location.href = '/dashboard'}
@@ -294,22 +294,26 @@ export default function SupportChat() {
             <h2 className="text-lg sm:text-2xl font-bold text-gray-800 truncate">Support Chat</h2>
             <div className="text-xs sm:text-sm text-gray-500 truncate">Chat with our support team. Attach files if needed.</div>
           </div>
+          {/* Session timer */}
+          {sessionStart && !sessionExpired && (
+            <div className="absolute right-4 top-4 text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-full font-bold shadow">{Math.max(0, 30 - Math.floor((Date.now() - sessionStart) / 60000))} min left</div>
+          )}
         </div>
         {/* Chat Area */}
-        <div className="flex-1 overflow-y-auto p-3 sm:p-6 bg-white space-y-4 scrollbar-thin scrollbar-thumb-gold scrollbar-track-gray-900/60" style={{ minHeight: 0 }}>
+        <div className="flex-1 overflow-y-auto p-3 sm:p-6 bg-white space-y-4 scrollbar-thin scrollbar-thumb-gold scrollbar-track-gray-900/60 relative" style={{ minHeight: 0 }}>
           {messages.length === 0 && (
             <div className="text-center text-gray-400 my-8">No messages yet. Start the conversation below!</div>
           )}
           {filteredMessages.map((m, i) => (
-            <div key={i} className={`flex mb-3 ${m.sender === 'user' ? 'justify-end' : 'justify-start'} w-full`}>
+            <div key={i} className={`flex mb-3 ${m.sender === 'user' ? 'justify-end' : 'justify-start'} w-full group relative`}>
               {m.sender === 'support' && <img src={AVATAR_SUPPORT} alt="Support" className="w-8 h-8 sm:w-9 sm:h-9 rounded-full mr-2 border-2 border-yellow-400 shadow" />}
-              <div className={`w-full sm:max-w-[70%] px-3 py-2 rounded-2xl ${m.sender === 'user' ? 'bg-blue-100 text-blue-900 rounded-br-none font-semibold' : 'bg-yellow-100 text-gray-900 rounded-bl-none'} shadow-md border border-yellow-100 relative`}>
-                {/* Show both file and text if both are present, with text under image */}
+              <div className={`w-full sm:max-w-[70%] px-3 py-2 rounded-2xl ${m.sender === 'user' ? 'bg-blue-100 text-blue-900 rounded-br-none font-semibold float-right' : 'bg-yellow-100 text-gray-900 rounded-bl-none float-left'} shadow-md border border-yellow-100 relative transition-all duration-300`}>
+                {/* File/image preview logic */}
                 {m.type === 'file' && m.attachment && m.content && m.content !== m.attachment ? (
                   <>
                     {m.attachment.match(/\.(jpg|jpeg|png|gif)$/i) ? (
                       <>
-                        <img src={m.attachment} alt={m.content} className="max-w-[60vw] sm:max-w-[200px] max-h-[200px] rounded mb-2 border" />
+                        <img src={m.attachment} alt={m.content} className="max-w-[60vw] sm:max-w-[200px] max-h-[200px] rounded mb-2 border cursor-zoom-in transition-transform duration-200 hover:scale-105" />
                         <span className="block mt-2 font-bold text-base sm:text-lg text-blue-900 text-center">{m.content}</span>
                       </>
                     ) : (
@@ -317,20 +321,26 @@ export default function SupportChat() {
                     )}
                   </>
                 ) : m.type === 'file' && m.attachment && m.attachment.match(/\.(jpg|jpeg|png|gif)$/i) ? (
-                  <img src={m.attachment} alt={m.content} className="max-w-[60vw] sm:max-w-[200px] max-h-[200px] rounded mb-2 border" />
+                  <img src={m.attachment} alt={m.content} className="max-w-[60vw] sm:max-w-[200px] max-h-[200px] rounded mb-2 border cursor-zoom-in transition-transform duration-200 hover:scale-105" />
                 ) : m.type === 'file' && m.attachment ? (
                   <a href={m.attachment} download={m.content} className="text-blue-600 underline break-all" target="_blank" rel="noopener noreferrer">{m.content}</a>
                 ) : (
                   <span>{m.content}</span>
                 )}
+                {/* Message reactions */}
+                <div className="flex gap-2 mt-2">
+                  <button className="text-lg hover:bg-blue-100 rounded-full px-2 py-1" title="Like">👍</button>
+                  <button className="text-lg hover:bg-yellow-100 rounded-full px-2 py-1" title="Love">❤️</button>
+                  <button className="text-lg hover:bg-gray-100 rounded-full px-2 py-1" title="Dislike">👎</button>
+                </div>
+                {/* Message status */}
                 <div className="text-xs text-gray-700 mt-1 flex justify-between items-center">
                   <span>{m.sender === 'user' ? 'You' : 'Support'}</span>
                   <span className="flex items-center gap-1">
                     {formatTime(m.timestamp)}
-                    {/* Double tick: grey for sent, blue for seen */}
-                    {m.sender === ((user && user.isAdmin) ? 'support' : 'user') && (
-                      <FaCheckDouble className={m.status === 'seen' ? 'text-blue-500 ml-1' : 'text-gray-400 ml-1'} title={m.status === 'seen' ? 'Seen' : 'Sent'} />
-                    )}
+                    {m.status === 'failed' && <span className="text-red-500 ml-1">Failed</span>}
+                    {m.status === 'delivered' && <span className="text-gray-400 ml-1">Delivered</span>}
+                    {m.status === 'seen' && <FaCheckDouble className="text-blue-500 ml-1" title="Seen" />}
                   </span>
                 </div>
               </div>
@@ -338,12 +348,20 @@ export default function SupportChat() {
             </div>
           ))}
           {isTyping && (
-            <div className="flex mb-2 justify-start items-center w-full">
+            <div className="flex mb-2 justify-start items-center w-full animate-pulse">
               <img src={AVATAR_SUPPORT} alt="Support" className="w-8 h-8 sm:w-9 sm:h-9 rounded-full mr-2 border-2 border-yellow-400 shadow" />
-              <div className="bg-yellow-100 px-3 py-2 rounded-2xl shadow text-left text-gray-700 w-full">Support is typing...</div>
+              <div className="bg-yellow-100 px-3 py-2 rounded-2xl shadow text-left text-gray-700 w-full">Support is typing<span className="animate-bounce">...</span></div>
             </div>
           )}
+          {/* Scroll to bottom button */}
+          <button onClick={() => chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })} className="fixed bottom-24 right-6 bg-blue-600 text-white px-3 py-2 rounded-full shadow-lg hover:bg-blue-700 transition-all z-50">↓</button>
           <div ref={chatEndRef} />
+          {/* Quick reply suggestions */}
+          <div className="flex flex-wrap gap-2 mt-4">
+            <button className="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full shadow hover:bg-yellow-200" onClick={() => setInput('How do I reset my password?')}>How do I reset my password?</button>
+            <button className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full shadow hover:bg-blue-200" onClick={() => setInput('How long does KYC take?')}>How long does KYC take?</button>
+            <button className="bg-green-100 text-green-700 px-3 py-1 rounded-full shadow hover:bg-green-200" onClick={() => setInput('How do I withdraw funds?')}>How do I withdraw funds?</button>
+          </div>
         </div>
         {/* Input Area / Session Expired */}
         {sessionExpired ? (
