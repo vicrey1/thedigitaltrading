@@ -566,8 +566,8 @@ export default function Settings() {
           <span className="font-semibold text-lg">Recent Login History</span>
         </div>
         {/* Desktop Table */}
-        <div className="overflow-x-auto w-full hidden md:block">
-          <table className="min-w-full w-full text-sm">
+        <div className="hidden sm:block overflow-x-auto w-full">
+          <table className="w-full text-sm">
             <thead>
               <tr className="text-gold">
                 <th className="p-2 text-left">Date</th>
@@ -592,7 +592,7 @@ export default function Settings() {
           </table>
         </div>
         {/* Mobile Card Layout */}
-        <div className="block md:hidden space-y-4 w-full">
+        <div className="sm:hidden space-y-4 w-full">
           {loginHistory.length === 0 ? (
             <div className="text-center text-gray-400 py-6">No login history found</div>
           ) : (
