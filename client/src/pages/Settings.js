@@ -199,7 +199,7 @@ export default function Settings() {
   }
 
   return (
-    <div className="space-y-8 px-2 sm:px-4 md:px-6 py-6 sm:py-8 w-full max-w-full min-h-screen overflow-x-auto overflow-y-auto">
+    <div className="space-y-8 px-2 sm:px-4 md:px-6 py-6 sm:py-8 w-full max-w-full min-h-screen overflow-x-auto overflow-y-auto box-border">
       <ToastContainer />
       <ConfirmModal
         isOpen={showDeleteModal}
