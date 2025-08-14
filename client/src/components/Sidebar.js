@@ -92,17 +92,6 @@ const Sidebar = ({ collapsed = false, setCollapsed = () => {}, hasNewAnnouncemen
         ))}
       </ul>
     </nav>
-    {/* Sticky Sign Out Button for mobile */}
-    <div className="md:static md:mb-6 md:mx-4 md:relative md:w-auto w-full fixed bottom-0 left-0 z-50 px-4 pb-4 bg-black bg-opacity-80 md:bg-opacity-0">
-      <button
-        onClick={handleLogout}
-        className={`flex items-center justify-center md:justify-${collapsed ? 'center' : 'start'} p-4 sm:p-3 rounded-lg bg-red-600 hover:bg-red-700 text-white font-bold transition-all duration-300 w-full text-lg sm:text-base`}
-        style={{ minWidth: 0 }}
-      >
-        <span className="mr-3 text-xl flex-shrink-0"><FiLogOut /></span>
-        {!collapsed && <span>Sign Out</span>}
-      </button>
-    </div>
       </div>
       {/* Overlay for mobile */}
       {mobileOpen && (
