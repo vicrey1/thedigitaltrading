@@ -47,26 +47,26 @@ export default function InviteFriends() {
             <span className="font-extrabold text-2xl tracking-wide text-yellow-300">Invite Friends & Earn Rewards</span>
           </div>
         </div>
-        <div className="mb-6 flex flex-col md:flex-row md:items-center gap-4 w-full">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full">
-            <span className="font-mono bg-black bg-opacity-30 px-3 py-2 rounded-lg text-gold text-lg border border-yellow-700 shadow-inner">{referralCode}</span>
-            <button onClick={handleCopyCode} className="flex items-center gap-1 text-blue-400 hover:text-blue-600 bg-gray-900 border border-blue-400 px-3 py-2 rounded-lg font-semibold shadow transition w-full sm:w-auto">
+        <div className="mb-6 flex flex-col gap-4 w-full">
+          <div className="flex flex-col gap-2 w-full">
+            <span className="font-mono bg-black bg-opacity-30 px-3 py-2 rounded-lg text-gold text-lg border border-yellow-700 shadow-inner w-full">{referralCode}</span>
+            <button onClick={handleCopyCode} className="flex items-center gap-1 text-blue-400 hover:text-blue-600 bg-gray-900 border border-blue-400 px-3 py-2 rounded-lg font-semibold shadow transition w-full">
               <FiCopy /> Copy Code
             </button>
-            <button onClick={handleCopy} className="flex items-center gap-1 text-blue-400 hover:text-blue-600 bg-gray-900 border border-blue-400 px-3 py-2 rounded-lg font-semibold shadow transition w-full sm:w-auto">
+            <button onClick={handleCopy} className="flex items-center gap-1 text-blue-400 hover:text-blue-600 bg-gray-900 border border-blue-400 px-3 py-2 rounded-lg font-semibold shadow transition w-full">
               <FiCopy /> Copy Link
             </button>
           </div>
-          <div className="text-sm text-gray-400 mt-1 md:mt-0 w-full">Share your code and earn bonuses when friends join and invest!</div>
+          <div className="text-sm text-gray-400 mt-1 w-full">Share your code and earn bonuses when friends join and invest!</div>
         </div>
-        <div className="mb-6 w-full">
+        <div className="mb-6 w-full space-y-4">
           <span className="font-semibold text-yellow-200">Your Referral Link:</span>
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 mt-2 w-full">
+          <div className="flex flex-col gap-2 mt-2 w-full">
             <input type="text" value={referralLink} readOnly className="w-full p-3 rounded-lg bg-gray-800 text-white border-2 border-yellow-700 focus:border-gold outline-none font-mono text-base shadow-inner" />
-            <button onClick={handleCopy} className="flex items-center gap-1 text-blue-400 hover:text-blue-600 bg-gray-900 border border-blue-400 px-3 py-2 rounded-lg font-semibold shadow transition w-full sm:w-auto"><FiCopy /></button>
+            <button onClick={handleCopy} className="flex items-center gap-1 text-blue-400 hover:text-blue-600 bg-gray-900 border border-blue-400 px-3 py-2 rounded-lg font-semibold shadow transition w-full"><FiCopy /></button>
           </div>
         </div>
-        <div className="mb-6 w-full">
+        <div className="mb-6 w-full space-y-4">
           <span className="font-semibold text-yellow-200">Referral Stats:</span>
           {loading ? (
             <div className="text-gray-400">Loading...</div>
@@ -74,17 +74,17 @@ export default function InviteFriends() {
             <>
               {/* Desktop/Tablet Stats */}
               <div className="hidden md:flex flex-col md:flex-row gap-6 mt-4 w-full">
-                <div className="flex flex-col items-center bg-gray-800 bg-opacity-60 rounded-xl p-4 shadow border border-gray-700 min-w-[140px]">
+                <div className="flex flex-col items-center bg-gray-800 bg-opacity-60 rounded-xl p-4 shadow border border-gray-700">
                   <FiUsers className="text-3xl text-blue-400 mb-1" />
                   <div className="text-lg font-bold text-white">{referralStats.totalInvited}</div>
                   <div className="text-xs text-gray-400">Total Invited</div>
                 </div>
-                <div className="flex flex-col items-center bg-gray-800 bg-opacity-60 rounded-xl p-4 shadow border border-gray-700 min-w-[140px]">
+                <div className="flex flex-col items-center bg-gray-800 bg-opacity-60 rounded-xl p-4 shadow border border-gray-700">
                   <FiBarChart2 className="text-3xl text-green-400 mb-1" />
                   <div className="text-lg font-bold text-green-400">${referralStats.totalRewards}</div>
                   <div className="text-xs text-gray-400">Total Rewards</div>
                 </div>
-                <div className="flex flex-col items-center bg-gray-800 bg-opacity-60 rounded-xl p-4 shadow border border-gray-700 min-w-[140px]">
+                <div className="flex flex-col items-center bg-gray-800 bg-opacity-60 rounded-xl p-4 shadow border border-gray-700">
                   <FiGift className="text-3xl text-yellow-400 mb-1" />
                   <div className="text-lg font-bold text-yellow-400">{referralStats.activeReferrals}</div>
                   <div className="text-xs text-gray-400">Active Referrals</div>
@@ -108,7 +108,7 @@ export default function InviteFriends() {
                   <div className="text-xs text-gray-400">Active Referrals</div>
                 </div>
               </div>
-              <div className="mt-8 w-full">
+              <div className="mt-8 w-full space-y-4">
                 <span className="font-semibold text-yellow-200">Referred Users:</span>
                 {referralStats.referredDetails && referralStats.referredDetails.length > 0 ? (
                   <>
