@@ -18,7 +18,7 @@ function Sidebar({ isOpen, onClose }) {
         e('a', { key: link.href, href: link.href, className: 'sidebar-link hover:text-brand-accent transition-colors duration-300', onClick: onClose }, link.label)
     );
 
-    return e('aside', { id: 'sidebar', className: `fixed top-0 right-0 h-full w-72 bg-brand-dark/80 backdrop-blur-lg shadow-2xl z-50 transition-transform duration-500 ease-in-out ${isOpen ? 'translate-x-0' : 'translate-x-full'}` },
+    return e('aside', { id: 'sidebar', className: `fixed top-0 right-0 h-full w-72 bg-brand-dark/80 backdrop-blur-lg shadow-2xl z-50 transition-transform duration-500 ease-in-out ${isOpen ? 'translate-x-0 pointer-events-auto opacity-100' : 'translate-x-full pointer-events-none opacity-0'}` },
         e('div', { className: 'p-6 flex flex-col h-full' },
             e('div', { className: 'flex justify-between items-center mb-12' },
                 e('span', { className: 'text-xl font-serif font-bold text-brand-accent' }, 'MENU'),
