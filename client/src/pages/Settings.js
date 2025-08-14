@@ -8,6 +8,7 @@ import { useUserDataRefresh } from '../contexts/UserDataRefreshContext';
 import { useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import TopRightBar from '../components/TopRightBar';
 
 export default function Settings() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -210,6 +211,7 @@ export default function Settings() {
         confirmText="Delete"
         cancelText="Cancel"
       />
+      <TopRightBar />
       <h1 className="text-3xl font-bold text-gold-gradient mb-8 flex items-center gap-2"><FiSettings /> Settings</h1>
       {/* Profile Section */}
       <div className="glassmorphic p-4 sm:p-6 rounded-xl w-full max-w-full overflow-x-auto">
