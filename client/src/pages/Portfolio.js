@@ -398,39 +398,37 @@ const Portfolio = ({ adminView = false, portfolioData: adminPortfolioData }) => 
           </div>
         </div>
 
-        <div className="overflow-x-auto w-full">
-          <table className="min-w-[600px] w-full text-xs sm:text-sm">
+        <div className="hidden sm:block overflow-x-auto w-full">
+          <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-800 text-gray-400 text-left">
-                <th className="pb-2 sm:pb-4 whitespace-nowrap">Fund</th>
-                <th className="pb-2 sm:pb-4 whitespace-nowrap">Plan</th>
-                <th className="pb-2 sm:pb-4 text-right whitespace-nowrap">Invested</th>
-                <th className="pb-2 sm:pb-4 text-right whitespace-nowrap">Current Value</th>
-                <th className="pb-2 sm:pb-4 text-right whitespace-nowrap">ROI (Expected)</th>
-                <th className="pb-2 sm:pb-4 whitespace-nowrap">Duration</th>
-                <th className="pb-2 sm:pb-4 text-right whitespace-nowrap">Actions</th>
+                <th className="pb-4">Fund</th>
+                <th className="pb-4">Plan</th>
+                <th className="pb-4 text-right">Invested</th>
+                <th className="pb-4 text-right">Current Value</th>
+                <th className="pb-4 text-right">ROI (Expected)</th>
+                <th className="pb-4">Duration</th>
+                <th className="pb-4 text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
               {filteredInvestments.map((investment) => {
-                console.log('[PORTFOLIO TABLE] investment:', investment);
-                console.log('[PORTFOLIO TABLE] investment.planName:', investment.planName);
                 const { value } = getCurrentRoiAndValue(investment);
                 return (
                   <tr key={investment.id} className="border-b border-gray-800 hover:bg-gray-800 hover:bg-opacity-30 transition">
-                    <td className="py-2 sm:py-4 whitespace-nowrap">
+                    <td className="py-4">
                       <div className="font-medium">{investment.fundName}</div>
                       <div className="text-sm text-gray-400">ID: {investment.id}</div>
                     </td>
-                    <td className="py-2 sm:py-4 whitespace-nowrap">
+                    <td className="py-4">
                       <div className="font-medium">{investment.planName}</div>
                       <div className="text-sm text-gray-400">
                         {investment.status === 'active' ? 'Active' : 'Completed'}
                       </div>
                     </td>
-                    <td className="py-2 sm:py-4 text-right font-mono whitespace-nowrap">${investment.initialAmount.toLocaleString()}</td>
-                    <td className="py-2 sm:py-4 text-right font-mono whitespace-nowrap">${Number(value).toLocaleString(undefined, {maximumFractionDigits: 2})}</td>
-                    <td className="py-2 sm:py-4 text-right font-mono text-gold whitespace-nowrap">
+                    <td className="py-4 text-right font-mono">${investment.initialAmount.toLocaleString()}</td>
+                    <td className="py-4 text-right font-mono">${Number(value).toLocaleString(undefined, {maximumFractionDigits: 2})}</td>
+                    <td className="py-4 text-right font-mono text-gold">
                       {(() => {
                         const planKey = (investment.planName || '').trim();
                         const planConfigKey = Object.keys(planConfig).find(
@@ -439,7 +437,7 @@ const Portfolio = ({ adminView = false, portfolioData: adminPortfolioData }) => 
                         return planConfigKey ? planConfig[planConfigKey].roi + '%' : '--';
                       })()}
                     </td>
-                    <td className="py-2 sm:py-4 whitespace-nowrap">
+                    <td className="py-4">
                       <div className="flex items-center">
                         <FiCalendar className="mr-2 text-gray-400" />
                         <span className="text-sm">
@@ -448,20 +446,53 @@ const Portfolio = ({ adminView = false, portfolioData: adminPortfolioData }) => 
                         </span>
                       </div>
                     </td>
-                    <td className="py-2 sm:py-4 text-right whitespace-nowrap">
+                    <td className="py-4 text-right">
                       <button 
                         onClick={() => setSelectedInvestment(investment)}
                         className="text-gold hover:underline text-sm font-medium"
                       >
                         Details
                       </button>
-                      {/* Withdraw ROI button removed from here; only available in details modal */}
                     </td>
                   </tr>
                 );
               })}
             </tbody>
           </table>
+        </div>
+        {/* Mobile card layout for investments */}
+        <div className="sm:hidden space-y-4">
+          {filteredInvestments.map((investment) => {
+            const { value } = getCurrentRoiAndValue(investment);
+            return (
+              <div key={investment.id} className="glassmorphic p-4 rounded-xl">
+                <div className="flex justify-between items-center mb-2">
+                  <div>
+                    <div className="font-bold text-lg">{investment.fundName}</div>
+                    <div className="text-xs text-gray-400">ID: {investment.id}</div>
+                  </div>
+                  <span className="px-2 py-1 rounded bg-gray-800 text-xs text-gray-200">{investment.status}</span>
+                </div>
+                <div className="mb-1 text-sm"><span className="font-bold">Plan:</span> {investment.planName}</div>
+                <div className="mb-1 text-sm"><span className="font-bold">Invested:</span> ${investment.initialAmount.toLocaleString()}</div>
+                <div className="mb-1 text-sm"><span className="font-bold">Current Value:</span> ${Number(value).toLocaleString(undefined, {maximumFractionDigits: 2})}</div>
+                <div className="mb-1 text-sm"><span className="font-bold">ROI (Expected):</span> {(() => {
+                  const planKey = (investment.planName || '').trim();
+                  const planConfigKey = Object.keys(planConfig).find(
+                    key => key.toLowerCase() === planKey.toLowerCase()
+                  );
+                  return planConfigKey ? planConfig[planConfigKey].roi + '%' : '--';
+                })()}</div>
+                <div className="mb-1 text-sm"><span className="font-bold">Duration:</span> {investment.startDate ? new Date(investment.startDate).toLocaleDateString() : ''} - {investment.endDate ? new Date(investment.endDate).toLocaleDateString() : ''}</div>
+                <button 
+                  onClick={() => setSelectedInvestment(investment)}
+                  className="mt-2 w-full bg-gold text-black px-4 py-2 rounded-lg font-bold hover:bg-yellow-500 transition text-sm"
+                >
+                  Details
+                </button>
+              </div>
+            );
+          })}
         </div>
 
         {filteredInvestments.length === 0 && (
