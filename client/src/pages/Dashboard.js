@@ -617,18 +617,16 @@ const Dashboard = ({ adminView = false, portfolioData: adminPortfolioData }) => 
           <h3 className="text-lg font-bold mb-2">Chat & Support</h3>
           <div className="flex flex-col gap-4 mb-2">
             <button
-              className="w-full bg-blue-500 text-white py-6 rounded-xl font-bold text-lg flex items-center justify-center gap-3 shadow-lg hover:bg-blue-600 transition"
-              style={{ minHeight: '72px' }}
+              className="w-full bg-blue-500 text-white py-4 sm:py-6 rounded-xl font-bold text-base sm:text-lg flex items-center justify-center gap-3 shadow-lg hover:bg-blue-600 transition min-h-[56px] sm:min-h-[72px]"
               onClick={() => window.location.href = '/dashboard/support'}
             >
-              <FiMessageCircle className="h-7 w-7" />
+              <FiMessageCircle className="h-6 w-6 sm:h-7 sm:w-7" />
               Support Chat
             </button>
             <button
-              className="w-full bg-green-500 text-white py-6 rounded-xl font-bold text-lg flex items-center justify-center gap-3 shadow-lg hover:bg-green-600 transition"
-              style={{ minHeight: '72px' }}
+              className="w-full bg-green-500 text-white py-4 sm:py-6 rounded-xl font-bold text-base sm:text-lg flex items-center justify-center gap-3 shadow-lg hover:bg-green-600 transition min-h-[56px] sm:min-h-[72px]"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8a9.77 9.77 0 01-4-.8l-4 1 1-3.2A7.96 7.96 0 013 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 sm:h-7 sm:w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8a9.77 9.77 0 01-4-.8l-4 1 1-3.2A7.96 7.96 0 013 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
               WhatsApp
             </button>
           </div>
