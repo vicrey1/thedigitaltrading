@@ -249,7 +249,7 @@ export default function Settings() {
             </div>
           </div>
         )}
-        <div className="flex gap-2 mt-4">
+        <div className="flex flex-col sm:flex-row gap-2 mt-4 w-full">
           {edit ? (
             <>
               <button className="bg-gold text-black px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-yellow-400" onClick={handleSave}><FiSave /> Save</button>
@@ -266,7 +266,7 @@ export default function Settings() {
           <FiLock className="text-2xl text-gold" />
           <span className="font-semibold text-lg">Withdrawal PIN</span>
         </div>
-        <div className="flex gap-2 items-center mb-2">
+        <div className="flex flex-col sm:flex-row gap-2 items-center mb-2 w-full">
           <input
             type="password"
             value={pin}
@@ -329,7 +329,7 @@ export default function Settings() {
           </div>
         )}
       </div>
-      {/* Change Password with code confirmation Section */}
+      {/* Change Password Section */}
       <div className="glassmorphic p-3 sm:p-6 rounded-xl w-full space-y-4">
         <div className="flex items-center gap-4 mb-4">
           <FiKey className="text-2xl text-gold" />
@@ -437,7 +437,7 @@ export default function Settings() {
           <FiLock className="text-2xl text-gold" />
           <span className="font-semibold text-lg">Security</span>
         </div>
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-3 w-full">
           <button className="flex items-center gap-2 text-red-400 hover:text-red-600"><FiLogOut /> Logout All Devices</button>
         </div>
       </div>
@@ -447,7 +447,7 @@ export default function Settings() {
           <FiGlobe className="text-2xl text-gold" />
           <span className="font-semibold text-lg">Preferences</span>
         </div>
-        <div className="flex flex-col md:flex-row gap-6">
+        <div className="flex flex-col gap-4 w-full">
           <div className="flex items-center gap-2">
             <FiBell className="text-xl text-yellow-400" />
             <span>Notifications</span>
@@ -488,7 +488,7 @@ export default function Settings() {
           <FiGift className="text-2xl text-gold" />
           <span className="font-semibold text-lg">Referral & Support</span>
         </div>
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-3 w-full">
           <button onClick={handleInviteFriends} className="flex items-center gap-2 text-pink-400 hover:text-pink-600"><FiGift /> Invite Friends</button>
           <button onClick={handleManageLinkedAccounts} className="flex items-center gap-2 text-blue-400 hover:text-blue-600"><FiUsers /> Manage Linked Accounts</button>
           <button onClick={handleContactSupport} className="flex items-center gap-2 text-yellow-400 hover:text-yellow-600"><FiHelpCircle /> Contact Support</button>
@@ -539,7 +539,7 @@ export default function Settings() {
           <span className="font-semibold text-lg">Active Sessions</span>
         </div>
         {/* Active Sessions */}
-        <div className="glass-card p-6 rounded-xl mb-6 shadow-lg">
+        <div className="glass-card p-3 sm:p-6 rounded-xl mb-6 shadow-lg w-full">
           <div className="flex items-center gap-4 mb-4">
             <FiActivity className="text-2xl text-gold" />
             <span className="font-semibold text-lg">Active Sessions</span>
