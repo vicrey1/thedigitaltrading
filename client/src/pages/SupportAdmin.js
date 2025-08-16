@@ -269,6 +269,32 @@ export default function SupportAdmin() {
     return () => socket.off('messagesSeen', handleMessagesSeen);
   }, []);
 
+  // If there are message userIds not present in allUsersMap, fetch their profiles individually
+  const missingIds = Array.from(new Set(messages.filter(m => m.sender === 'user' && m.userId).map(m => m.userId))).filter(id => !allUsersMap[id]);
+  if (missingIds.length > 0) {
+    let cancelled = false;
+    (async () => {
+      for (const id of missingIds) {
+        try {
+          const token = localStorage.getItem('adminToken') || localStorage.getItem('token');
+          const headers = token ? { Authorization: `Bearer ${token}` } : {};
+          const res = await axios.get(`/api/admin/users/${id}/profile`, { headers });
+          if (cancelled) return;
+          const profile = res.data;
+          // Merge into allUsers if not already present
+          setAllUsers(prev => {
+            if (prev.some(u => (u._id || u.id) === (profile._id || profile.id))) return prev;
+            return [...prev, profile];
+          });
+        } catch (e) {
+          // ignore failures for missing or unauthorized requests
+          console.warn('[SUPPORT_ADMIN] Failed to fetch profile for userId', id, e && e.message);
+        }
+      }
+    })();
+    return () => { cancelled = true; };
+  }
+
   // Only render chat area if a user is selected
   return (
     <div className="fixed inset-0 z-40 flex bg-white">
