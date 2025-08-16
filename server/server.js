@@ -34,14 +34,25 @@ io.on('connection', (socket) => {
 app.use(cors({
   origin: 'https://www.luxyield.com',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'], // Added PATCH
-  credentials: true
+  credentials: true,
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+  exposedHeaders: ['Authorization']
 }));
 // Handle preflight requests for all routes
 app.options('*', cors({
   origin: 'https://www.luxyield.com',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'], // Added PATCH
-  credentials: true
+  credentials: true,
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept']
 }));
+// Ensure Authorization header is explicitly allowed for all responses (safety for proxies)
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  res.header('Access-Control-Expose-Headers', 'Authorization');
+  // Helpful debug logging for CORS issues
+  if (req.method === 'OPTIONS') console.log('[CORS] Preflight', req.method, req.originalUrl, 'Headers:', Object.keys(req.headers));
+  next();
+});
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 // Register /api/plans route after app is initialized and after all require statements
