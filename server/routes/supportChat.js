@@ -6,6 +6,9 @@ const fs = require('fs');
 const User = require('../models/User');
 const authMiddleware = require('../middleware/auth');
 const SupportUpload = require('../models/SupportUpload');
+const { S3Client, PutObjectCommand, GetObjectCommand } = require('@aws-sdk/client-s3');
+const { Upload } = require('@aws-sdk/lib-storage');
+const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
 
 let sharp = null;
 try {
@@ -15,7 +18,73 @@ try {
   sharp = null;
 }
 
-module.exports = (io) => {
+// Multer config: accept files into memory for direct S3 upload or disk fallback
+const MAX_FILE_SIZE = parseInt(process.env.SUPPORT_MAX_FILE_SIZE || (10 * 1024 * 1024)); // 10MB default
+const ALLOWED_MIMES = (process.env.SUPPORT_ALLOWED_MIMES && process.env.SUPPORT_ALLOWED_MIMES.split(',')) || ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'application/pdf', 'text/plain', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+
+const multerStorage = multer.memoryStorage();
+const upload = multer({ 
+  storage: multerStorage,
+  limits: { fileSize: MAX_FILE_SIZE },
+  fileFilter: (req, file, cb) => {
+    if (!ALLOWED_MIMES.includes(file.mimetype)) {
+      return cb(new Error('Invalid file type'));
+    }
+    cb(null, true);
+  }
+});
+
+// S3 client if env provided
+let s3Client = null;
+if (process.env.S3_BUCKET && process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY) {
+  s3Client = new S3Client({ region: process.env.AWS_REGION || 'us-east-1' });
+}
+
+// Helper: upload buffer to S3 and return key + url
+async function uploadBufferToS3(buffer, key, contentType) {
+  if (!s3Client) throw new Error('S3 not configured');
+  const parallelUploads3 = new Upload({
+    client: s3Client,
+    params: {
+      Bucket: process.env.S3_BUCKET,
+      Key: key,
+      Body: buffer,
+      ContentType: contentType
+    }
+  });
+  await parallelUploads3.done();
+  // Return signed URL valid for 7 days
+  const cmd = new GetObjectCommand({ Bucket: process.env.S3_BUCKET, Key: key });
+  const url = await getSignedUrl(s3Client, cmd, { expiresIn: 60 * 60 * 24 * 7 });
+  return { key, url };
+}
+
+// SSE endpoint for upload progress notifications (admins/users can subscribe)
+router.get('/upload-progress/:clientId', authMiddleware, (req, res) => {
+  const clientId = req.params.clientId;
+  res.writeHead(200, {
+    Connection: 'keep-alive',
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache'
+  });
+  const send = (data) => res.write(`data: ${JSON.stringify(data)}\n\n`);
+  // Keep connection alive
+  const keepAlive = setInterval(() => res.write(':keep-alive\n\n'), 15000);
+  // Listen for progress events on process-wide emitter
+  const onProgress = (payload) => {
+    if (payload.clientId === clientId) send(payload);
+  };
+  globalThis.supportUploadProgressEmitter = globalThis.supportUploadProgressEmitter || require('events').EventEmitter.prototype;
+  // Using simple process-level emitter map
+  globalThis.__supportEmitter = globalThis.__supportEmitter || new (require('events')).EventEmitter();
+  globalThis.__supportEmitter.on('progress', onProgress);
+
+  req.on('close', () => {
+    clearInterval(keepAlive);
+    globalThis.__supportEmitter.off('progress', onProgress);
+  });
+});
+
 // In-memory message store (replace with DB in production)
 let messages = [];
 
@@ -141,42 +210,67 @@ router.post('/message-seen', (req, res) => {
 // Upload a file (require auth to track owner)
 router.post('/upload', authMiddleware, upload.single('file'), async (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
-  const filePath = path.join(__dirname, '../uploads/support', req.file.filename);
-  const ext = path.extname(req.file.originalname).toLowerCase();
+  // Validate size & mime already handled by multer
+  const fileBuffer = req.file.buffer;
+  const originalName = req.file.originalname;
+  const ext = path.extname(originalName).toLowerCase();
   const isImage = ['.jpg', '.jpeg', '.png', '.webp', '.gif'].includes(ext);
-  let thumbnailUrl = null;
-  const BASE = process.env.API_URL || (req.protocol + '://' + req.get('host')) || 'https://api.luxyield.com';
-  // Generate thumbnail if image
-  if (isImage && sharp) {
-    const thumbName = req.file.filename + '_thumb.jpg';
-    const thumbPath = path.join(__dirname, '../uploads/support', thumbName);
-    try {
-      await sharp(filePath)
-        .resize(200, 200, { fit: 'inside' })
-        .jpeg({ quality: 80 })
-        .toFile(thumbPath);
-      thumbnailUrl = `${BASE}/api/support/file/${thumbName}`;
-    } catch (err) {
-      console.error('Thumbnail generation failed:', err);
-    }
-  }
+  const baseName = Date.now() + '-' + Math.round(Math.random()*1e9) + '-' + originalName.replace(/\s+/g, '_');
 
-  // Persist ownership metadata in DB
+  let s3Key = null;
+  let fileUrl = null;
+  let thumbUrl = null;
+
   try {
-    const ownerId = req.user && req.user.id ? req.user.id : null;
-    await SupportUpload.create({ filename: req.file.filename, originalName: req.file.originalname, userId: ownerId });
-  } catch (e) {
-    console.warn('Failed to persist upload metadata:', e && e.message);
-  }
+    if (s3Client) {
+      // Upload original file to S3
+      const key = `support/${baseName}`;
+      // Emit start
+      globalThis.__supportEmitter && globalThis.__supportEmitter.emit('progress', { clientId: req.user && req.user.id, status: 'started', filename: key });
+      await uploadBufferToS3(fileBuffer, key, req.file.mimetype);
+      s3Key = key;
+      // Generate URL via presigner
+      const getCmd = new GetObjectCommand({ Bucket: process.env.S3_BUCKET, Key: key });
+      fileUrl = await getSignedUrl(s3Client, getCmd, { expiresIn: 60 * 60 * 24 * 7 });
 
-  // Check if file exists before returning URL
-  fs.access(filePath, fs.constants.F_OK, (err) => {
-    if (err) {
-      return res.status(500).json({ error: 'File not found after upload' });
+      // Generate thumbnail & upload to S3 (if image and sharp available)
+      if (isImage && sharp) {
+        const thumbBuf = await sharp(fileBuffer).resize(200, 200, { fit: 'inside' }).jpeg({ quality: 80 }).toBuffer();
+        const thumbKey = `support/${baseName}_thumb.jpg`;
+        await uploadBufferToS3(thumbBuf, thumbKey, 'image/jpeg');
+        thumbUrl = (await getSignedUrl(s3Client, new GetObjectCommand({ Bucket: process.env.S3_BUCKET, Key: thumbKey }), { expiresIn: 60*60*24*7 }));
+      }
+
+    } else {
+      // Fallback to disk
+      const filename = baseName;
+      const filePath = path.join(__dirname, '../uploads/support', filename);
+      await fs.promises.writeFile(filePath, fileBuffer);
+      fileUrl = `${process.env.API_URL || (req.protocol + '://' + req.get('host'))}/api/support/file/${filename}`;
+      if (isImage && sharp) {
+        const thumbPath = path.join(__dirname, '../uploads/support', filename + '_thumb.jpg');
+        await sharp(filePath).resize(200,200,{fit:'inside'}).jpeg({quality:80}).toFile(thumbPath);
+        thumbUrl = `${process.env.API_URL || (req.protocol + '://' + req.get('host'))}/api/support/file/${filename}_thumb.jpg`;
+      }
     }
-    const fileUrl = `${BASE}/api/support/file/${req.file.filename}`;
-    res.json({ fileUrl, thumbnailUrl, originalName: req.file.originalname });
-  });
+
+    // Persist ownership metadata in DB
+    try {
+      const ownerId = req.user && req.user.id ? req.user.id : null;
+      await SupportUpload.create({ filename: s3Key || baseName, originalName, userId: ownerId, storage: s3Client ? 's3' : 'disk' });
+    } catch (e) {
+      console.warn('Failed to persist upload metadata:', e && e.message);
+    }
+
+    // Emit done
+    globalThis.__supportEmitter && globalThis.__supportEmitter.emit('progress', { clientId: req.user && req.user.id, status: 'done', filename: s3Key || baseName });
+
+    return res.json({ fileUrl, thumbnailUrl: thumbUrl, originalName });
+  } catch (err) {
+    console.error('Upload error:', err && (err.stack || err.message || err));
+    globalThis.__supportEmitter && globalThis.__supportEmitter.emit('progress', { clientId: req.user && req.user.id, status: 'error', filename: baseName, error: err.message });
+    return res.status(500).json({ error: 'Upload failed', message: err.message });
+  }
 });
 
 // Admin: clear chat (for demo)
@@ -239,29 +333,33 @@ if (io) {
 // Serve support files with auth and ownership check
 router.get('/file/:filename', authMiddleware, async (req, res) => {
   const filename = req.params.filename;
-  const filePath = path.join(__dirname, '../uploads/support', filename);
-  const userId = req.user && req.user.id;
-  const isAdmin = req.user && req.user.role && req.user.role.toLowerCase() === 'admin';
-
-  try {
-    await fs.promises.access(filePath, fs.constants.F_OK);
-  } catch (e) {
-    return res.status(404).send('Not found');
-  }
-
-  // Ownership check via DB
+  // If filename includes 'support/' treat as S3 key; else may be disk
   try {
     const record = await SupportUpload.findOne({ filename }).lean();
+    const userId = req.user && req.user.id;
+    const isAdmin = req.user && req.user.role && req.user.role.toLowerCase() === 'admin';
     if (!isAdmin) {
       if (!record || !record.userId) return res.status(403).send('Forbidden');
       if (String(record.userId) !== String(userId)) return res.status(403).send('Forbidden');
     }
+
+    if (record && record.storage === 's3' && s3Client) {
+      const key = record.filename;
+      const cmd = new GetObjectCommand({ Bucket: process.env.S3_BUCKET, Key: key });
+      const url = await getSignedUrl(s3Client, cmd, { expiresIn: 60 }); // short-lived
+      return res.redirect(url);
+    }
+
+    // Fallback to disk
+    const filePath = path.join(__dirname, '../uploads/support', filename);
+    await fs.promises.access(filePath, fs.constants.F_OK);
     return res.sendFile(filePath);
   } catch (e) {
-    console.error('Error checking upload ownership:', e && e.message);
-    return res.status(500).send('Server error');
+    console.error('Error serving file:', e && e.message);
+    return res.status(404).send('Not found');
   }
 });
 
+module.exports = (io) => {
 return router;
 };
