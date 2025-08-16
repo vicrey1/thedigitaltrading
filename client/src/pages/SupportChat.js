@@ -428,10 +428,22 @@ export default function SupportChat() {
               className="hidden"
               id="file-upload"
               name="file-upload"
+              accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt"
               onChange={e => setFile(e.target.files[0])}
             />
             <label htmlFor="file-upload" className="cursor-pointer bg-gray-200 px-2 sm:px-3 py-2 rounded-full hover:bg-gray-300 text-lg sm:text-xl w-full sm:w-auto text-center">📎</label>
-            {file && (
+            {file && file.type.startsWith('image/') && (
+              <span className="ml-2 flex items-center gap-2">
+                <img
+                  src={URL.createObjectURL(file)}
+                  alt="preview"
+                  style={{ maxWidth: 48, maxHeight: 48, borderRadius: 6, border: '1px solid #ddd' }}
+                  onLoad={e => URL.revokeObjectURL(e.target.src)}
+                />
+                <span className="text-xs text-blue-700 bg-blue-100 px-2 py-1 rounded-full font-semibold truncate w-full sm:max-w-[120px]" title={file.name}>{file.name}</span>
+              </span>
+            )}
+            {file && !file.type.startsWith('image/') && (
               <span className="ml-2 text-xs text-blue-700 bg-blue-100 px-2 py-1 rounded-full font-semibold truncate w-full sm:max-w-[120px]" title={file.name}>
                 {file.name}
               </span>
