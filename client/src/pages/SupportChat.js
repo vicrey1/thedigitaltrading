@@ -1,13 +1,13 @@
 // This file is being rebuilt from scratch.
-import React, { useState, useRef, useEffect } from 'react';
-import { FaHeadset, FaArrowLeft, FaPaperPlane, FaCheckDouble, FaSmile, FaFileAlt, FaImage } from 'react-icons/fa';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { FaHeadset, FaArrowLeft, FaPaperPlane, FaCheckDouble, FaSmile, FaFileAlt, FaImage, FaTimes, FaRedo, FaStop } from 'react-icons/fa';
 import axios from 'axios';
 import { useUser } from '../contexts/UserContext';
 import socket from '../utils/socket';
 
 const AVATAR_USER = 'https://ui-avatars.com/api/?name=You&background=0D8ABC&color=fff';
 const AVATAR_SUPPORT = 'https://ui-avatars.com/api/?name=Support&background=FFD700&color=000';
-const UPLOADS_BASE_URL = 'https://api.luxyield.com'; // Always use API domain for images
+const UPLOADS_BASE_URL = process.env.REACT_APP_API_URL || 'https://api.luxyield.com'; // prefer env
 const FALLBACK_IMG = 'https://ui-avatars.com/api/?name=Image+Not+Found&background=cccccc&color=333';
 
 function formatTime(ts) {
@@ -31,6 +31,188 @@ export default function SupportChat() {
   const [sessionExpired, setSessionExpired] = useState(false);
   const chatEndRef = useRef(null);
   const { user } = useUser();
+
+  // New: upload queue and map of abort controllers for cancel
+  const [uploadQueue, setUploadQueue] = useState([]); // { id, file, progress, status, error }
+  const uploadControllers = useRef({});
+
+  // New: image modal for viewing full images
+  const [imageModal, setImageModal] = useState(null); // { url, alt }
+
+  // Helper: generate temp id for optimistic messages/uploads
+  const genId = () => `local_${Date.now()}_${Math.random().toString(36).slice(2,8)}`;
+
+  // Upload helper with progress and cancel support
+  const uploadFile = useCallback((fileItem, onProgress) => {
+    const id = genId();
+    const form = new FormData();
+    form.append('file', fileItem.file);
+    // Create Axios cancel token via AbortController
+    const controller = new AbortController();
+    uploadControllers.current[id] = controller;
+
+    return axios.post('/api/support/upload', form, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+      onUploadProgress: (evt) => {
+        const pct = Math.round((evt.loaded * 100) / (evt.total || 1));
+        if (onProgress) onProgress(pct);
+      },
+      signal: controller.signal
+    }).then(res => ({ success: true, data: res.data }))
+      .catch(err => {
+        if (err.name === 'CanceledError' || err.message === 'canceled') {
+          return { success: false, canceled: true, error: 'Canceled' };
+        }
+        return { success: false, error: err.response?.data?.message || err.message };
+      }).finally(() => {
+        delete uploadControllers.current[id];
+      });
+  }, []);
+
+  // New: start upload for an item in queue
+  const startUpload = useCallback(async (item) => {
+    setUploadQueue(q => q.map(x => x.id === item.id ? { ...x, status: 'uploading', progress: 0 } : x));
+    const result = await uploadFile(item, (pct) => {
+      setUploadQueue(q => q.map(x => x.id === item.id ? { ...x, progress: pct } : x));
+    });
+
+    if (result.success) {
+      const { fileUrl, thumbnailUrl, originalName } = result.data;
+      // Update optimistic message in chat (match by tempId stored in item.msgId)
+      setMessages(prev => prev.map(m => {
+        if (m._localId && m._localId === item.msgId) {
+          const attachment = {
+            file: fileUrl.split('/').pop(),
+            thumb: thumbnailUrl ? thumbnailUrl.split('/').pop() : null,
+            url: fileUrl,
+            thumbUrl: thumbnailUrl || null
+          };
+          return { ...m, attachment, type: thumbnailUrl ? 'image' : 'file', status: 'sent' };
+        }
+        return m;
+      }));
+      // Mark queue item done
+      setUploadQueue(q => q.map(x => x.id === item.id ? { ...x, status: 'done', progress: 100 } : x));
+    } else if (result.canceled) {
+      setUploadQueue(q => q.map(x => x.id === item.id ? { ...x, status: 'canceled', error: 'Canceled' } : x));
+      setMessages(prev => prev.map(m => m._localId === item.msgId ? { ...m, status: 'canceled' } : m));
+    } else {
+      setUploadQueue(q => q.map(x => x.id === item.id ? { ...x, status: 'error', error: result.error } : x));
+      setMessages(prev => prev.map(m => m._localId === item.msgId ? { ...m, status: 'failed', error: result.error } : m));
+    }
+  }, [uploadFile]);
+
+  // New: cancel upload
+  const cancelUpload = (queueId) => {
+    const controllerId = Object.keys(uploadControllers.current)[0];
+    // Try to abort controller associated with any running upload; we kept controllers keyed by generated id within uploadFile
+    // We don't persist mapping queueId->controllerId here due to simple impl; cancel all running controllers
+    Object.values(uploadControllers.current).forEach(ctrl => { try { ctrl.abort(); } catch(e){} });
+    setUploadQueue(q => q.map(x => x.id === queueId ? { ...x, status: 'canceled' } : x));
+  };
+
+  // New: retry upload
+  const retryUpload = async (queueItem) => {
+    const item = { ...queueItem, id: genId(), progress: 0, status: 'pending' };
+    setUploadQueue(q => [...q.filter(x => x.id !== queueItem.id), item]);
+    // Immediately start retry
+    startUpload({ ...item, file: item.file, msgId: item.msgId });
+  };
+
+  // Modified sendMessage/handleSend logic: handle optimistic message for file uploads
+  const sendMessage = async (msg, type = 'text', attachment = null, options = {}) => {
+    if (sessionExpired) return;
+    const localId = genId();
+    const newMsg = {
+      _localId: localId,
+      sender: 'user',
+      userId: user?._id || user?.id || 'Unknown User',
+      name: user?.name || 'Unknown',
+      username: user?.username || 'unknown',
+      content: msg,
+      type,
+      timestamp: Date.now(),
+      attachment,
+      status: type === 'text' ? 'sent' : 'pending' // file messages start pending
+    };
+
+    setMessages((prev) => [...prev, newMsg]);
+
+    if (type === 'text') {
+      // send to backend
+      try {
+        await axios.post('/api/support/message', newMsg);
+      } catch (e) {
+        setMessages(prev => prev.map(m => m._localId === localId ? { ...m, status: 'failed', error: e.message } : m));
+      }
+      return;
+    }
+
+    // For files/images, add to upload queue and start upload
+    const queueItem = { id: genId(), file: options.fileObj || null, progress: 0, status: 'pending', msgId: localId };
+    setUploadQueue(q => [...q, queueItem]);
+    // Start upload
+    startUpload(queueItem);
+
+    // Also, post a lightweight message record to backend to create chat message placeholder if needed
+    try {
+      await axios.post('/api/support/message', { ...newMsg, type: 'file' });
+    } catch (e) {
+      // ignore backend placeholder failure — message may still be delivered after upload
+    }
+  };
+
+  const handleSend = async (e) => {
+    e.preventDefault();
+    if (sessionExpired) return;
+    if (!input.trim() && !file) return;
+
+    if (file) {
+      const name = input.trim() || file.name;
+      // Restrict file size <= 10MB locally
+      const MAX = 10 * 1024 * 1024;
+      if (file.size > MAX) {
+        alert('File too large. Max 10MB');
+        return;
+      }
+      // push optimistic message and queue upload
+      sendMessage(name, file.type.startsWith('image/') ? 'image' : 'file', null, { fileObj: file });
+      setFile(null);
+      setInput('');
+      return;
+    }
+
+    sendMessage(input);
+    setInput('');
+  };
+
+  // Retry a failed message's upload
+  const handleRetryMessage = (msgLocalId) => {
+    const msg = messages.find(m => m._localId === msgLocalId);
+    if (!msg) return;
+    // Find associated queue item by msgId
+    const qItem = uploadQueue.find(q => q.msgId === msgLocalId || q.msgId === msgLocalId);
+    if (qItem) {
+      retryUpload(qItem);
+    } else {
+      // No queue item; user may try re-adding file manually
+      alert('No upload record found to retry. Please re-attach the file and send again.');
+    }
+  };
+
+  // Cancel an in-progress message upload
+  const handleCancelMessage = (msgLocalId) => {
+    // find queue item
+    const qItem = uploadQueue.find(q => q.msgId === msgLocalId);
+    if (qItem) cancelUpload(qItem.id);
+  };
+
+  // Image click: open modal with full image
+  const openImage = (m) => {
+    // Prefer absolute URLs returned by server (attachment.url/thumbUrl)
+    const url = m.attachment?.url ? m.attachment.url : (m.attachment?.file ? `${UPLOADS_BASE_URL}/api/support/file/${m.attachment.file}` : null);
+    if (url) setImageModal({ url, alt: m.content });
+  };
 
   // Restore sessionStart from localStorage only once on mount
   useEffect(() => {
@@ -192,94 +374,14 @@ export default function SupportChat() {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping]);
 
-  const sendMessage = async (msg, type = 'text', attachment = null) => {
-    if (sessionExpired) return;
-    const newMsg = {
-      sender: 'user',
-      userId: user?._id || user?.id || 'Unknown User',
-      name: user?.name || 'Unknown',
-      username: user?.username || 'unknown',
-      content: msg,
-      type,
-      timestamp: Date.now(),
-      attachment,
-    };
-    // Add the message locally so the user sees their own message
-    setMessages((prev) => [...prev, newMsg]);
-    setIsTyping(true);
-    // Send to backend
-    await axios.post('/api/support/message', newMsg);
-    // Simulate support reply (replace with backend call for real agent)
-    setTimeout(async () => {
-      if (type === 'text') {
-        const reply = {
-          sender: 'support',
-          content: autoReply(msg),
-          type,
-          timestamp: Date.now(),
-          attachment: null,
-        };
-        // Do NOT add the reply here; wait for Socket.IO event
-        await axios.post('/api/support/message', reply);
-      }
-      setIsTyping(false);
-    }, 1200);
-  };
-
-  const autoReply = (msg) => {
-    if (/refund|money/i.test(msg)) return 'For refund requests, please provide your transaction ID.';
-    if (/kyc|verify/i.test(msg)) return 'KYC verification can take up to 24 hours.';
-    if (/withdraw/i.test(msg)) return 'Withdrawals are processed within 1-2 business days.';
-    return 'Thank you for contacting support! An agent will reply soon.';
-  };
-
-  const handleSend = async (e) => {
-    e.preventDefault();
-    if (sessionExpired) return;
-    if (!input.trim() && !file) return;
-    if (file) {
-      // Upload file to backend
-      const formData = new FormData();
-      formData.append('file', file);
-      try {
-        const res = await axios.post('/api/support/upload', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
-        const fileUrl = res.data.fileUrl;
-        const thumbnailUrl = res.data.thumbnailUrl;
-        // Send a message with both text and file if both are present
-        sendMessage(input.trim() || res.data.originalName, thumbnailUrl ? 'image' : 'file', {
-          file: fileUrl.split('/').pop(),
-          thumb: thumbnailUrl ? thumbnailUrl.split('/').pop() : null
-        });
-      } catch (err) {
-        alert('File upload failed: ' + (err.response?.data?.message || err.message));
-        console.error('File upload error:', err);
-      }
-      setFile(null);
-    } else {
-      sendMessage(input);
-    }
-    setInput('');
-  };
-
-  // Only clear session on new session or admin end, not on refresh
-  // Removed duplicate handleNewSession definition
-
+  // New: effect to auto-start pending uploads (in case user adds multiple)
   useEffect(() => {
-    document.body.classList.add('support-chat-open');
-    document.documentElement.classList.add('support-chat-open');
-    document.getElementById('root')?.classList.add('support-chat-open');
-    return () => {
-      document.body.classList.remove('support-chat-open');
-      document.documentElement.classList.remove('support-chat-open');
-      document.getElementById('root')?.classList.remove('support-chat-open');
-    };
-  }, []);
-
-  // Filter out the auto-reply if admin has replied
-  const adminHasReplied = messages.some(m => m.sender === 'support' && m.content !== 'Thank you for contacting support! An agent will reply soon.');
-  const filteredMessages = adminHasReplied
-    ? messages.filter(m => !(m.sender === 'support' && m.content === 'Thank you for contacting support! An agent will reply soon.'))
-    : messages;
+    const pending = uploadQueue.filter(q => q.status === 'pending');
+    if (pending.length > 0) {
+      // Start first pending upload; concurrency could be limited
+      startUpload(pending[0]);
+    }
+  }, [uploadQueue, startUpload]);
 
   // Mark messages as seen when chat is open or new messages arrive
   useEffect(() => {
@@ -353,57 +455,83 @@ export default function SupportChat() {
             <div className="flex flex-col items-center justify-center p-6 bg-red-50 border-t border-yellow-200 w-full space-y-4">
               <div className="text-red-600 font-bold text-base sm:text-lg mb-2">Session expired</div>
               <div className="text-gray-700 mb-4 text-xs sm:text-base text-center">Your support chat session has ended after 30 minutes. Please start a new chat if you need further assistance.</div>
-              <button onClick={handleNewSession} className="bg-blue-600 text-white px-4 sm:px-5 py-2 rounded-full hover:bg-blue-700 w-full max-w-xs">Start New Chat</button>
+              <button onClick={() => { setSessionStart(Date.now()); setSessionExpired(false); }} className="bg-blue-600 text-white px-4 sm:px-5 py-2 rounded-full hover:bg-blue-700 w-full max-w-xs">Start New Chat</button>
             </div>
           ) : (
             <>
               {messages.length === 0 && (
                 <div className="text-center text-gray-400 my-8">No messages yet. Start the conversation below!</div>
               )}
-              {filteredMessages.map((m, i) => (
-                <div key={i} className={`flex mb-3 ${m.sender === 'user' ? 'justify-end' : 'justify-start'} w-full group relative`}>
+
+              {messages.map((m, i) => (
+                <div key={m._localId || m.timestamp || i} className={`flex mb-3 ${m.sender === 'user' ? 'justify-end' : 'justify-start'} w-full group relative`}>
                   {m.sender === 'support' && <img src={AVATAR_SUPPORT} alt="Support" className="w-8 h-8 sm:w-9 sm:h-9 rounded-full mr-2 border-2 border-yellow-400 shadow" />}
-                  <div className={`w-full max-w-[90vw] sm:max-w-[70%] px-2 sm:px-3 py-2 rounded-2xl ${m.sender === 'user' ? 'bg-blue-100 text-blue-900 rounded-br-none font-semibold float-right' : 'bg-yellow-100 text-gray-900 rounded-bl-none float-left'} shadow-md border border-yellow-100 relative transition-all duration-300`}>
-                    {/* File/image preview logic */}
+                  <div className={`w-full max-w-[90vw] sm:max-w-[70%] px-3 py-2 rounded-2xl ${m.sender === 'user' ? 'bg-blue-100 text-blue-900 rounded-br-none font-semibold float-right' : 'bg-yellow-100 text-gray-900 rounded-bl-none float-left'} shadow-md border border-yellow-100 relative transition-all duration-300`}>
+                    {/* File/image preview logic with progress and controls */}
                     {m.type === 'image' && m.attachment ? (
                       <>
                         <img
-                          src={m.attachment.thumb ? `${UPLOADS_BASE_URL}/uploads/support/${m.attachment.thumb}` : `${UPLOADS_BASE_URL}/uploads/support/${m.attachment.file}`}
+                          src={m.attachment.thumbUrl || (m.attachment.url ? m.attachment.url : `${UPLOADS_BASE_URL}/api/support/file/${m.attachment.file}`)}
                           alt={m.content}
-                          className="max-w-full sm:max-w-[200px] max-h-[200px] rounded mb-2 border cursor-zoom-in transition-transform duration-200 hover:scale-105"
-                          onClick={e => {
-                            if (m.attachment.file) window.open(`${UPLOADS_BASE_URL}/uploads/support/${m.attachment.file}`, '_blank');
-                          }}
-                          loading={m.attachment.thumb ? 'eager' : 'lazy'}
+                          className="max-w-full sm:max-w-[300px] max-h-[300px] rounded mb-2 border cursor-zoom-in transition-transform duration-200 hover:scale-105"
+                          onClick={() => openImage(m)}
+                          loading="lazy"
                           onError={e => { e.target.onerror=null; e.target.src=FALLBACK_IMG; }}
                         />
+                        {m.attachment?.url && (
+                          <div className="text-xs text-gray-500">Tap image to view full size</div>
+                        )}
                       </>
                     ) : m.type === 'file' && m.attachment ? (
-                      <a href={`${UPLOADS_BASE_URL}/uploads/support/${typeof m.attachment === 'string' ? m.attachment : m.attachment.file}`}
-                        download={m.content}
-                        className="text-blue-600 underline break-all" target="_blank" rel="noopener noreferrer">{m.content}</a>
+                      <a href={m.attachment.url || `${UPLOADS_BASE_URL}/api/support/file/${m.attachment.file}`} download={m.content} className="text-blue-600 underline break-all" target="_blank" rel="noopener noreferrer">{m.content}</a>
                     ) : (
                       <span>{m.content}</span>
                     )}
-                    {/* Message reactions */}
-                    <div className="flex gap-2 mt-2">
-                      <button className="text-lg hover:bg-blue-100 rounded-full px-2 py-1" title="Like"><FaSmile /></button>
-                      <button className="text-lg hover:bg-yellow-100 rounded-full px-2 py-1" title="File"><FaFileAlt /></button>
-                      <button className="text-lg hover:bg-gray-100 rounded-full px-2 py-1" title="Image"><FaImage /></button>
-                    </div>
+
+                    {/* Progress / actions for messages that are pending or failed */}
+                    {m.status === 'pending' && (
+                      <div className="mt-2">
+                        <div className="w-full bg-gray-200 rounded h-2 overflow-hidden">
+                          <div className="h-2 bg-blue-500" style={{ width: `${(uploadQueue.find(q => q.msgId === m._localId)?.progress) || 0}%` }} />
+                        </div>
+                        <div className="flex items-center justify-between text-xs text-gray-600 mt-1">
+                          <span>Uploading...</span>
+                          <div className="flex items-center gap-2">
+                            <button onClick={() => handleCancelMessage(m._localId)} className="text-red-500 px-2 py-1 rounded" aria-label="Cancel upload"><FaStop /></button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {m.status === 'failed' && (
+                      <div className="mt-2 text-xs text-red-600 flex items-center gap-2">
+                        <span>{m.error || 'Upload failed'}</span>
+                        <button onClick={() => handleRetryMessage(m._localId)} className="text-blue-600 px-2 py-1 rounded" aria-label="Retry upload"><FaRedo /></button>
+                      </div>
+                    )}
+
+                    {m.status === 'canceled' && (
+                      <div className="mt-2 text-xs text-gray-600 flex items-center gap-2">
+                        <span>Upload canceled</span>
+                        <button onClick={() => handleRetryMessage(m._localId)} className="text-blue-600 px-2 py-1 rounded" aria-label="Retry upload"><FaRedo /></button>
+                      </div>
+                    )}
+
                     {/* Message status */}
-                    <div className="text-xs text-gray-700 mt-1 flex justify-between items-center">
+                    <div className="text-xs text-gray-700 mt-2 flex justify-between items-center">
                       <span>{m.sender === 'user' ? 'You' : 'Support'}</span>
                       <span className="flex items-center gap-1">
                         {formatTime(m.timestamp)}
                         {m.status === 'delivered' && <span className="text-gray-400 ml-1">Delivered</span>}
                         {m.status === 'seen' && <FaCheckDouble className="text-blue-500 ml-1" title="Seen" />}
+                        {m.status === 'failed' && <span className="text-red-500 ml-1">Failed</span>}
                       </span>
                     </div>
                   </div>
                   {m.sender === 'user' && <img src={AVATAR_USER} alt="User" className="w-8 h-8 sm:w-9 sm:h-9 rounded-full ml-2 border-2 border-blue-400 shadow" />}
                 </div>
               ))}
+
               {isTyping && (
                 <div className="flex mb-2 justify-start items-center w-full animate-pulse">
                   <img src={AVATAR_SUPPORT} alt="Support" className="w-8 h-8 sm:w-9 sm:h-9 rounded-full mr-2 border-2 border-yellow-400 shadow" />
@@ -411,18 +539,20 @@ export default function SupportChat() {
                 </div>
               )}
               <div ref={chatEndRef} />
+
               {/* Quick reply suggestions */}
-              <div className="flex flex-wrap gap-2 mt-4">
+              <div className="flex flex-wrap gap-2 mt-4" role="list">
                 {quickReplies.map((q, idx) => (
-                  <button key={idx} className="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full shadow hover:bg-yellow-200" onClick={() => handleQuickReply(q)}>{q}</button>
+                  <button key={idx} className="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full shadow hover:bg-yellow-200" onClick={() => setInput(q)} role="listitem">{q}</button>
                 ))}
               </div>
             </>
           )}
         </div>
-        {/* Input Area */}
+
+        {/* Input Area (enhanced) */}
         {!sessionExpired && (
-          <form className="flex flex-col sm:flex-row items-center gap-2 p-2 sm:p-4 border-t border-yellow-200 bg-white w-full" onSubmit={handleSend}>
+          <form className="flex flex-col sm:flex-row items-center gap-2 p-2 sm:p-4 border-t border-yellow-200 bg-white w-full" onSubmit={handleSend} aria-label="Support chat input form">
             <input
               type="text"
               id="support-chat-input"
@@ -432,7 +562,9 @@ export default function SupportChat() {
               value={input}
               onChange={e => setInput(e.target.value)}
               autoComplete="on"
+              aria-label="Message input"
             />
+
             <input
               type="file"
               className="hidden"
@@ -441,7 +573,8 @@ export default function SupportChat() {
               accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt"
               onChange={e => setFile(e.target.files[0])}
             />
-            <label htmlFor="file-upload" className="cursor-pointer bg-gray-200 px-2 sm:px-3 py-2 rounded-full hover:bg-gray-300 text-lg sm:text-xl w-full sm:w-auto text-center">📎</label>
+            <label htmlFor="file-upload" className="cursor-pointer bg-gray-200 px-3 py-2 rounded-full hover:bg-gray-300 text-lg sm:text-xl w-full sm:w-auto text-center" aria-label="Attach file">📎</label>
+
             {file && file.type.startsWith('image/') && (
               <span className="ml-2 flex items-center gap-2">
                 <img
@@ -451,17 +584,36 @@ export default function SupportChat() {
                   onLoad={e => URL.revokeObjectURL(e.target.src)}
                 />
                 <span className="text-xs text-blue-700 bg-blue-100 px-2 py-1 rounded-full font-semibold truncate w-full sm:max-w-[120px]" title={file.name}>{file.name}</span>
+                <button type="button" onClick={() => setFile(null)} className="ml-2 text-red-500" aria-label="Remove attachment"><FaTimes /></button>
               </span>
             )}
+
             {file && !file.type.startsWith('image/') && (
               <span className="ml-2 text-xs text-blue-700 bg-blue-100 px-2 py-1 rounded-full font-semibold truncate w-full sm:max-w-[120px]" title={file.name}>
                 {file.name}
+                <button type="button" onClick={() => setFile(null)} className="ml-2 text-red-500" aria-label="Remove attachment"><FaTimes /></button>
               </span>
             )}
-            <button type="submit" className="bg-blue-600 text-white px-4 sm:px-5 py-2 rounded-full hover:bg-blue-700 flex items-center gap-2 text-xs sm:text-base w-full sm:w-auto"><FaPaperPlane /> Send</button>
+
+            <button type="submit" className="bg-blue-600 text-white px-4 sm:px-5 py-2 rounded-full hover:bg-blue-700 flex items-center gap-2 text-xs sm:text-base w-full sm:w-auto" aria-label="Send message"><FaPaperPlane /> Send</button>
           </form>
         )}
       </div>
+
+      {/* Image modal */}
+      {imageModal && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50" onClick={() => setImageModal(null)}>
+          <div className="bg-white rounded p-4 max-w-4xl w-full" onClick={(e)=>e.stopPropagation()}>
+            <div className="flex items-start justify-between">
+              <h3 className="text-lg font-bold">{imageModal.alt}</h3>
+              <button className="text-gray-600" onClick={()=>setImageModal(null)} aria-label="Close image viewer"><FaTimes /></button>
+            </div>
+            <div className="mt-3">
+              <img src={imageModal.url} alt={imageModal.alt} className="max-h-[80vh] w-full object-contain" onError={e=>{e.target.onerror=null; e.target.src=FALLBACK_IMG}} />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
