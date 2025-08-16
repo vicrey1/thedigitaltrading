@@ -50,22 +50,31 @@ export default function SupportAdmin() {
   // Prefetch thumbnails for messages when they arrive
   useEffect(() => {
     (async () => {
-      const candidates = messages.filter(m => m.attachment && (typeof m.attachment === 'object' ? (m.attachment.thumbUrl || m.attachment.url || m.attachment.file) : m.attachment));
+      const candidates = messages.filter(m => m.attachment);
       for (const m of candidates) {
         try {
           const att = m.attachment;
-          let maybeUrl = null;
+          let urls = [];
           if (typeof att === 'object') {
-            maybeUrl = att.thumbUrl || att.url || (att.file ? `${UPLOADS_BASE_URL}/api/support/file/${att.file}` : null);
+            // prefer thumbUrl then url then file
+            if (att.thumbUrl) urls.push({ url: att.thumbUrl, key: att.thumbUrl.split('/').pop() });
+            if (att.url) urls.push({ url: att.url, key: att.url.split('/').pop() });
+            if (att.file) urls.push({ url: `${UPLOADS_BASE_URL}/api/support/file/${att.file}`, key: att.file });
+            if (att.thumb) urls.push({ url: `${UPLOADS_BASE_URL}/api/support/file/${att.thumb}`, key: att.thumb });
           } else if (typeof att === 'string') {
-            maybeUrl = att;
+            // att could be full url or filename
+            const isFull = att.includes('/');
+            const url = isFull ? att : `${UPLOADS_BASE_URL}/api/support/file/${att}`;
+            urls.push({ url, key: isFull ? att.split('/').pop() : att });
           }
-          if (!maybeUrl) continue;
-          if (maybeUrl.includes('/api/support/file')) {
-            const key = (typeof att === 'object' && att.file) ? att.file : maybeUrl.split('/').pop();
-            const thumbKey = (typeof att === 'object' && att.thumb) ? (att.thumb + '_thumb') : key;
-            if (!authBlobCacheRef.current[thumbKey]) {
-              fetchProtectedFileAsBlobUrl(maybeUrl, thumbKey).catch(()=>{});
+
+          for (const entry of urls) {
+            if (!entry.url) continue;
+            // Only fetch protected API paths (server) or presigned URLs as needed
+            const key = entry.key;
+            if (!authBlobCacheRef.current[key]) {
+              // Fire and forget
+              fetchProtectedFileAsBlobUrl(entry.url, key).catch(() => {});
             }
           }
         } catch (e) { /* ignore per-item errors */ }
