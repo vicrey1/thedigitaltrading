@@ -1,7 +1,7 @@
 // This file is being rebuilt from scratch.
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { FaHeadset, FaArrowLeft, FaPaperPlane, FaCheckDouble, FaSmile, FaFileAlt, FaImage, FaTimes, FaRedo, FaStop } from 'react-icons/fa';
-import axios from 'axios';
+import axios from '../utils/axios';
 import { useUser } from '../contexts/UserContext';
 import socket from '../utils/socket';
 
@@ -215,8 +215,59 @@ export default function SupportChat() {
   // Image click: open modal with full image
   const openImage = (m) => {
     // Prefer absolute URLs returned by server (attachment.url/thumbUrl)
-    const url = m.attachment?.url ? m.attachment.url : (m.attachment?.file ? `${UPLOADS_BASE_URL}/api/support/file/${m.attachment.file}` : null);
-    if (url) setImageModal({ url, alt: m.content });
+    const maybeUrl = m.attachment?.url ? m.attachment.url : (m.attachment?.file ? `${UPLOADS_BASE_URL}/api/support/file/${m.attachment.file}` : null);
+    if (!maybeUrl) return;
+    // If it's a presigned/external url, open directly. If it's our API endpoint, fetch with Authorization and create blob URL.
+    const isApiFile = maybeUrl.includes('/api/support/file');
+    if (!isApiFile) {
+      setImageModal({ url: maybeUrl, alt: m.content });
+      return;
+    }
+    // Fetch authenticated image and open in modal
+    (async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+        const res = await fetch(maybeUrl, { headers });
+        if (!res.ok) throw new Error('Failed to load image');
+        const blob = await res.blob();
+        const blobUrl = URL.createObjectURL(blob);
+        setImageModal({ url: blobUrl, alt: m.content });
+      } catch (err) {
+        console.error('Failed to fetch image for modal', err);
+        // fallback: try to open the raw URL
+        setImageModal({ url: maybeUrl, alt: m.content });
+      }
+    })();
+  };
+
+  // Download support file (handles server-authenticated files and presigned URLs)
+  const downloadSupportFile = async (attachment, filename, originalName) => {
+    try {
+      const url = attachment?.url ? attachment.url : `${UPLOADS_BASE_URL}/api/support/file/${attachment?.file || filename}`;
+      const isApiFile = url.includes('/api/support/file');
+      if (isApiFile) {
+        const token = localStorage.getItem('token');
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+        const res = await fetch(url, { headers });
+        if (!res.ok) throw new Error('Failed to download file');
+        const blob = await res.blob();
+        const blobUrl = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = originalName || filename || 'file';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
+      } else {
+        // presigned or external link
+        window.open(url, '_blank');
+      }
+    } catch (err) {
+      console.error('Download failed', err);
+      alert('Failed to download file.');
+    }
   };
 
   // Restore sessionStart from localStorage only once on mount
@@ -488,7 +539,7 @@ export default function SupportChat() {
                         )}
                       </>
                     ) : m.type === 'file' && m.attachment ? (
-                      <a href={m.attachment.url || `${UPLOADS_BASE_URL}/api/support/file/${m.attachment.file}`} download={m.content} className="text-blue-600 underline break-all" target="_blank" rel="noopener noreferrer">{m.content}</a>
+                      <button type="button" onClick={() => downloadSupportFile(m.attachment, m.attachment?.file, m.content)} className="text-blue-600 underline break-all bg-transparent border-0 p-0 text-left" aria-label={`Download ${m.content}`}>{m.content}</button>
                     ) : (
                       <span>{m.content}</span>
                     )}
