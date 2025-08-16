@@ -7,7 +7,7 @@ import socket from '../utils/socket';
 
 const AVATAR_USER = 'https://ui-avatars.com/api/?name=You&background=0D8ABC&color=fff';
 const AVATAR_SUPPORT = 'https://ui-avatars.com/api/?name=Support&background=FFD700&color=000';
-const UPLOADS_BASE_URL = process.env.REACT_APP_API_URL || 'https://api.luxyield.com';
+const UPLOADS_BASE_URL = 'https://api.luxyield.com'; // Always use API domain for images
 const FALLBACK_IMG = 'https://ui-avatars.com/api/?name=Image+Not+Found&background=cccccc&color=333';
 
 function formatTime(ts) {
