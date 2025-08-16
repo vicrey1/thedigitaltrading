@@ -252,17 +252,19 @@ router.patch('/deposits/:id', authAdmin, async (req, res) => {
   }
 });
 
-// Admin login
+// Admin login returns 401 for invalid credentials
 router.post('/auth/login', async (req, res) => {
   try {
     const { email, password } = req.body;
     // Find user with admin role
     const admin = await User.findOne({ email, role: 'admin' });
     if (!admin) {
+      // 401 Unauthorized for invalid credentials
       return res.status(401).json({ message: 'Invalid credentials' });
     }
     const isMatch = await bcrypt.compare(password, admin.password);
     if (!isMatch) {
+      // 401 Unauthorized for invalid credentials
       return res.status(401).json({ message: 'Invalid credentials' });
     }
     const token = jwt.sign(

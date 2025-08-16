@@ -1,4 +1,3 @@
-
 require('dotenv').config({ path: __dirname + '/.env' });
 console.log('==============================');
 console.log('LuxYield Backend Server Starting');
@@ -34,13 +33,13 @@ io.on('connection', (socket) => {
 // CORS Middleware
 app.use(cors({
   origin: 'https://www.luxyield.com',
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'], // Added PATCH
   credentials: true
 }));
 // Handle preflight requests for all routes
 app.options('*', cors({
   origin: 'https://www.luxyield.com',
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'], // Added PATCH
   credentials: true
 }));
 app.use(express.json({ limit: '10mb' }));
@@ -89,6 +88,9 @@ app.use('/api/support', supportChat(io));
 app.use('/api/investment', require('./routes/investment'));
 app.use('/api/ai-chat', require('./routes/aiChat'));
 app.use('/api/withdrawal', require('./routes/withdrawal'));
+
+// Serve support uploads statically
+app.use('/uploads/support', express.static(__dirname + '/uploads/support'));
 
 // Socket.IO logic
 io.on('connection', (socket) => {
