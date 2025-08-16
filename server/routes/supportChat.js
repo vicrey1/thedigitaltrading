@@ -7,6 +7,9 @@ const fs = require('fs');
 const User = require('../models/User');
 const authMiddleware = require('../middleware/auth');
 const SupportUpload = require('../models/SupportUpload');
+const { verifyToken, isAdminToken } = require('../middleware/auth');
+const AWS = require('aws-sdk');
+const s3 = new AWS.S3();
 
 let S3Client, PutObjectCommand, GetObjectCommand, Upload, getSignedUrl;
 try {
@@ -347,33 +350,72 @@ if (io) {
   });
 }
 
-// Serve support files with auth and ownership check
-router.get('/file/:filename', authMiddleware, async (req, res) => {
-  const filename = req.params.filename;
-  // If filename includes 'support/' treat as S3 key; else may be disk
+// Verbose file serving for diagnostics
+router.get('/file/:filename', async (req, res) => {
   try {
-    const record = await SupportUpload.findOne({ filename }).lean();
-    const userId = req.user && req.user.id;
-    const isAdmin = req.user && req.user.role && req.user.role.toLowerCase() === 'admin';
-    if (!isAdmin) {
-      if (!record || !record.userId) return res.status(403).send('Forbidden');
-      if (String(record.userId) !== String(userId)) return res.status(403).send('Forbidden');
+    const filename = req.params.filename;
+    const authHeader = req.headers['authorization'] || req.query.authorization || req.query.token || req.body && req.body.token;
+    let tokenInfo = null;
+    try {
+      tokenInfo = await verifyToken(authHeader);
+    } catch (err) {
+      // If verifyToken throws, log and continue; admin may be using adminToken in query
+      console.warn('[FILE-SERVE] verifyToken failed:', err && err.message);
     }
 
-    if (record && record.storage === 's3' && s3Client) {
-      const key = record.filename;
-      const cmd = new GetObjectCommand({ Bucket: process.env.S3_BUCKET, Key: key });
-      const url = await getSignedUrl(s3Client, cmd, { expiresIn: 60 }); // short-lived
+    const adminFallback = req.query.adminToken || req.query.admin_token;
+    if (!tokenInfo && adminFallback) {
+      try {
+        tokenInfo = await isAdminToken(adminFallback);
+      } catch (err) {
+        console.warn('[FILE-SERVE] adminToken verify failed:', err && err.message);
+      }
+    }
+
+    console.log('[FILE-SERVE] Request for', filename, 'by', tokenInfo ? tokenInfo.id : 'unauthenticated', 'isAdmin:', tokenInfo ? tokenInfo.isAdmin : false);
+
+    const record = await SupportUpload.findOne({ filename });
+    if (!record) {
+      console.warn('[FILE-SERVE] No SupportUpload record for', filename);
+      return res.status(404).json({ error: 'Not found' });
+    }
+
+    console.log('[FILE-SERVE] Found record:', { filename: record.filename, userId: record.userId && record.userId.toString(), storage: record.storage });
+
+    const requesterId = tokenInfo && tokenInfo.id;
+    const requesterIsAdmin = tokenInfo && tokenInfo.isAdmin;
+
+    if (!requesterId && !requesterIsAdmin) {
+      console.warn('[FILE-SERVE] No authenticated requester');
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    if (!requesterIsAdmin && record.userId && record.userId.toString() !== requesterId.toString()) {
+      console.warn('[FILE-SERVE] Access denied: requester', requesterId, 'does not match owner', record.userId.toString());
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+
+    // Serve from S3 or disk depending on record.storage
+    if (record.storage === 's3') {
+      // Generate signed URL and redirect
+      const params = { Bucket: process.env.S3_BUCKET, Key: filename, Expires: 60 };
+      const url = s3.getSignedUrl('getObject', params);
+      console.log('[FILE-SERVE] Redirecting to S3 URL for', filename);
       return res.redirect(url);
     }
 
-    // Fallback to disk
-    const filePath = path.join(__dirname, '../uploads/support', filename);
-    await fs.promises.access(filePath, fs.constants.F_OK);
-    return res.sendFile(filePath);
-  } catch (e) {
-    console.error('Error serving file:', e && e.message);
-    return res.status(404).send('Not found');
+    // Disk fallback
+    const filePath = path.join(__dirname, '..', 'uploads', filename);
+    if (!fs.existsSync(filePath)) {
+      console.warn('[FILE-SERVE] File missing on disk:', filePath);
+      return res.status(410).json({ error: 'File missing' });
+    }
+
+    console.log('[FILE-SERVE] Streaming file from disk:', filePath);
+    res.sendFile(filePath);
+  } catch (err) {
+    console.error('[FILE-SERVE] Error serving file:', err);
+    res.status(500).json({ error: 'Server error' });
   }
 });
 
