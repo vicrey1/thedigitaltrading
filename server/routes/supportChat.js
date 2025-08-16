@@ -18,6 +18,9 @@ module.exports = (io) => {
 // In-memory message store (replace with DB in production)
 let messages = [];
 
+// In-memory uploads map to track ownership (filename -> { userId, originalName, timestamp })
+const uploadsMap = {}
+
 // File upload setup
 const upload = multer({
   dest: path.join(__dirname, '../uploads/support'),
@@ -148,7 +151,7 @@ router.post('/message-seen', (req, res) => {
 });
 
 // Upload a file
-router.post('/upload', upload.single('file'), async (req, res) => {
+router.post('/upload', authMiddleware, upload.single('file'), async (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
   const filePath = path.join(__dirname, '../uploads/support', req.file.filename);
   const ext = path.extname(req.file.originalname).toLowerCase();
@@ -169,9 +172,21 @@ router.post('/upload', upload.single('file'), async (req, res) => {
       console.error('Thumbnail generation failed:', err);
     }
   } else if (isImage && !sharp) {
-    // sharp not available: skip thumbnail generation but continue
     console.warn('[supportChat] skipping thumbnail generation because sharp is not installed');
   }
+
+  // Record ownership metadata
+  try {
+    const ownerId = req.user && req.user.id ? req.user.id : null;
+    uploadsMap[req.file.filename] = {
+      userId: ownerId,
+      originalName: req.file.originalname,
+      timestamp: Date.now()
+    };
+  } catch (e) {
+    console.warn('Failed to record upload ownership', e);
+  }
+
   // Check if file exists before returning URL
   fs.access(filePath, fs.constants.F_OK, (err) => {
     if (err) {
@@ -239,18 +254,25 @@ if (io) {
   });
 }
 
-// Serve support files with optional auth check
+// Serve support files with auth and ownership check
 router.get('/file/:filename', authMiddleware, (req, res) => {
   const filename = req.params.filename;
   const filePath = path.join(__dirname, '../uploads/support', filename);
-  // Ensure user can only access their own files if they are not admin
-  // If user is admin, allow access to all files
   const userId = req.user && req.user.id;
   const isAdmin = req.user && req.user.role && req.user.role.toLowerCase() === 'admin';
-  // TODO: further restrict based on message ownership when storing message metadata
+
   fs.access(filePath, fs.constants.F_OK, (err) => {
     if (err) return res.status(404).send('Not found');
-    // Basic auth passed, send file
+    // Ownership check: admin can access all, otherwise ensure file owner matches user
+    const meta = uploadsMap[filename];
+    if (!isAdmin) {
+      if (!meta || !meta.userId) {
+        return res.status(403).send('Forbidden');
+      }
+      if (String(meta.userId) !== String(userId)) {
+        return res.status(403).send('Forbidden');
+      }
+    }
     res.sendFile(filePath);
   });
 });
