@@ -286,7 +286,19 @@ router.post('/upload', authMiddleware, upload.single('file'), async (req, res) =
     // Persist ownership metadata in DB
     try {
       const ownerId = req.user && req.user.id ? req.user.id : null;
-      await SupportUpload.create({ filename: s3Key || baseName, originalName, userId: ownerId, storage: s3Client ? 's3' : 'disk' });
+      // create record for main file
+      const mainFilename = s3Key || baseName;
+      await SupportUpload.create({ filename: mainFilename, originalName, userId: ownerId, storage: s3Client ? 's3' : 'disk' });
+      // create record for thumbnail if present
+      if (thumbUrl) {
+        const thumbFilename = s3Key ? ("support/" + baseName + '_thumb.jpg') : (baseName + '_thumb.jpg');
+        try {
+          await SupportUpload.create({ filename: thumbFilename, originalName: originalName + ' (thumb)', userId: ownerId, storage: s3Client ? 's3' : 'disk' });
+        } catch (e) {
+          // ignore duplicate/thumb creation errors
+          console.warn('Failed to persist thumbnail metadata (may already exist):', e && e.message);
+        }
+      }
     } catch (e) {
       console.warn('Failed to persist upload metadata:', e && e.message);
     }
