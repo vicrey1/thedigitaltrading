@@ -6,9 +6,25 @@ const fs = require('fs');
 const User = require('../models/User');
 const authMiddleware = require('../middleware/auth');
 const SupportUpload = require('../models/SupportUpload');
-const { S3Client, PutObjectCommand, GetObjectCommand } = require('@aws-sdk/client-s3');
-const { Upload } = require('@aws-sdk/lib-storage');
-const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
+
+let S3Client, PutObjectCommand, GetObjectCommand, Upload, getSignedUrl;
+try {
+  const s3pkg = require('@aws-sdk/client-s3');
+  const libstorage = require('@aws-sdk/lib-storage');
+  const presigner = require('@aws-sdk/s3-request-presigner');
+  S3Client = s3pkg.S3Client;
+  PutObjectCommand = s3pkg.PutObjectCommand;
+  GetObjectCommand = s3pkg.GetObjectCommand;
+  Upload = libstorage.Upload;
+  getSignedUrl = presigner.getSignedUrl;
+} catch (e) {
+  console.warn('[supportChat] AWS SDK not available; S3 features disabled. Install @aws-sdk/client-s3 @aws-sdk/lib-storage @aws-sdk/s3-request-presigner to enable S3 uploads.');
+  S3Client = null;
+  PutObjectCommand = null;
+  GetObjectCommand = null;
+  Upload = null;
+  getSignedUrl = null;
+}
 
 let sharp = null;
 try {
