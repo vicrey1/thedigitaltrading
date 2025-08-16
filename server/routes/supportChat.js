@@ -163,10 +163,32 @@ router.post('/message', async (req, res) => {
   const { sender, userId, content, type, timestamp, attachment, name, username } = req.body;
   // Normalize attachment to just filename if full path provided
   let normalizedAttachment = attachment;
-  if (attachment && attachment.includes('/')) {
-    const parts = attachment.split('/');
-    normalizedAttachment = parts[parts.length - 1];
+  try {
+    if (attachment) {
+      if (typeof attachment === 'string') {
+        if (attachment.includes('/')) {
+          const parts = attachment.split('/');
+          normalizedAttachment = parts[parts.length - 1];
+        }
+      } else if (typeof attachment === 'object') {
+        // Ensure file/thumb fields are sanitized to filenames when full URLs provided
+        const att = { ...attachment };
+        if (att.file && typeof att.file === 'string' && att.file.includes('/')) {
+          att.file = att.file.split('/').pop();
+        }
+        if (att.thumb && typeof att.thumb === 'string' && att.thumb.includes('/')) {
+          att.thumb = att.thumb.split('/').pop();
+        }
+        // Also sanitize url/thumbUrl if present to keep full URLs (they may be presigned)
+        // Keep url and thumbUrl untouched so clients can use them directly.
+        normalizedAttachment = att;
+      }
+    }
+  } catch (e) {
+    console.warn('[SUPPORT_MESSAGE] Attachment normalization error:', e && e.message);
+    normalizedAttachment = attachment;
   }
+
   let msg = { sender, content, type, timestamp, attachment: normalizedAttachment, status: 'sent' };
 
   // If message is from user, ensure name, username, and avatar are included
