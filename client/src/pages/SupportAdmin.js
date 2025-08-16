@@ -107,15 +107,26 @@ export default function SupportAdmin() {
   }, [userSelected]);
 
   // Compute unread count for each user
+  // Build a quick lookup of authoritative user records fetched from the server
+  const allUsersMap = useMemo(() => {
+    const map = {};
+    allUsers.forEach(u => {
+      if (u && (u._id || u.id)) map[u._id || u.id] = u;
+    });
+    return map;
+  }, [allUsers]);
+
   const userMap = {};
   messages.forEach(m => {
     if (m.sender === 'user') {
       const id = m.userId || 'Unknown User';
       if (!userMap[id]) {
+        const lookup = allUsersMap[id];
         userMap[id] = {
           userId: id,
-          name: m.name || 'Unknown',
-          username: m.username || id,
+          // Prefer the authoritative name/username from allUsers when available
+          name: (lookup && (lookup.name || lookup.fullName)) || m.name || 'Unknown',
+          username: (lookup && (lookup.username || lookup.email)) || m.username || id,
           lastMessage: '',
           lastTimestamp: 0,
           unread: 0,
