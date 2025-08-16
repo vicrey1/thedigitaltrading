@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+let io = null; // will be set when module is initialized with io instance
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
@@ -376,6 +377,8 @@ router.get('/file/:filename', authMiddleware, async (req, res) => {
   }
 });
 
-module.exports = (io) => {
-return router;
+// At the very end, assign passed io to local variable and return router
+module.exports = (passedIo) => {
+  io = passedIo;
+  return router;
 };
