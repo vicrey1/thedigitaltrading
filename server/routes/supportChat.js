@@ -8,8 +8,17 @@ const User = require('../models/User');
 const authMiddleware = require('../middleware/auth');
 const SupportUpload = require('../models/SupportUpload');
 const { verifyToken, isAdminToken } = require('../middleware/auth');
-const AWS = require('aws-sdk');
-const s3 = new AWS.S3();
+
+// Instead of failing at startup when aws-sdk is not installed, attempt to require it lazily
+let AWS, s3;
+try {
+  AWS = require('aws-sdk');
+  s3 = new AWS.S3();
+  console.log('[SUPPORT_CHAT] aws-sdk loaded, S3 support enabled');
+} catch (err) {
+  s3 = null;
+  console.warn('[SUPPORT_CHAT] aws-sdk not available, S3 support disabled:', err && err.message);
+}
 
 let S3Client, PutObjectCommand, GetObjectCommand, Upload, getSignedUrl;
 try {
@@ -397,6 +406,16 @@ router.get('/file/:filename', async (req, res) => {
 
     // Serve from S3 or disk depending on record.storage
     if (record.storage === 's3') {
+      if (!s3) {
+        console.warn('[FILE-SERVE] Record marked s3 but aws-sdk is not available; falling back to disk check for', filename);
+        // Try disk fallback if possible
+        const filePathFallback = path.join(__dirname, '..', 'uploads', filename);
+        if (fs.existsSync(filePathFallback)) {
+          console.log('[FILE-SERVE] Serving fallback disk file for', filename);
+          return res.sendFile(filePathFallback);
+        }
+        return res.status(503).json({ error: 'Storage temporarily unavailable' });
+      }
       // Generate signed URL and redirect
       const params = { Bucket: process.env.S3_BUCKET, Key: filename, Expires: 60 };
       const url = s3.getSignedUrl('getObject', params);
