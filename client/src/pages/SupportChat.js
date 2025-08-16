@@ -99,6 +99,29 @@ export default function SupportChat() {
         }
         return m;
       }));
+
+      // Notify backend of the completed message so server can emit to admins/users
+      try {
+        const payload = {
+          sender: 'user',
+          userId: user?._id || user?.id || null,
+          name: user?.name || 'Unknown',
+          username: user?.username || user?.email || 'unknown',
+          content: originalName || fileUrl.split('/').pop(),
+          type: thumbnailUrl ? 'image' : 'file',
+          timestamp: Date.now(),
+          attachment: {
+            file: fileUrl.split('/').pop(),
+            thumb: thumbnailUrl ? thumbnailUrl.split('/').pop() : null,
+            url: fileUrl,
+            thumbUrl: thumbnailUrl || null
+          }
+        };
+        axios.post('/api/support/message', payload).catch(e => { console.warn('Failed to notify backend of uploaded message', e); });
+      } catch (e) {
+        console.warn('Failed to send finalized message to backend', e);
+      }
+
       // Mark queue item done
       setUploadQueue(q => q.map(x => x.id === item.id ? { ...x, status: 'done', progress: 100 } : x));
     } else if (result.canceled) {
