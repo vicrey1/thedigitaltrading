@@ -229,7 +229,7 @@ export default function SupportChat() {
     // Fetch authenticated image and open in modal
     (async () => {
       try {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('token') || localStorage.getItem('adminToken');
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
         const res = await fetch(maybeUrl, { headers });
         if (!res.ok) throw new Error('Failed to load image');
@@ -250,7 +250,7 @@ export default function SupportChat() {
       const url = attachment?.url ? attachment.url : `${UPLOADS_BASE_URL}/api/support/file/${attachment?.file || filename}`;
       const isApiFile = url.includes('/api/support/file');
       if (isApiFile) {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('token') || localStorage.getItem('adminToken');
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
         const res = await fetch(url, { headers });
         if (!res.ok) throw new Error('Failed to download file');
@@ -490,7 +490,7 @@ export default function SupportChat() {
     // Return cached
     if (authBlobCacheRef.current[cacheKey]) return authBlobCacheRef.current[cacheKey];
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('token') || localStorage.getItem('adminToken');
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
       const res = await fetch(url, { headers });
       if (!res.ok) throw new Error('Failed to fetch protected file');
