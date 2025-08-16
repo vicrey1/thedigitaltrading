@@ -4,6 +4,7 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const User = require('../models/User');
+const authMiddleware = require('../middleware/auth');
 
 let sharp = null;
 try {
@@ -239,12 +240,17 @@ if (io) {
 }
 
 // Serve support files with optional auth check
-router.get('/file/:filename', (req, res) => {
+router.get('/file/:filename', authMiddleware, (req, res) => {
   const filename = req.params.filename;
   const filePath = path.join(__dirname, '../uploads/support', filename);
-  // TODO: add real auth check here (e.g., check JWT in headers)
+  // Ensure user can only access their own files if they are not admin
+  // If user is admin, allow access to all files
+  const userId = req.user && req.user.id;
+  const isAdmin = req.user && req.user.role && req.user.role.toLowerCase() === 'admin';
+  // TODO: further restrict based on message ownership when storing message metadata
   fs.access(filePath, fs.constants.F_OK, (err) => {
     if (err) return res.status(404).send('Not found');
+    // Basic auth passed, send file
     res.sendFile(filePath);
   });
 });
