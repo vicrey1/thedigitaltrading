@@ -5,6 +5,7 @@ const path = require('path');
 const fs = require('fs');
 const User = require('../models/User');
 const authMiddleware = require('../middleware/auth');
+const SupportUpload = require('../models/SupportUpload');
 
 let sharp = null;
 try {
@@ -17,19 +18,6 @@ try {
 module.exports = (io) => {
 // In-memory message store (replace with DB in production)
 let messages = [];
-
-// In-memory uploads map to track ownership (filename -> { userId, originalName, timestamp })
-const uploadsMap = {}
-
-// File upload setup
-const upload = multer({
-  dest: path.join(__dirname, '../uploads/support'),
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
-});
-
-// Ensure upload dir exists
-const uploadDir = path.join(__dirname, '../uploads/support');
-if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 
 // Get all messages
 router.get('/messages', (req, res) => {
@@ -150,7 +138,7 @@ router.post('/message-seen', (req, res) => {
   res.json({ success: true });
 });
 
-// Upload a file
+// Upload a file (require auth to track owner)
 router.post('/upload', authMiddleware, upload.single('file'), async (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
   const filePath = path.join(__dirname, '../uploads/support', req.file.filename);
@@ -171,20 +159,14 @@ router.post('/upload', authMiddleware, upload.single('file'), async (req, res) =
     } catch (err) {
       console.error('Thumbnail generation failed:', err);
     }
-  } else if (isImage && !sharp) {
-    console.warn('[supportChat] skipping thumbnail generation because sharp is not installed');
   }
 
-  // Record ownership metadata
+  // Persist ownership metadata in DB
   try {
     const ownerId = req.user && req.user.id ? req.user.id : null;
-    uploadsMap[req.file.filename] = {
-      userId: ownerId,
-      originalName: req.file.originalname,
-      timestamp: Date.now()
-    };
+    await SupportUpload.create({ filename: req.file.filename, originalName: req.file.originalname, userId: ownerId });
   } catch (e) {
-    console.warn('Failed to record upload ownership', e);
+    console.warn('Failed to persist upload metadata:', e && e.message);
   }
 
   // Check if file exists before returning URL
@@ -255,26 +237,30 @@ if (io) {
 }
 
 // Serve support files with auth and ownership check
-router.get('/file/:filename', authMiddleware, (req, res) => {
+router.get('/file/:filename', authMiddleware, async (req, res) => {
   const filename = req.params.filename;
   const filePath = path.join(__dirname, '../uploads/support', filename);
   const userId = req.user && req.user.id;
   const isAdmin = req.user && req.user.role && req.user.role.toLowerCase() === 'admin';
 
-  fs.access(filePath, fs.constants.F_OK, (err) => {
-    if (err) return res.status(404).send('Not found');
-    // Ownership check: admin can access all, otherwise ensure file owner matches user
-    const meta = uploadsMap[filename];
+  try {
+    await fs.promises.access(filePath, fs.constants.F_OK);
+  } catch (e) {
+    return res.status(404).send('Not found');
+  }
+
+  // Ownership check via DB
+  try {
+    const record = await SupportUpload.findOne({ filename }).lean();
     if (!isAdmin) {
-      if (!meta || !meta.userId) {
-        return res.status(403).send('Forbidden');
-      }
-      if (String(meta.userId) !== String(userId)) {
-        return res.status(403).send('Forbidden');
-      }
+      if (!record || !record.userId) return res.status(403).send('Forbidden');
+      if (String(record.userId) !== String(userId)) return res.status(403).send('Forbidden');
     }
-    res.sendFile(filePath);
-  });
+    return res.sendFile(filePath);
+  } catch (e) {
+    console.error('Error checking upload ownership:', e && e.message);
+    return res.status(500).send('Server error');
+  }
 });
 
 return router;
