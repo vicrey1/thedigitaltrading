@@ -4,7 +4,14 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const User = require('../models/User');
-const sharp = require('sharp');
+
+let sharp = null;
+try {
+  sharp = require('sharp');
+} catch (err) {
+  console.warn('[supportChat] sharp not available; thumbnails will be disabled. Error:', err && err.message);
+  sharp = null;
+}
 
 module.exports = (io) => {
 // In-memory message store (replace with DB in production)
@@ -127,7 +134,7 @@ router.post('/upload', upload.single('file'), async (req, res) => {
   const isImage = ['.jpg', '.jpeg', '.png', '.webp', '.gif'].includes(ext);
   let thumbnailUrl = null;
   // Generate thumbnail if image
-  if (isImage) {
+  if (isImage && sharp) {
     const thumbName = req.file.filename + '_thumb.jpg';
     const thumbPath = path.join(__dirname, '../uploads/support', thumbName);
     try {
@@ -139,6 +146,9 @@ router.post('/upload', upload.single('file'), async (req, res) => {
     } catch (err) {
       console.error('Thumbnail generation failed:', err);
     }
+  } else if (isImage && !sharp) {
+    // sharp not available: skip thumbnail generation but continue
+    console.warn('[supportChat] skipping thumbnail generation because sharp is not installed');
   }
   // Check if file exists before returning URL
   fs.access(filePath, fs.constants.F_OK, (err) => {
