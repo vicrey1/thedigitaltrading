@@ -46,6 +46,9 @@ const adminCompleteInvestment = require('./admin_complete_investment');
 const adminContinueInvestment = require('./admin_continue_investment');
 const Investment = require('../models/Investment');
 const MarketUpdate = require('../models/MarketUpdate');
+const SupportUpload = require('../models/SupportUpload');
+const path = require('path');
+const fs = require('fs');
 
 // JWT decode middleware for admin routes
 router.use((req, res, next) => {
@@ -645,6 +648,56 @@ router.delete('/market-updates/:id', authAdmin, async (req, res) => {
     res.json({ message: 'Market update deleted' });
   } catch (err) {
     res.status(500).json({ message: 'Failed to delete market update', error: err.message });
+  }
+});
+
+// List support uploads (admin)
+router.get('/support/uploads', authAdmin, async (req, res) => {
+  try {
+    const uploads = await SupportUpload.find().sort('-createdAt').lean();
+    const BASE = process.env.API_URL || (req.protocol + '://' + req.get('host')) || 'https://api.luxyield.com';
+    const normalized = uploads.map(u => ({
+      ...u,
+      url: `${BASE}/api/support/file/${u.filename}`,
+      thumbUrl: `${BASE}/api/support/file/${u.filename}_thumb.jpg`
+    }));
+    res.json(normalized);
+  } catch (e) {
+    console.error('List uploads error:', e && e.message);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Delete upload (admin): removes file(s) and DB record
+router.delete('/support/uploads/:id', authAdmin, async (req, res) => {
+  try {
+    const id = req.params.id;
+    const record = await SupportUpload.findById(id);
+    if (!record) return res.status(404).json({ message: 'Not found' });
+    // Delete files (original + thumb)
+    const file = path.join(uploadPath, record.filename);
+    const thumb = path.join(uploadPath, record.filename + '_thumb.jpg');
+    try { await fs.promises.unlink(file); } catch (err) { /* ignore */ }
+    try { await fs.promises.unlink(thumb); } catch (err) { /* ignore */ }
+    await SupportUpload.findByIdAndDelete(id);
+    res.json({ success: true });
+  } catch (e) {
+    console.error('Delete upload error:', e && e.message);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Reassign upload to another user
+router.patch('/support/uploads/:id/reassign', authAdmin, async (req, res) => {
+  try {
+    const id = req.params.id;
+    const { userId } = req.body;
+    const record = await SupportUpload.findByIdAndUpdate(id, { userId }, { new: true }).lean();
+    if (!record) return res.status(404).json({ message: 'Not found' });
+    res.json(record);
+  } catch (e) {
+    console.error('Reassign upload error:', e && e.message);
+    res.status(500).json({ message: 'Server error' });
   }
 });
 
