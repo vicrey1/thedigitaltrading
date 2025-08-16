@@ -242,9 +242,11 @@ export default function SupportChat() {
       const formData = new FormData();
       formData.append('file', file);
       try {
-        const res = await axios.post('/api/upload-support-file', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+        const res = await axios.post('/api/support/upload', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+        // Use the generated filename from backend (fileUrl)
+        const fileUrl = res.data.fileUrl;
         // Send a message with both text and file if both are present
-        sendMessage(input.trim() || res.data.originalName, 'file', res.data.url);
+        sendMessage(input.trim() || res.data.originalName, 'file', fileUrl.split('/').pop());
       } catch (err) {
         alert('File upload failed: ' + (err.response?.data?.message || err.message));
         console.error('File upload error:', err);
