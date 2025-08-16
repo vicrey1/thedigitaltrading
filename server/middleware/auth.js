@@ -1,10 +1,41 @@
 const jwt = require('jsonwebtoken');
 const JWT_SECRET = process.env.JWT_SECRET;
 
-// Simple authentication middleware
-module.exports = (req, res, next) => {
+function parseRawAuth(rawAuth) {
+  if (!rawAuth) return { token: null, source: null };
+  if (typeof rawAuth !== 'string') return { token: null, source: null };
+  if (rawAuth.startsWith('Bearer ')) {
+    return { token: rawAuth.split(' ')[1], source: 'authorization' };
+  }
+  return { token: rawAuth, source: 'header' };
+}
+
+function verifyToken(rawAuthOrToken) {
+  // Accept either a raw Authorization header ("Bearer xxx") or a raw token string
+  const { token, source } = parseRawAuth(rawAuthOrToken);
+  if (!token) {
+    const e = new Error('No token provided');
+    e.code = 'NO_TOKEN';
+    throw e;
+  }
+  const decoded = jwt.verify(token, JWT_SECRET);
+  const id = decoded && decoded.user && decoded.user.id ? decoded.user.id : decoded.id || decoded._id;
+  const role = decoded && decoded.user && decoded.user.role ? decoded.user.role : decoded.role;
+  return { id, role, decoded, rawToken: token, source };
+}
+
+function isAdminToken(rawAuthOrToken) {
+  const info = verifyToken(rawAuthOrToken);
+  if (info.role === 'admin' || info.role === 'administrator') return info;
+  const e = new Error('Not an admin token');
+  e.code = 'NOT_ADMIN';
+  throw e;
+}
+
+// Simple authentication middleware (keeps previous behavior)
+function middleware(req, res, next) {
   // Support multiple header shapes and query/body tokens for flexibility
-  const rawAuth = req.headers['authorization'] || req.headers['Authorization'] || req.headers['x-access-token'] || req.headers['token'] || req.query && req.query.token || req.body && req.body.token;
+  const rawAuth = req.headers['authorization'] || req.headers['Authorization'] || req.headers['x-access-token'] || req.headers['token'] || (req.query && req.query.token) || (req.body && req.body.token);
 
   let token = null;
   let source = null;
@@ -44,4 +75,9 @@ module.exports = (req, res, next) => {
     console.log('[AUTH] Invalid token:', err.message);
     return res.status(401).json({ error: 'Invalid token' });
   }
-};
+}
+
+// Export middleware as default and helper functions as properties so both require styles work
+module.exports = middleware;
+module.exports.verifyToken = verifyToken;
+module.exports.isAdminToken = isAdminToken;
