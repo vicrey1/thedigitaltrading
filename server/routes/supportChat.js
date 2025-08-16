@@ -34,10 +34,30 @@ router.get('/messages', (req, res) => {
     const normalized = messages.map(m => {
       const copy = { ...m };
       if (copy.attachment) {
-        // If attachment contains a path, extract filename
-        const parts = copy.attachment.split('/');
-        const filename = parts.length ? parts[parts.length - 1] : copy.attachment;
-        copy.attachment = `${BASE}/uploads/support/${filename}`;
+        // If attachment is an object with file/thumb
+        if (typeof copy.attachment === 'object') {
+          const att = { ...copy.attachment };
+          if (att.file && !att.file.startsWith('http')) {
+            const parts = att.file.split('/');
+            const filename = parts.length ? parts[parts.length - 1] : att.file;
+            att.file = `${BASE}/api/support/file/${filename}`;
+          }
+          if (att.thumb && !att.thumb.startsWith('http')) {
+            const parts = att.thumb.split('/');
+            const filename = parts.length ? parts[parts.length - 1] : att.thumb;
+            att.thumb = `${BASE}/api/support/file/${filename}`;
+          }
+          copy.attachment = att;
+        } else if (typeof copy.attachment === 'string') {
+          // If attachment contains a path, extract filename
+          if (copy.attachment.startsWith('http')) {
+            // already a full URL
+          } else {
+            const parts = copy.attachment.split('/');
+            const filename = parts.length ? parts[parts.length - 1] : copy.attachment;
+            copy.attachment = `${BASE}/api/support/file/${filename}`;
+          }
+        }
       }
       return copy;
     });
@@ -133,6 +153,7 @@ router.post('/upload', upload.single('file'), async (req, res) => {
   const ext = path.extname(req.file.originalname).toLowerCase();
   const isImage = ['.jpg', '.jpeg', '.png', '.webp', '.gif'].includes(ext);
   let thumbnailUrl = null;
+  const BASE = process.env.API_URL || (req.protocol + '://' + req.get('host')) || 'https://api.luxyield.com';
   // Generate thumbnail if image
   if (isImage && sharp) {
     const thumbName = req.file.filename + '_thumb.jpg';
@@ -142,7 +163,7 @@ router.post('/upload', upload.single('file'), async (req, res) => {
         .resize(200, 200, { fit: 'inside' })
         .jpeg({ quality: 80 })
         .toFile(thumbPath);
-      thumbnailUrl = `/uploads/support/${thumbName}`;
+      thumbnailUrl = `${BASE}/api/support/file/${thumbName}`;
     } catch (err) {
       console.error('Thumbnail generation failed:', err);
     }
@@ -155,7 +176,7 @@ router.post('/upload', upload.single('file'), async (req, res) => {
     if (err) {
       return res.status(500).json({ error: 'File not found after upload' });
     }
-    const fileUrl = `/uploads/support/${req.file.filename}`;
+    const fileUrl = `${BASE}/api/support/file/${req.file.filename}`;
     res.json({ fileUrl, thumbnailUrl, originalName: req.file.originalname });
   });
 });
@@ -216,6 +237,17 @@ if (io) {
     });
   });
 }
+
+// Serve support files with optional auth check
+router.get('/file/:filename', (req, res) => {
+  const filename = req.params.filename;
+  const filePath = path.join(__dirname, '../uploads/support', filename);
+  // TODO: add real auth check here (e.g., check JWT in headers)
+  fs.access(filePath, fs.constants.F_OK, (err) => {
+    if (err) return res.status(404).send('Not found');
+    res.sendFile(filePath);
+  });
+});
 
 return router;
 };
