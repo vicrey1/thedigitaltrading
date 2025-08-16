@@ -4,6 +4,7 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const User = require('../models/User');
+const sharp = require('sharp');
 
 module.exports = (io) => {
 // In-memory message store (replace with DB in production)
@@ -119,16 +120,33 @@ router.post('/message-seen', (req, res) => {
 });
 
 // Upload a file
-router.post('/upload', upload.single('file'), (req, res) => {
+router.post('/upload', upload.single('file'), async (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
   const filePath = path.join(__dirname, '../uploads/support', req.file.filename);
+  const ext = path.extname(req.file.originalname).toLowerCase();
+  const isImage = ['.jpg', '.jpeg', '.png', '.webp', '.gif'].includes(ext);
+  let thumbnailUrl = null;
+  // Generate thumbnail if image
+  if (isImage) {
+    const thumbName = req.file.filename + '_thumb.jpg';
+    const thumbPath = path.join(__dirname, '../uploads/support', thumbName);
+    try {
+      await sharp(filePath)
+        .resize(200, 200, { fit: 'inside' })
+        .jpeg({ quality: 80 })
+        .toFile(thumbPath);
+      thumbnailUrl = `/uploads/support/${thumbName}`;
+    } catch (err) {
+      console.error('Thumbnail generation failed:', err);
+    }
+  }
   // Check if file exists before returning URL
   fs.access(filePath, fs.constants.F_OK, (err) => {
     if (err) {
       return res.status(500).json({ error: 'File not found after upload' });
     }
     const fileUrl = `/uploads/support/${req.file.filename}`;
-    res.json({ fileUrl, originalName: req.file.originalname });
+    res.json({ fileUrl, thumbnailUrl, originalName: req.file.originalname });
   });
 });
 

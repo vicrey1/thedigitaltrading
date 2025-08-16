@@ -243,10 +243,13 @@ export default function SupportChat() {
       formData.append('file', file);
       try {
         const res = await axios.post('/api/support/upload', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
-        // Use the generated filename from backend (fileUrl)
         const fileUrl = res.data.fileUrl;
+        const thumbnailUrl = res.data.thumbnailUrl;
         // Send a message with both text and file if both are present
-        sendMessage(input.trim() || res.data.originalName, 'file', fileUrl.split('/').pop());
+        sendMessage(input.trim() || res.data.originalName, thumbnailUrl ? 'image' : 'file', {
+          file: fileUrl.split('/').pop(),
+          thumb: thumbnailUrl ? thumbnailUrl.split('/').pop() : null
+        });
       } catch (err) {
         alert('File upload failed: ' + (err.response?.data?.message || err.message));
         console.error('File upload error:', err);
@@ -363,13 +366,20 @@ export default function SupportChat() {
                   <div className={`w-full max-w-[90vw] sm:max-w-[70%] px-2 sm:px-3 py-2 rounded-2xl ${m.sender === 'user' ? 'bg-blue-100 text-blue-900 rounded-br-none font-semibold float-right' : 'bg-yellow-100 text-gray-900 rounded-bl-none float-left'} shadow-md border border-yellow-100 relative transition-all duration-300`}>
                     {/* File/image preview logic */}
                     {m.type === 'image' && m.attachment ? (
-                      <img src={`${UPLOADS_BASE_URL}/uploads/support/${m.attachment.split('/').pop()}`}
-                        alt={m.content}
-                        className="max-w-full sm:max-w-[200px] max-h-[200px] rounded mb-2 border cursor-zoom-in transition-transform duration-200 hover:scale-105"
-                        onError={e => { e.target.onerror=null; e.target.src=FALLBACK_IMG; }}
-                      />
+                      <>
+                        <img
+                          src={m.attachment.thumb ? `${UPLOADS_BASE_URL}/uploads/support/${m.attachment.thumb}` : `${UPLOADS_BASE_URL}/uploads/support/${m.attachment.file}`}
+                          alt={m.content}
+                          className="max-w-full sm:max-w-[200px] max-h-[200px] rounded mb-2 border cursor-zoom-in transition-transform duration-200 hover:scale-105"
+                          onClick={e => {
+                            if (m.attachment.file) window.open(`${UPLOADS_BASE_URL}/uploads/support/${m.attachment.file}`, '_blank');
+                          }}
+                          loading={m.attachment.thumb ? 'eager' : 'lazy'}
+                          onError={e => { e.target.onerror=null; e.target.src=FALLBACK_IMG; }}
+                        />
+                      </>
                     ) : m.type === 'file' && m.attachment ? (
-                      <a href={`${UPLOADS_BASE_URL}/uploads/support/${m.attachment.split('/').pop()}`}
+                      <a href={`${UPLOADS_BASE_URL}/uploads/support/${typeof m.attachment === 'string' ? m.attachment : m.attachment.file}`}
                         download={m.content}
                         className="text-blue-600 underline break-all" target="_blank" rel="noopener noreferrer">{m.content}</a>
                     ) : (

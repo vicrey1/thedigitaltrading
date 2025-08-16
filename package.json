@@ -5,6 +5,7 @@
     "lucide-react": "^0.537.0",
     "mongoose": "^8.16.5",
     "react-toastify": "^11.0.5",
+    "sharp": "^0.34.3",
     "socket.io-client": "^4.8.1",
     "tronweb": "^2.9.0"
   }

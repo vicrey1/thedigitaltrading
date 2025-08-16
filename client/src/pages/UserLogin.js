@@ -43,8 +43,8 @@ const UserLogin = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-dark p-4">
-      <div className="w-full max-w-md bg-gray-800 rounded-xl shadow-lg p-8">
+    <div className="min-h-screen flex items-center justify-center bg-dark p-2 sm:p-4">
+      <div className="w-full max-w-md bg-gray-800 rounded-xl shadow-lg p-4 sm:p-8">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gold mb-2">LUXYIELD</h1>
           <h2 className="text-xl text-white">User Login</h2>
@@ -53,7 +53,7 @@ const UserLogin = () => {
           <div className="mb-4 p-3 bg-red-500 bg-opacity-20 text-red-400 rounded-lg">{error}</div>
         )}
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
+          <div className="w-full">
             <label htmlFor="login-email" className="block text-gray-400 mb-2">Email</label>
             <input
               id="login-email"
@@ -67,7 +67,7 @@ const UserLogin = () => {
               autoComplete="email"
             />
           </div>
-          <div>
+          <div className="w-full">
             <label htmlFor="login-password" className="block text-gray-400 mb-2">Password</label>
             <input
               id="login-password"
@@ -86,7 +86,7 @@ const UserLogin = () => {
           </div>
           <button
             type="submit"
-            className="w-full bg-gold text-black font-bold py-3 rounded hover:bg-yellow-600 transition"
+            className="w-full bg-gold text-black font-bold py-3 rounded hover:bg-yellow-600 transition text-base sm:text-lg"
             disabled={loading}
           >
             {loading ? 'Logging in...' : 'Login'}
