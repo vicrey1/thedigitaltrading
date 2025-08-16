@@ -21,13 +21,35 @@ if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 
 // Get all messages
 router.get('/messages', (req, res) => {
-  res.json(messages);
+  try {
+    const BASE = process.env.API_URL || (req.protocol + '://' + req.get('host')) || 'https://api.luxyield.com';
+    const normalized = messages.map(m => {
+      const copy = { ...m };
+      if (copy.attachment) {
+        // If attachment contains a path, extract filename
+        const parts = copy.attachment.split('/');
+        const filename = parts.length ? parts[parts.length - 1] : copy.attachment;
+        copy.attachment = `${BASE}/uploads/support/${filename}`;
+      }
+      return copy;
+    });
+    res.json(normalized);
+  } catch (err) {
+    console.error('Error serving messages:', err);
+    res.status(500).json({ error: 'Failed to get messages' });
+  }
 });
 
 // Send a message
 router.post('/message', async (req, res) => {
   const { sender, userId, content, type, timestamp, attachment, name, username } = req.body;
-  let msg = { sender, content, type, timestamp, attachment, status: 'sent' };
+  // Normalize attachment to just filename if full path provided
+  let normalizedAttachment = attachment;
+  if (attachment && attachment.includes('/')) {
+    const parts = attachment.split('/');
+    normalizedAttachment = parts[parts.length - 1];
+  }
+  let msg = { sender, content, type, timestamp, attachment: normalizedAttachment, status: 'sent' };
 
   // If message is from user, ensure name, username, and avatar are included
   if (sender === 'user' && userId) {
