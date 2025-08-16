@@ -395,7 +395,8 @@ router.get('/file/:filename', async (req, res) => {
 
     console.log('[FILE-SERVE] Request for', filename, 'by', tokenInfo ? tokenInfo.id : 'unauthenticated', 'isAdmin:', tokenInfo ? tokenInfo.isAdmin : false);
 
-    const record = await SupportUpload.findOne({ filename });
+    // Try to find record by filename, but support older records that include the `support/` prefix
+    const record = await SupportUpload.findOne({ $or: [{ filename }, { filename: `support/${filename}` }] });
     if (!record) {
       console.warn('[FILE-SERVE] No SupportUpload record for', filename);
       return res.status(404).json({ error: 'Not found' });
@@ -420,11 +421,15 @@ router.get('/file/:filename', async (req, res) => {
     if (record.storage === 's3') {
       if (!s3) {
         console.warn('[FILE-SERVE] Record marked s3 but aws-sdk is not available; falling back to disk check for', filename);
-        // Try disk fallback if possible
-        const filePathFallback = path.join(__dirname, '..', 'uploads', filename);
-        if (fs.existsSync(filePathFallback)) {
-          console.log('[FILE-SERVE] Serving fallback disk file for', filename);
-          return res.sendFile(filePathFallback);
+        // Try disk fallback in both uploads/support and uploads
+        const fallbackPaths = [
+          path.join(__dirname, '..', 'uploads', 'support', filename),
+          path.join(__dirname, '..', 'uploads', filename)
+        ];
+        const fallbackExists = fallbackPaths.find(p => fs.existsSync(p));
+        if (fallbackExists) {
+          console.log('[FILE-SERVE] Serving fallback disk file for', filename, 'from', fallbackExists);
+          return res.sendFile(fallbackExists);
         }
         return res.status(503).json({ error: 'Storage temporarily unavailable' });
       }
@@ -435,10 +440,14 @@ router.get('/file/:filename', async (req, res) => {
       return res.redirect(url);
     }
 
-    // Disk fallback
-    const filePath = path.join(__dirname, '..', 'uploads', filename);
-    if (!fs.existsSync(filePath)) {
-      console.warn('[FILE-SERVE] File missing on disk:', filePath);
+    // Disk fallback - check both uploads/support and uploads root
+    const possiblePaths = [
+      path.join(__dirname, '..', 'uploads', 'support', filename),
+      path.join(__dirname, '..', 'uploads', filename)
+    ];
+    const filePath = possiblePaths.find(p => fs.existsSync(p));
+    if (!filePath) {
+      console.warn('[FILE-SERVE] File missing on disk (checked support/ and uploads/):', possiblePaths);
       return res.status(410).json({ error: 'File missing' });
     }
 
