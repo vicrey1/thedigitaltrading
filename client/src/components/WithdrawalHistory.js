@@ -10,26 +10,30 @@ const statusIcons = {
 };
 
 const WithdrawalHistory = ({ withdrawals }) => {
+  // Normalize the prop to an array to avoid runtime errors when the server
+  // returns undefined, null, or a single object.
+  const list = Array.isArray(withdrawals) ? withdrawals : [];
+
   return (
     <div className="glassmorphic p-6 rounded-xl">
       <h3 className="text-xl font-bold mb-4">Recent Withdrawals</h3>
-      {withdrawals.length === 0 ? (
+      {list.length === 0 ? (
         <p className="text-gray-400">No withdrawal history</p>
       ) : (
         <div className="space-y-4">
-          {withdrawals.map((withdrawal) => (
-            <div key={withdrawal.id} className="flex justify-between items-center p-3 border-b border-gray-800">
+          {list.map((withdrawal) => (
+            <div key={withdrawal.id || withdrawal._id || Math.random()} className="flex justify-between items-center p-3 border-b border-gray-800">
               <div className="flex items-center">
                 <div className="mr-4">
                   <FiDollarSign className="text-gold" size={20} />
                 </div>
                 <div>
-                  <p className="font-medium">${Math.abs(withdrawal.amount).toFixed(2)}</p>
+                  <p className="font-medium">${Math.abs(withdrawal.amount || 0).toFixed(2)}</p>
                   <p className={`text-sm ${withdrawal.type === 'roi' ? 'text-purple-500 font-semibold' : 'text-gray-400'}`}>
                     {withdrawal.type === 'roi' ? 'ROI Withdrawal' : `Withdrawal to ${withdrawal.walletAddress || 'DEFAULT_ADDRESS'}`}
                   </p>
                   <p className="text-sm text-gray-400">
-                    {new Date(withdrawal.date).toLocaleDateString()} • {withdrawal.network}
+                    {withdrawal.date ? new Date(withdrawal.date).toLocaleDateString() : ''} • {withdrawal.network || ''}
                   </p>
                 </div>
               </div>
