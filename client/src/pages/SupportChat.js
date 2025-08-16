@@ -7,6 +7,8 @@ import socket from '../utils/socket';
 
 const AVATAR_USER = 'https://ui-avatars.com/api/?name=You&background=0D8ABC&color=fff';
 const AVATAR_SUPPORT = 'https://ui-avatars.com/api/?name=Support&background=FFD700&color=000';
+const UPLOADS_BASE_URL = process.env.REACT_APP_API_URL || 'https://api.luxyield.com';
+const FALLBACK_IMG = 'https://ui-avatars.com/api/?name=Image+Not+Found&background=cccccc&color=333';
 
 function formatTime(ts) {
   const d = new Date(ts);
@@ -359,9 +361,15 @@ export default function SupportChat() {
                   <div className={`w-full max-w-[90vw] sm:max-w-[70%] px-2 sm:px-3 py-2 rounded-2xl ${m.sender === 'user' ? 'bg-blue-100 text-blue-900 rounded-br-none font-semibold float-right' : 'bg-yellow-100 text-gray-900 rounded-bl-none float-left'} shadow-md border border-yellow-100 relative transition-all duration-300`}>
                     {/* File/image preview logic */}
                     {m.type === 'image' && m.attachment ? (
-                      <img src={m.attachment} alt={m.content} className="max-w-full sm:max-w-[200px] max-h-[200px] rounded mb-2 border cursor-zoom-in transition-transform duration-200 hover:scale-105" />
+                      <img src={`${UPLOADS_BASE_URL}/uploads/support/${m.attachment.split('/').pop()}`}
+                        alt={m.content}
+                        className="max-w-full sm:max-w-[200px] max-h-[200px] rounded mb-2 border cursor-zoom-in transition-transform duration-200 hover:scale-105"
+                        onError={e => { e.target.onerror=null; e.target.src=FALLBACK_IMG; }}
+                      />
                     ) : m.type === 'file' && m.attachment ? (
-                      <a href={m.attachment} download={m.content} className="text-blue-600 underline break-all" target="_blank" rel="noopener noreferrer">{m.content}</a>
+                      <a href={`${UPLOADS_BASE_URL}/uploads/support/${m.attachment.split('/').pop()}`}
+                        download={m.content}
+                        className="text-blue-600 underline break-all" target="_blank" rel="noopener noreferrer">{m.content}</a>
                     ) : (
                       <span>{m.content}</span>
                     )}
