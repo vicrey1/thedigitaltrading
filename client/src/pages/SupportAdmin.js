@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import axios from 'axios';
 import socket from '../utils/socket';
@@ -22,6 +21,58 @@ export default function SupportAdmin() {
   const chatEndRef = useRef(null);
   const lastMessageRef = useRef();
   const chatContainerRef = useRef();
+
+  // Authenticated blob cache for admin to preview protected thumbnails/files
+  const [authBlobCache, setAuthBlobCache] = useState({});
+  const authBlobCacheRef = useRef({});
+
+  const UPLOADS_BASE_URL = process.env.REACT_APP_API_URL || 'https://api.luxyield.com';
+
+  const fetchProtectedFileAsBlobUrl = async (url, cacheKey) => {
+    if (!url) return null;
+    if (authBlobCacheRef.current[cacheKey]) return authBlobCacheRef.current[cacheKey];
+    try {
+      const token = localStorage.getItem('adminToken') || localStorage.getItem('token');
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      const res = await fetch(url, { headers });
+      if (!res.ok) throw new Error('Failed to fetch protected file');
+      const blob = await res.blob();
+      const objUrl = URL.createObjectURL(blob);
+      authBlobCacheRef.current[cacheKey] = objUrl;
+      setAuthBlobCache({ ...authBlobCacheRef.current });
+      return objUrl;
+    } catch (e) {
+      console.warn('[SUPPORT_ADMIN] Failed to fetch protected file', e && e.message);
+      return null;
+    }
+  };
+
+  // Prefetch thumbnails for messages when they arrive
+  useEffect(() => {
+    (async () => {
+      const candidates = messages.filter(m => m.attachment && (typeof m.attachment === 'object' ? (m.attachment.thumbUrl || m.attachment.url || m.attachment.file) : m.attachment));
+      for (const m of candidates) {
+        try {
+          const att = m.attachment;
+          let maybeUrl = null;
+          if (typeof att === 'object') {
+            maybeUrl = att.thumbUrl || att.url || (att.file ? `${UPLOADS_BASE_URL}/api/support/file/${att.file}` : null);
+          } else if (typeof att === 'string') {
+            maybeUrl = att;
+          }
+          if (!maybeUrl) continue;
+          if (maybeUrl.includes('/api/support/file')) {
+            const key = (typeof att === 'object' && att.file) ? att.file : maybeUrl.split('/').pop();
+            const thumbKey = (typeof att === 'object' && att.thumb) ? (att.thumb + '_thumb') : key;
+            if (!authBlobCacheRef.current[thumbKey]) {
+              fetchProtectedFileAsBlobUrl(maybeUrl, thumbKey).catch(()=>{});
+            }
+          }
+        } catch (e) { /* ignore per-item errors */ }
+      }
+    })();
+  }, [messages]);
+
   // Fetch all users for search/select
   useEffect(() => {
     async function fetchAllUsers() {
@@ -320,13 +371,37 @@ export default function SupportAdmin() {
               >
                 {m.sender === 'support' && <img src={AVATAR_ADMIN} alt="Support" className="w-9 h-9 rounded-full ml-2 border-2 border-yellow-400" />}
                 <div className={`max-w-[70%] px-4 py-2 rounded-2xl ${m.sender === 'support' ? 'bg-yellow-200 text-gray-900 rounded-br-none font-semibold' : 'bg-blue-100 text-blue-900 rounded-bl-none font-semibold'} shadow-md relative`}>
-                  {m.type === 'file' && m.attachment && m.attachment.match(/\.(jpg|jpeg|png|gif)$/i) ? (
-                    <img src={m.attachment} alt={m.content} className="max-w-[200px] max-h-[200px] rounded mb-2 border" />
-                  ) : m.type === 'file' && m.attachment ? (
-                    <a href={m.attachment} download={m.content} className="text-blue-600 underline break-all" target="_blank" rel="noopener noreferrer">{m.content}</a>
-                  ) : (
-                    <span>{m.content}</span>
-                  )}
+                  {(() => {
+                    // Support attachment as object (file/thumb/url/thumbUrl) or legacy string URL
+                    if (m.type === 'file' && m.attachment) {
+                      const att = m.attachment;
+                      // If attachment is object and contains image types
+                      if (typeof att === 'object') {
+                        const isImage = (att.file && att.file.match && att.file.match(/\.(jpg|jpeg|png|gif|webp)$/i)) || (att.url && att.url.match && att.url.match(/\.(jpg|jpeg|png|gif|webp)$/i)) || (att.thumbUrl || att.thumb);
+                        if (isImage) {
+                          const src = (
+                            // prefer cached blob for thumb
+                            (att.file && authBlobCache[att.file + '_thumb']) ||
+                            (att.thumb && authBlobCache[att.thumb + '_thumb']) ||
+                            att.thumbUrl ||
+                            att.url ||
+                            (att.file ? `${UPLOADS_BASE_URL}/api/support/file/${att.file}` : null)
+                          );
+                          return <img src={src || ''} alt={m.content} className="max-w-[200px] max-h-[200px] rounded mb-2 border" />;
+                        }
+                        // Non-image file: render download link (use url if available or api endpoint)
+                        const href = att.url || (att.file ? `${UPLOADS_BASE_URL}/api/support/file/${att.file}` : '#');
+                        return <a href={href} download={m.content} className="text-blue-600 underline break-all" target="_blank" rel="noopener noreferrer">{m.content}</a>;
+                      }
+                      // Legacy string attachment: treat as URL or filename
+                      if (typeof m.attachment === 'string') {
+                        const isImg = m.attachment.match(/\.(jpg|jpeg|png|gif|webp)$/i);
+                        if (isImg) return <img src={m.attachment} alt={m.content} className="max-w-[200px] max-h-[200px] rounded mb-2 border" />;
+                        return <a href={m.attachment} download={m.content} className="text-blue-600 underline break-all" target="_blank" rel="noopener noreferrer">{m.content}</a>;
+                      }
+                    }
+                    return <span>{m.content}</span>;
+                  })()}
                   <div className="text-xs text-gray-700 mt-1 flex justify-between items-center">
                     <span>{m.sender === 'user' ? 'User' : 'Support'}</span>
                     <span className="flex items-center gap-1">
