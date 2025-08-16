@@ -43,15 +43,17 @@ const Portfolio = ({ adminView = false, portfolioData: adminPortfolioData }) => 
       try {
         const res = await axios.get(PLANS_API);
         setInvestmentPlans(res.data);
-        // Build planConfig for easy lookup
+        // Build planConfig for easy lookup (normalize keys to lowercase and accept multiple ROI field names)
         const configObj = {};
         res.data.forEach(plan => {
-          configObj[plan.name] = {
-            roi: plan.percentReturn,
-            duration: plan.durationDays,
-            min: plan.minInvestment,
-            max: plan.maxInvestment,
-            color: plan.color || '#D4AF37'
+          const nameKey = (plan.name || '').trim().toLowerCase();
+          configObj[nameKey] = {
+            roi: plan.percentReturn ?? plan.roi ?? plan.percent ?? plan.percent_return ?? 0,
+            duration: plan.durationDays ?? plan.duration,
+            min: plan.minInvestment ?? plan.min,
+            max: plan.maxInvestment ?? plan.max,
+            color: plan.color || '#D4AF37',
+            rawName: plan.name
           };
         });
         setPlanConfig(configObj);
@@ -205,6 +207,13 @@ const Portfolio = ({ adminView = false, portfolioData: adminPortfolioData }) => 
     };
   }
 
+  // Helper to find plan config by name (case-insensitive)
+  function findPlanConfigByName(name) {
+    if (!name || typeof name !== 'string') return null;
+    const key = name.trim().toLowerCase();
+    return planConfig[key] || null;
+  }
+
   // Check if user has any active investment
   const hasActiveInvestment = filteredInvestments.some(inv => inv.status === 'active');
 
@@ -262,12 +271,8 @@ const Portfolio = ({ adminView = false, portfolioData: adminPortfolioData }) => 
               <h2 className="text-2xl font-bold">
                 {(() => {
                   if (!activeInvestment) return '--';
-                  const planKey = (activeInvestment.planName || '').trim();
-                  console.log('Active investment planName:', planKey);
-                  const planConfigKey = Object.keys(planConfig).find(
-                    key => key.toLowerCase() === planKey.toLowerCase()
-                  );
-                  return planConfigKey ? planConfig[planConfigKey].roi + '%' : '--';
+                  const cfg = findPlanConfigByName(activeInvestment.planName);
+                  return cfg ? (typeof cfg.roi === 'number' ? `${cfg.roi}%` : `${cfg.roi}`) : '--';
                 })()}
               </h2>
             </div>
@@ -430,11 +435,8 @@ const Portfolio = ({ adminView = false, portfolioData: adminPortfolioData }) => 
                     <td className="py-4 text-right font-mono">${Number(value).toLocaleString(undefined, {maximumFractionDigits: 2})}</td>
                     <td className="py-4 text-right font-mono text-gold">
                       {(() => {
-                        const planKey = (investment.planName || '').trim();
-                        const planConfigKey = Object.keys(planConfig).find(
-                          key => key.toLowerCase() === planKey.toLowerCase()
-                        );
-                        return planConfigKey ? planConfig[planConfigKey].roi + '%' : '--';
+                        const cfg = findPlanConfigByName(investment.planName);
+                        return cfg ? (typeof cfg.roi === 'number' ? `${cfg.roi}%` : `${cfg.roi}`) : '--';
                       })()}
                     </td>
                     <td className="py-4">
@@ -477,11 +479,8 @@ const Portfolio = ({ adminView = false, portfolioData: adminPortfolioData }) => 
                 <div className="mb-1 text-sm"><span className="font-bold">Invested:</span> ${investment.initialAmount.toLocaleString()}</div>
                 <div className="mb-1 text-sm"><span className="font-bold">Current Value:</span> ${Number(value).toLocaleString(undefined, {maximumFractionDigits: 2})}</div>
                 <div className="mb-1 text-sm"><span className="font-bold">ROI (Expected):</span> {(() => {
-                  const planKey = (investment.planName || '').trim();
-                  const planConfigKey = Object.keys(planConfig).find(
-                    key => key.toLowerCase() === planKey.toLowerCase()
-                  );
-                  return planConfigKey ? planConfig[planConfigKey].roi + '%' : '--';
+                  const cfg = findPlanConfigByName(investment.planName);
+                  return cfg ? (typeof cfg.roi === 'number' ? `${cfg.roi}%` : `${cfg.roi}`) : '--';
                 })()}</div>
                 <div className="mb-1 text-sm"><span className="font-bold">Duration:</span> {investment.startDate ? new Date(investment.startDate).toLocaleDateString() : ''} - {investment.endDate ? new Date(investment.endDate).toLocaleDateString() : ''}</div>
                 <button 
