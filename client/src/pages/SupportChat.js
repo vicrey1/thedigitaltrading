@@ -51,8 +51,13 @@ export default function SupportChat() {
     const controller = new AbortController();
     uploadControllers.current[id] = controller;
 
+    // Attach auth token so server recognizes the user and doesn't return 401 which triggers global logout
+    const token = localStorage.getItem('token');
+    const headers = { 'Content-Type': 'multipart/form-data' };
+    if (token) headers.Authorization = `Bearer ${token}`;
+
     return axios.post('/api/support/upload', form, {
-      headers: { 'Content-Type': 'multipart/form-data' },
+      headers,
       onUploadProgress: (evt) => {
         const pct = Math.round((evt.loaded * 100) / (evt.total || 1));
         if (onProgress) onProgress(pct);
@@ -60,7 +65,7 @@ export default function SupportChat() {
       signal: controller.signal
     }).then(res => ({ success: true, data: res.data }))
       .catch(err => {
-        if (err.name === 'CanceledError' || err.message === 'canceled') {
+        if (err.name === 'CanceledError' || err.message === 'canceled' || err.name === 'AbortError') {
           return { success: false, canceled: true, error: 'Canceled' };
         }
         return { success: false, error: err.response?.data?.message || err.message };
