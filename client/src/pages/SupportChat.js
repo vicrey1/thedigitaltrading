@@ -35,6 +35,9 @@ export default function SupportChat() {
   // New: upload queue and map of abort controllers for cancel
   const [uploadQueue, setUploadQueue] = useState([]); // { id, file, progress, status, error }
   const uploadControllers = useRef({});
+  // Cache for authenticated blob URLs to display protected images/files in <img>
+  const [authBlobCache, setAuthBlobCache] = useState({}); // key -> objectURL
+  const authBlobCacheRef = useRef({});
 
   // New: image modal for viewing full images
   const [imageModal, setImageModal] = useState(null); // { url, alt }
@@ -481,6 +484,52 @@ export default function SupportChat() {
     setFile(null);
   }
 
+  // Helper to fetch a protected URL (our /api/support/file/* endpoints) with Authorization and cache blob URL
+  const fetchProtectedFileAsBlobUrl = useCallback(async (url, cacheKey) => {
+    if (!url) return null;
+    // Return cached
+    if (authBlobCacheRef.current[cacheKey]) return authBlobCacheRef.current[cacheKey];
+    try {
+      const token = localStorage.getItem('token');
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      const res = await fetch(url, { headers });
+      if (!res.ok) throw new Error('Failed to fetch protected file');
+      const blob = await res.blob();
+      const objUrl = URL.createObjectURL(blob);
+      authBlobCacheRef.current[cacheKey] = objUrl;
+      // Trigger state update once
+      setAuthBlobCache({...authBlobCacheRef.current});
+      return objUrl;
+    } catch (err) {
+      console.error('Failed to fetch protected file:', err);
+      return null;
+    }
+  }, []);
+
+  // When messages change, prefetch thumbnails for protected attachments
+  useEffect(() => {
+    (async () => {
+      const candidates = messages.filter(m => m.attachment && (m.attachment.thumbUrl || m.attachment.url || m.attachment.file));
+      for (const m of candidates) {
+        try {
+          const att = m.attachment;
+          // Determine the URL to fetch (thumb preferred)
+          const maybeUrl = att.thumbUrl ? att.thumbUrl : (att.url ? att.url : (att.file ? `${UPLOADS_BASE_URL}/api/support/file/${att.file}` : null));
+          if (!maybeUrl) continue;
+          if (maybeUrl.includes('/api/support/file')) {
+            // Use file name as cache key if available
+            const key = att.file ? att.file : (maybeUrl.split('/').pop());
+            // For thumbs, prefer a _thumb suffix key
+            const thumbKey = att.thumbUrl && att.thumbUrl.includes('_thumb') ? (key + '_thumb') : key;
+            if (!authBlobCacheRef.current[thumbKey]) {
+              fetchProtectedFileAsBlobUrl(maybeUrl, thumbKey).catch(()=>{});
+            }
+          }
+        } catch (e) { /* ignore per-item errors */ }
+      }
+    })();
+  }, [messages, fetchProtectedFileAsBlobUrl]);
+
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-yellow-50 via-blue-50 to-white px-0 sm:px-4 md:px-8 overflow-x-hidden">
       <div className="w-full max-w-full sm:max-w-2xl md:max-w-3xl lg:max-w-4xl flex flex-col min-h-[80vh] max-h-[98vh] rounded-2xl shadow-2xl border border-yellow-200 bg-white overflow-hidden">
@@ -527,12 +576,17 @@ export default function SupportChat() {
                     {m.type === 'image' && m.attachment ? (
                       <>
                         <img
-                          src={m.attachment.thumbUrl || (m.attachment.url ? m.attachment.url : `${UPLOADS_BASE_URL}/api/support/file/${m.attachment.file}`)}
-                          alt={m.content}
-                          className="max-w-full sm:max-w-[300px] max-h-[300px] rounded mb-2 border cursor-zoom-in transition-transform duration-200 hover:scale-105"
-                          onClick={() => openImage(m)}
-                          loading="lazy"
-                          onError={e => { e.target.onerror=null; e.target.src=FALLBACK_IMG; }}
+                          src={
+                            // Prefer cached authenticated blob URL if available
+                            (m.attachment && m.attachment.file && authBlobCache[m.attachment.file + '_thumb']) ||
+                            (m.attachment && m.attachment.file && authBlobCache[m.attachment.file]) ||
+                            m.attachment?.thumbUrl || (m.attachment?.url ? m.attachment.url : (m.attachment?.file ? `${UPLOADS_BASE_URL}/api/support/file/${m.attachment.file}` : ''))
+                          }
+                           alt={m.content}
+                           className="max-w-full sm:max-w-[300px] max-h-[300px] rounded mb-2 border cursor-zoom-in transition-transform duration-200 hover:scale-105"
+                           onClick={() => openImage(m)}
+                           loading="lazy"
+                           onError={e => { e.target.onerror=null; e.target.src=FALLBACK_IMG; }}
                         />
                         {m.attachment?.url && (
                           <div className="text-xs text-gray-500">Tap image to view full size</div>
