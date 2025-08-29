@@ -57,6 +57,8 @@ import Statements from './pages/Statements';
 import SupportChat from './pages/SupportChat';
 import VerifyEmail from './pages/VerifyEmail';
 import InviteFriends from './pages/InviteFriends';
+import VerifySuccess from './pages/VerifySuccess';
+import VerifyFailed from './pages/VerifyFailed';
 
 function AppLayout({ sidebarCollapsed, setSidebarCollapsed, hasNewAnnouncement, children }) {
   console.log('AppLayout rendered');
@@ -135,6 +137,8 @@ function App() {
                   <Route path="/forgot-password" element={<ForgotPassword />} />
                   <Route path="/reset-password/:token" element={<ResetPassword />} />
                   <Route path="/verify-email/:token" element={<VerifyEmail />} />
+                  <Route path="/verify-success" element={<VerifySuccess />} />
+                  <Route path="/verify-failed" element={<VerifyFailed />} />
                   {/* Dynamic Fund, Blog, Event Detail Routes */}
                   <Route path="/funds/:slug" element={<FundDetailPage />} />
                   <Route path="/blog/:slug" element={<BlogDetailPage />} />

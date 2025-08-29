@@ -496,13 +496,18 @@ router.get('/verify-email/:token', async (req, res) => {
     const { token } = req.params;
     const pending = await PendingUser.findOne({ emailVerificationToken: token, emailVerificationTokenExpiry: { $gt: Date.now() } });
     if (!pending) {
-      return res.status(400).send('Invalid or expired verification link.');
+      // Redirect to frontend failure page when token is invalid/expired
+      const frontendFail = (process.env.FRONTEND_URL || `${req.protocol}://${req.get('host')}`) + '/verify-failed?reason=expired';
+      console.log('[EMAIL VERIFICATION] Invalid or expired token:', token, 'Redirecting to:', frontendFail);
+      return res.redirect(frontendFail);
     }
     // Check again if user already exists
     let user = await User.findOne({ email: pending.email });
     if (user) {
       await PendingUser.deleteOne({ _id: pending._id });
-      return res.status(400).send('User already exists.');
+      const frontendFail = (process.env.FRONTEND_URL || `${req.protocol}://${req.get('host')}`) + `/verify-failed?reason=exists&email=${encodeURIComponent(pending.email)}`;
+      console.log('[EMAIL VERIFICATION] User already exists for pending:', pending.email, 'Redirecting to:', frontendFail);
+      return res.redirect(frontendFail);
     }
     // Generate wallets (same as before)
     const registrationData = pending.registrationData;
@@ -559,11 +564,15 @@ router.get('/verify-email/:token', async (req, res) => {
     const newUser = new User(userData);
     await newUser.save();
     await PendingUser.deleteOne({ _id: pending._id });
-    // Optionally redirect to frontend success page
-    res.send('Email verified and account created! You can now log in.');
+    // Redirect users to a friendly frontend success page with the verified email (no tokens in URL)
+    const frontendSuccess = (process.env.FRONTEND_URL || `${req.protocol}://${req.get('host')}`) + `/verify-success?email=${encodeURIComponent(pending.email)}`;
+    console.log('[EMAIL VERIFICATION] Token verification succeeded — redirecting user to:', frontendSuccess);
+    return res.redirect(frontendSuccess);
   } catch (err) {
     console.error('Email verification error:', err);
-    res.status(500).send('Server error');
+    // On server error redirect to fail page with generic reason
+    const frontendFail = (process.env.FRONTEND_URL || `${req.protocol}://${req.get('host')}`) + '/verify-failed?reason=server';
+    return res.redirect(frontendFail);
   }
 });
 
