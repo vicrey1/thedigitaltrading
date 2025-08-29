@@ -204,8 +204,11 @@ router.post('/register', async (req, res) => {
       });
       console.log('Created PendingUser:', newPending);
     }
-    const verifyUrl = `${process.env.FRONTEND_URL}/verify-email/${emailToken}`;
-    console.log('[EMAIL VERIFICATION] Registration flow: email:', email, 'Token:', emailToken, 'Expiry:', new Date(expiry).toISOString());
+    // Determine a reliable backend verification URL (prefer env, fall back to request host)
+    const backendBase = process.env.BACKEND_URL || process.env.API_BASE_URL || `${req.protocol}://${req.get('host')}`;
+    const verifyUrlBackend = `${backendBase}/api/auth/verify-email/${emailToken}`;
+    const verifyUrlFrontend = `${process.env.FRONTEND_URL}/verify-email/${emailToken}`;
+    console.log('[EMAIL VERIFICATION] Registration flow: email:', email, 'Token:', emailToken, 'Expiry:', new Date(expiry).toISOString(), 'Backend verify URL:', verifyUrlBackend, 'Frontend verify URL:', verifyUrlFrontend);
     try {
       await sendMail({
         to: email,
@@ -213,7 +216,10 @@ router.post('/register', async (req, res) => {
         html: `<div style="font-family:sans-serif;max-width:480px;margin:auto;padding:32px 24px;background:#18181b;border-radius:16px;color:#fff;text-align:center;">
           <h2 style="color:#FFD700;">Verify Your Email</h2>
           <p style="margin:24px 0;">Click the button below to verify your email address and complete registration, or use the OTP code below.</p>
-          <a href="${verifyUrl}" style="display:inline-block;padding:12px 32px;background:#FFD700;color:#18181b;font-weight:bold;border-radius:8px;text-decoration:none;margin:16px 0;">Verify Email</a>
+          <!-- Primary: direct link to backend verification endpoint to avoid CORS/frontend issues -->
+          <a href="${verifyUrlBackend}" style="display:inline-block;padding:12px 32px;background:#FFD700;color:#18181b;font-weight:bold;border-radius:8px;text-decoration:none;margin:16px 0;">Verify Email</a>
+          <p style="margin:8px 0;color:#aaa;font-size:12px;">If the button does not work, open this frontend URL in your browser:</p>
+          <a href="${verifyUrlFrontend}" style="display:inline-block;padding:8px 16px;background:#444;color:#fff;border-radius:6px;text-decoration:none;margin:8px 0;font-size:13px;">Open frontend verification page</a>
           <p style="margin:24px 0;font-size:18px;">Or enter this OTP code: <span style="font-weight:bold;letter-spacing:2px;">${emailOtp}</span></p>
           <p style="margin-top:24px;font-size:13px;color:#aaa;">If you did not create an account, you can ignore this email.</p>
         </div>`
