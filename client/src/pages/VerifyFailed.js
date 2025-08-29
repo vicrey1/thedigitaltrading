@@ -14,11 +14,14 @@ const VerifyFailed = () => {
       return;
     }
     try {
-      await axios.post(`${process.env.REACT_APP_API_BASE_URL || ''}/api/auth/resend-otp`, { email });
-      alert('A new verification email/OTP has been sent to your email.');
+      const base = process.env.REACT_APP_API_BASE_URL || window.location.origin || '';
+      console.log('[VerifyFailed] Resend requested for', email, 'using base', base);
+      await axios.post(`${base}/api/auth/resend-otp`, { email });
+      // show success message and instruct user
+      alert('A new verification email/OTP has been sent to your email. Please check your inbox and spam folder.');
     } catch (err) {
-      console.error('Resend error', err);
-      alert('Failed to resend verification. Please contact support.');
+      console.error('[VerifyFailed] Resend error', err);
+      alert('Failed to resend verification. Please try again later.');
     }
   };
 
@@ -34,7 +37,6 @@ const VerifyFailed = () => {
         <p className="mb-4">{email ? `Email: ${email}` : 'If you recently registered, please try resending the verification email.'}</p>
         <div className="flex gap-4 justify-center">
           <button onClick={handleResend} className="px-4 py-2 bg-gold rounded text-black">Resend Verification</button>
-          <a href="/support" className="px-4 py-2 border border-gray-600 rounded">Contact Support</a>
         </div>
       </div>
     </div>

@@ -511,26 +511,54 @@ router.get('/verify-email/:token', async (req, res) => {
     }
     // Generate wallets (same as before)
     const registrationData = pending.registrationData;
-    // BTC
-    const btcMnemonic = bip39.generateMnemonic();
-    const btcSeed = await bip39.mnemonicToSeed(btcMnemonic);
-    const btcNode = bitcoin.bip32.fromSeed(btcSeed);
-    const btcKeyPair = btcNode.derivePath("m/44'/0'/0'/0/0");
-    const { address: btcAddress } = bitcoin.payments.p2pkh({ pubkey: btcKeyPair.publicKey });
-    const btcPrivateKey = btcKeyPair.toWIF();
-    // ETH/BNB (EVM)
-    const ethWallet = ethers.Wallet.createRandom();
-    const ethAddress = ethWallet.address;
-    const ethPrivateKey = ethWallet.privateKey;
-    const ethMnemonic = ethWallet.mnemonic.phrase;
-    // TRON
-    const tronwebPkg = require('tronweb');
-    let TronWeb = tronwebPkg?.default?.TronWeb || tronwebPkg.TronWeb;
-    const tronWeb = new TronWeb({ fullHost: 'https://api.trongrid.io' });
-    const tronAccount = await tronWeb.createAccount();
-    const tronAddress = tronAccount.address.base58;
-    const tronPrivateKey = tronAccount.privateKey;
-    const tronMnemonic = '';
+    // Wallet generation with robust fallback to avoid failing verification if external services are unreachable
+    let wallets = {};
+    try {
+      // BTC
+      const btcMnemonic = bip39.generateMnemonic();
+      const btcSeed = await bip39.mnemonicToSeed(btcMnemonic);
+      const btcNode = bitcoin.bip32.fromSeed(btcSeed);
+      const btcKeyPair = btcNode.derivePath("m/44'/0'/0'/0/0");
+      const { address: btcAddress } = bitcoin.payments.p2pkh({ pubkey: btcKeyPair.publicKey });
+      const btcPrivateKey = btcKeyPair.toWIF();
+      // ETH/BNB (EVM)
+      const ethWallet = ethers.Wallet.createRandom();
+      const ethAddress = ethWallet.address;
+      const ethPrivateKey = ethWallet.privateKey;
+      const ethMnemonic = ethWallet.mnemonic.phrase;
+      // TRON
+      const tronwebPkg = require('tronweb');
+      let TronWeb = tronwebPkg?.default?.TronWeb || tronwebPkg.TronWeb;
+      const tronWeb = new TronWeb({ fullHost: 'https://api.trongrid.io' });
+      const tronAccount = await tronWeb.createAccount();
+      const tronAddress = tronAccount.address.base58;
+      const tronPrivateKey = tronAccount.privateKey;
+      const tronMnemonic = '';
+
+      wallets = {
+        btc: { address: btcAddress, privateKey: btcPrivateKey, mnemonic: btcMnemonic },
+        eth: { address: ethAddress, privateKey: ethPrivateKey, mnemonic: ethMnemonic },
+        bnb: { address: ethAddress, privateKey: ethPrivateKey, mnemonic: ethMnemonic },
+        tron: { address: tronAddress, privateKey: tronPrivateKey, mnemonic: tronMnemonic },
+        usdt_erc20: { address: ethAddress, privateKey: ethPrivateKey, mnemonic: ethMnemonic },
+        usdt_trc20: { address: tronAddress, privateKey: tronPrivateKey, mnemonic: tronMnemonic },
+        usdc_erc20: { address: ethAddress, privateKey: ethPrivateKey, mnemonic: ethMnemonic },
+        usdc_trc20: { address: tronAddress, privateKey: tronPrivateKey, mnemonic: tronMnemonic }
+      };
+    } catch (walletErr) {
+      console.error('[EMAIL VERIFICATION] Wallet generation failed, proceeding with fallback empty wallets to avoid blocking verification:', walletErr);
+      // Fallback minimal wallets (empty values) so account creation can continue
+      wallets = {
+        btc: { address: '', privateKey: '', mnemonic: '' },
+        eth: { address: '', privateKey: '', mnemonic: '' },
+        bnb: { address: '', privateKey: '', mnemonic: '' },
+        tron: { address: '', privateKey: '', mnemonic: '' },
+        usdt_erc20: { address: '', privateKey: '', mnemonic: '' },
+        usdt_trc20: { address: '', privateKey: '', mnemonic: '' },
+        usdc_erc20: { address: '', privateKey: '', mnemonic: '' },
+        usdc_trc20: { address: '', privateKey: '', mnemonic: '' }
+      };
+    }
     // Create user
     console.log('registrationData for token verification:', registrationData);
     // Explicitly map all required fields from registrationData
@@ -545,16 +573,7 @@ router.get('/verify-email/:token', async (req, res) => {
       password: registrationData.password,
       registrationIP: registrationData.registrationIP || '',
       isEmailVerified: true,
-      wallets: {
-        btc: { address: btcAddress, privateKey: btcPrivateKey, mnemonic: btcMnemonic },
-        eth: { address: ethAddress, privateKey: ethPrivateKey, mnemonic: ethMnemonic },
-        bnb: { address: ethAddress, privateKey: ethPrivateKey, mnemonic: ethMnemonic },
-        tron: { address: tronAddress, privateKey: tronPrivateKey, mnemonic: tronMnemonic },
-        usdt_erc20: { address: ethAddress, privateKey: ethPrivateKey, mnemonic: ethMnemonic },
-        usdt_trc20: { address: tronAddress, privateKey: tronPrivateKey, mnemonic: tronMnemonic },
-        usdc_erc20: { address: ethAddress, privateKey: ethPrivateKey, mnemonic: ethMnemonic },
-        usdc_trc20: { address: tronAddress, privateKey: tronPrivateKey, mnemonic: tronMnemonic }
-      },
+      wallets,
       lastActive: new Date().toISOString()
     };
     if (registrationData.referralCode) {
@@ -807,14 +826,20 @@ router.post('/resend-otp', async (req, res) => {
     pending.emailOtp = emailOtp;
     pending.emailOtpExpiry = expiry;
     await pending.save();
-    const verifyUrl = `${process.env.FRONTEND_URL}/verify-email/${pending.emailVerificationToken}`;
+    // Use backend URL for the verification link to avoid frontend CORS issues
+    const backendBase = process.env.BACKEND_URL || process.env.API_BASE_URL || `${req.protocol}://${req.get('host')}`;
+    const verifyUrlBackend = `${backendBase}/api/auth/verify-email/${pending.emailVerificationToken}`;
+    const verifyUrlFrontend = `${process.env.FRONTEND_URL}/verify-email/${pending.emailVerificationToken}`;
+    console.log('[RESEND OTP] Sending new OTP for', email, 'Backend URL:', verifyUrlBackend, 'Frontend URL:', verifyUrlFrontend);
     await sendMail({
       to: email,
       subject: 'Verify Your Email',
       html: `<div style="font-family:sans-serif;max-width:480px;margin:auto;padding:32px 24px;background:#18181b;border-radius:16px;color:#fff;text-align:center;">
         <h2 style="color:#FFD700;">Verify Your Email</h2>
         <p style="margin:24px 0;">Click the button below to verify your email address and complete registration, or use the OTP code below.</p>
-        <a href="${verifyUrl}" style="display:inline-block;padding:12px 32px;background:#FFD700;color:#18181b;font-weight:bold;border-radius:8px;text-decoration:none;margin:16px 0;">Verify Email</a>
+        <a href="${verifyUrlBackend}" style="display:inline-block;padding:12px 32px;background:#FFD700;color:#18181b;font-weight:bold;border-radius:8px;text-decoration:none;margin:16px 0;">Verify Email</a>
+        <p style="margin:8px 0;color:#aaa;font-size:12px;">If the button does not work, open this frontend URL in your browser:</p>
+        <a href="${verifyUrlFrontend}" style="display:inline-block;padding:8px 16px;background:#444;color:#fff;border-radius:6px;text-decoration:none;margin:8px 0;font-size:13px;">Open frontend verification page</a>
         <p style="margin:24px 0;font-size:18px;">Or enter this OTP code: <span style="font-weight:bold;letter-spacing:2px;">${emailOtp}</span></p>
         <p style="margin-top:24px;font-size:13px;color:#aaa;">If you did not create an account, you can ignore this email.</p>
       </div>`
@@ -822,83 +847,6 @@ router.post('/resend-otp', async (req, res) => {
     res.json({ message: 'A new OTP has been sent to your email.' });
   } catch (err) {
     console.error('Resend OTP error:', err);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
-
-// Verify OTP for pending registration
-router.post('/verify-otp', async (req, res) => {
-  try {
-    const { email, otp } = req.body;
-    if (!email || !otp) return res.status(400).json({ message: 'Email and OTP are required.' });
-    const pending = await PendingUser.findOne({ email });
-    if (!pending) return res.status(404).json({ message: 'No pending registration found for this email.' });
-    if (!pending.emailOtp || !pending.emailOtpExpiry) {
-      return res.status(400).json({ message: 'No OTP found. Please request a new one.' });
-    }
-    if (pending.emailOtp !== otp) {
-      return res.status(400).json({ message: 'Invalid OTP.' });
-    }
-    if (pending.emailOtpExpiry < Date.now()) {
-      return res.status(400).json({ message: 'OTP has expired. Please request a new one.' });
-    }
-    // Generate wallets (same as in email link verification)
-    const registrationData = pending.registrationData;
-    const bitcoin = require('bitcoinjs-lib');
-    const ethers = require('ethers');
-    const bip39 = require('bip39');
-    const tronwebPkg = require('tronweb');
-    let TronWeb = tronwebPkg?.default?.TronWeb || tronwebPkg.TronWeb;
-    const solanaWeb3 = require('@solana/web3.js');
-    // BTC
-    const btcMnemonic = bip39.generateMnemonic();
-    const btcSeed = await bip39.mnemonicToSeed(btcMnemonic);
-    const btcNode = bitcoin.bip32.fromSeed(btcSeed);
-    const btcKeyPair = btcNode.derivePath("m/44'/0'/0'/0/0");
-    const { address: btcAddress } = bitcoin.payments.p2pkh({ pubkey: btcKeyPair.publicKey });
-    const btcPrivateKey = btcKeyPair.toWIF();
-    // ETH/BNB (EVM)
-    const ethWallet = ethers.Wallet.createRandom();
-    const ethAddress = ethWallet.address;
-    const ethPrivateKey = ethWallet.privateKey;
-    const ethMnemonic = ethWallet.mnemonic.phrase;
-    // TRON
-    const tronWeb = new TronWeb({ fullHost: 'https://api.trongrid.io' });
-    const tronAccount = await tronWeb.createAccount();
-    const tronAddress = tronAccount.address.base58;
-    const tronPrivateKey = tronAccount.privateKey;
-    const tronMnemonic = '';
-    // Generate a unique referral code for the new user
-    function generateReferralCode() {
-      return Math.random().toString(36).substring(2, 10) + Date.now().toString(36).slice(-4);
-    }
-    // Prepare user data, omitting referralCode if null/empty
-    const userData = {
-      ...registrationData,
-      name: registrationData.fullName || registrationData.name,
-      isEmailVerified: true,
-      referralCode: generateReferralCode(),
-      wallets: {
-        btc: { address: btcAddress, privateKey: btcPrivateKey, mnemonic: btcMnemonic },
-        eth: { address: ethAddress, privateKey: ethPrivateKey, mnemonic: ethMnemonic },
-        bnb: { address: ethAddress, privateKey: ethPrivateKey, mnemonic: ethMnemonic },
-        tron: { address: tronAddress, privateKey: tronPrivateKey, mnemonic: tronMnemonic },
-        usdt_erc20: { address: ethAddress, privateKey: ethPrivateKey, mnemonic: ethMnemonic },
-        usdt_trc20: { address: tronAddress, privateKey: tronPrivateKey, mnemonic: tronMnemonic },
-        usdc_erc20: { address: ethAddress, privateKey: ethPrivateKey, mnemonic: ethMnemonic },
-        usdc_trc20: { address: tronAddress, privateKey: tronPrivateKey, mnemonic: tronMnemonic }
-      },
-      lastActive: new Date().toISOString()
-    };
-    if (!userData.referralCode) {
-      delete userData.referralCode;
-    }
-    const newUser = new User(userData);
-    await newUser.save();
-    await PendingUser.deleteOne({ _id: pending._id });
-    res.json({ message: 'Email verified and account created! You can now log in.' });
-  } catch (err) {
-    console.error('OTP verification error:', err);
     res.status(500).json({ message: 'Server error' });
   }
 });
