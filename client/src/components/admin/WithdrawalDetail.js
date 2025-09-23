@@ -32,7 +32,7 @@ const WithdrawalDetail = ({ withdrawal, onApprove, onReject, onClose }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
-      <div className="bg-gray-800 rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-gold scrollbar-track-gray-900/60">
+      <div className="bg-gray-800 rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-orange scrollbar-track-gray-900/60">
         <div className="p-6">
           <div className="flex justify-between items-start mb-6">
             <h2 className="text-2xl font-bold">Withdrawal Review</h2>

@@ -80,9 +80,20 @@ async function getPortfolioData(userId) {
   const availableBalance = depositBalance - totalInvested + totalConfirmedRoi;
   function calculateInvestmentROI(inv) {
     const roiTransactions = (inv.transactions || []).filter(t => t.type === 'roi');
-    const roiSum = roiTransactions.reduce((sum, t) => sum + t.amount, 0);
+    const roiSum = roiTransactions.reduce((sum, t) => {
+      const amount = parseFloat(t.amount) || 0;
+      return sum + amount;
+    }, 0);
+    
+    // Validate investment values to prevent NaN
+    const amount = parseFloat(inv.amount) || 0;
+    const currentValue = parseFloat(inv.currentValue) || 0;
+    
+    if (amount <= 0) return 0; // Prevent division by zero
+    
     // ROI = (all ROI payouts + (currentValue - amount)) / amount * 100
-    return ((roiSum + (inv.currentValue - inv.amount)) / inv.amount) * 100;
+    const roi = ((roiSum + (currentValue - amount)) / amount) * 100;
+    return isNaN(roi) || !isFinite(roi) ? 0 : parseFloat(roi.toFixed(2));
   }
   // Fetch user gain logs
   const userGainLogs = await UserGainLog.find({ user_id: userId }).sort('-logged_at').limit(20);
@@ -140,17 +151,27 @@ async function getPortfolioData(userId) {
 
   const perfMetrics = calculatePerformanceMetrics(performanceData);
   // Calculate totalROI, and totalROIPercent after allInvestments is defined
-  const totalValueFinal = allInvestments.reduce((sum, inv) => sum + inv.currentValue, 0);
+  const totalValueFinal = allInvestments.reduce((sum, inv) => {
+    const currentValue = parseFloat(inv.currentValue) || 0;
+    return sum + currentValue;
+  }, 0);
   const totalROI = totalValueFinal - totalInvested;
-  const totalROIPercent = (totalROI / (totalInvested || 1)) * 100;
+  const totalROIPercent = totalInvested > 0 ? (totalROI / totalInvested) * 100 : 0;
+  
+  // Validate all numeric values to prevent NaN
+  const safeNumber = (value, defaultValue = 0) => {
+    const num = parseFloat(value);
+    return isNaN(num) || !isFinite(num) ? defaultValue : num;
+  };
+  
   return {
     investments: allInvestments.map(inv => ({
       id: inv._id,
       fundId: inv.fundId,
       fundName: inv.fundName,
       planName: inv.planName,
-      initialAmount: inv.amount,
-      currentValue: inv.currentValue,
+      initialAmount: safeNumber(inv.amount),
+      currentValue: safeNumber(inv.currentValue),
       roi: calculateInvestmentROI(inv),
       startDate: inv.startDate,
       endDate: inv.endDate,
@@ -158,15 +179,15 @@ async function getPortfolioData(userId) {
       roiWithdrawn: inv.roiWithdrawn || false
     })),
     summary: {
-      totalInvested: totalInvested,
-      totalValue: totalValue,
-      totalROI: totalROI,
-      totalROIPercent: totalROIPercent,
+      totalInvested: safeNumber(totalInvested),
+      totalValue: safeNumber(totalValue),
+      totalROI: safeNumber(totalROI),
+      totalROIPercent: safeNumber(totalROIPercent),
       activeInvestments: investments.filter(inv => inv.status === 'active').length,
-      sharpeRatio: perfMetrics.sharpeRatio,
-      alpha: perfMetrics.alpha,
-      volatility: perfMetrics.volatility,
-      maxDrawdown: perfMetrics.maxDrawdown,
+      sharpeRatio: safeNumber(perfMetrics.sharpeRatio),
+      alpha: safeNumber(perfMetrics.alpha),
+      volatility: safeNumber(perfMetrics.volatility),
+      maxDrawdown: safeNumber(perfMetrics.maxDrawdown),
     },
     userInfo: {
       name: userDoc?.name || 'Investor',
@@ -294,20 +315,34 @@ function generatePerformanceData(investments) {
     let totalValue = 0;
     let activeBenchmarks = [];
     investments.forEach(inv => {
+      // Validate investment data to prevent NaN
+      const invAmount = parseFloat(inv.amount) || 0;
+      const invCurrentValue = parseFloat(inv.currentValue) || 0;
+      
+      if (invAmount <= 0) return; // Skip invalid investments
+      
       const start = new Date(inv.startDate);
       const end = inv.endDate ? new Date(inv.endDate) : null;
+      
+      // Validate dates
+      if (isNaN(start.getTime())) return;
+      if (end && isNaN(end.getTime())) return;
+      
       if (start <= day.date && (!end || end >= day.date)) {
-        totalInvested += inv.amount;
+        totalInvested += invAmount;
         if (end && end < day.date) {
-          totalValue += inv.currentValue;
+          totalValue += invCurrentValue;
         } else {
           if (inv.transactions && inv.transactions.length > 0) {
             const roiSum = inv.transactions
               .filter(t => t.type === 'roi' && new Date(t.date) <= day.date)
-              .reduce((sum, t) => sum + t.amount, 0);
-            totalValue += inv.amount + roiSum;
+              .reduce((sum, t) => {
+                const amount = parseFloat(t.amount) || 0;
+                return sum + amount;
+              }, 0);
+            totalValue += invAmount + roiSum;
           } else {
-            totalValue += inv.currentValue;
+            totalValue += invCurrentValue;
           }
         }
         // For benchmark, use the initial amount grown by a fixed rate or the plan's ROI rate
@@ -318,19 +353,30 @@ function generatePerformanceData(investments) {
         if (inv.planName === 'Diamond') planRoi = 650;
         const daysActive = Math.max(1, Math.floor((day.date - start) / (1000 * 60 * 60 * 24)));
         // Assume plan duration is 365 days for annualized ROI
-        const benchmarkValue = inv.amount * (1 + (planRoi / 100) * (daysActive / 365));
-        activeBenchmarks.push(benchmarkValue);
+        const benchmarkValue = invAmount * (1 + (planRoi / 100) * (daysActive / 365));
+        if (!isNaN(benchmarkValue) && isFinite(benchmarkValue)) {
+          activeBenchmarks.push(benchmarkValue);
+        }
       }
     });
+    
+    // Ensure all values are valid numbers
+    totalInvested = isNaN(totalInvested) || !isFinite(totalInvested) ? 0 : totalInvested;
+    totalValue = isNaN(totalValue) || !isFinite(totalValue) ? 0 : totalValue;
+    
     const roiPercent = totalInvested > 0 ? ((totalValue - totalInvested) / totalInvested) * 100 : 0;
     const portfolioValue = parseFloat(totalValue.toFixed(2));
-    const benchmark = activeBenchmarks.length > 0 ? parseFloat((activeBenchmarks.reduce((a, b) => a + b, 0) / activeBenchmarks.length).toFixed(2)) : portfolioValue;
+    const benchmark = activeBenchmarks.length > 0 ? 
+      parseFloat((activeBenchmarks.reduce((a, b) => a + b, 0) / activeBenchmarks.length).toFixed(2)) : 
+      portfolioValue;
+    
+    // Final validation to ensure no NaN values
     return {
       name: day.name,
       date: day.date,
-      portfolioValue,
-      benchmark,
-      roiPercent: parseFloat(roiPercent.toFixed(2)),
+      portfolioValue: isNaN(portfolioValue) || !isFinite(portfolioValue) ? 0 : portfolioValue,
+      benchmark: isNaN(benchmark) || !isFinite(benchmark) ? 0 : benchmark,
+      roiPercent: isNaN(roiPercent) || !isFinite(roiPercent) ? 0 : parseFloat(roiPercent.toFixed(2)),
     };
   });
   // Debug: log the latest day's calculation
@@ -352,13 +398,22 @@ function generateAllocationData(investments) {
   // Group investments by fund type and calculate percentages
   const funds = {};
   investments.forEach(inv => {
-    funds[inv.fundName] = (funds[inv.fundName] || 0) + inv.currentValue;
+    // Validate investment data to prevent NaN
+    const fundName = inv.fundName || 'Unknown Fund';
+    const currentValue = parseFloat(inv.currentValue) || 0;
+    
+    // Only include investments with valid positive values
+    if (currentValue > 0) {
+      funds[fundName] = (funds[fundName] || 0) + currentValue;
+    }
   });
   
-  return Object.entries(funds).map(([name, value]) => ({
-    name,
-    value: parseFloat(value.toFixed(2))
-  }));
+  return Object.entries(funds)
+    .filter(([name, value]) => value > 0) // Filter out zero or negative values
+    .map(([name, value]) => ({
+      name,
+      value: isNaN(value) || !isFinite(value) ? 0 : parseFloat(value.toFixed(2))
+    }));
 }
 
 module.exports = router;

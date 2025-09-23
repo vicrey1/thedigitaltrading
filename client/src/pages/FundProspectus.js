@@ -6,7 +6,7 @@ export default function FundProspectus() {
       <h1 className="text-3xl font-bold mb-6 text-gold">Fund Prospectus</h1>
       <div className="mb-4">
         <h2 className="text-xl font-semibold mb-2">About Our Funds</h2>
-        <p className="mb-2">LUXYIELD offers a range of simulated investment funds, each with a unique strategy and risk profile. Our prospectus provides an overview of each fund, its objectives, and how simulated returns are generated for demo purposes.</p>
+        <p className="mb-2">THE DIGITAL TRADING offers a range of simulated investment funds, each with a unique strategy and risk profile. Our prospectus provides an overview of each fund, its objectives, and how simulated returns are generated for demo purposes.</p>
       </div>
       <div className="mb-4">
         <h3 className="text-lg font-bold">Spot Market Fund</h3>

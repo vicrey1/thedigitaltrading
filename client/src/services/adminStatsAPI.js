@@ -17,3 +17,8 @@ export const getAdminStats = async () => {
   const res = await API.get('/stats');
   return res.data;
 };
+
+export const getRecentActivities = async (limit = 10) => {
+  const res = await API.get(`/recent-activities?limit=${limit}`);
+  return res.data.activities || [];
+};

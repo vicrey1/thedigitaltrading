@@ -1,27 +1,202 @@
 /* Responsive Design for Mobile Devices */
-@media (max-width: 600px) {
+
+/* Mobile First - Base styles for mobile */
+@media (max-width: 768px) {
+  /* General mobile optimizations */
+  html, body {
+    font-size: 14px;
+    padding: 0;
+    overflow-x: hidden;
+  }
+
+  /* Glass card mobile optimization */
   .glass-card {
     border-radius: 12px;
-    padding: 10px;
+    padding: 16px;
+    margin: 8px;
   }
-  .glass-button {
-    font-size: 14px;
-    padding: 8px 16px;
+
+  /* Button optimizations */
+  .glass-button, button, .btn {
+    font-size: 16px;
+    padding: 12px 20px;
+    min-height: 44px;
+    min-width: 44px;
+    border-radius: 8px;
   }
+
+  /* Text optimizations */
   .gradient-text {
-    font-size: 1.1em;
+    font-size: 1.2em;
   }
-  html, body {
-    font-size: 15px;
-    padding: 0 4px;
-  }
-  img, .container, .content {
+
+  /* Container and layout */
+  .container, .content {
     max-width: 100%;
     width: 100%;
+    padding: 0 16px;
     box-sizing: border-box;
   }
+
+  /* Flex layouts */
   .row, .columns {
     flex-direction: column !important;
     width: 100%;
+    gap: 16px;
+  }
+
+  /* Hero section mobile */
+  .min-h-\[80vh\] {
+    min-height: 100vh;
+    padding: 20px 16px;
+  }
+
+  /* Text sizing for mobile */
+  .text-4xl, .text-5xl {
+    font-size: 2rem !important;
+    line-height: 1.2;
+  }
+
+  .text-3xl {
+    font-size: 1.75rem !important;
+  }
+
+  .text-2xl {
+    font-size: 1.5rem !important;
+  }
+
+  .text-xl {
+    font-size: 1.25rem !important;
+  }
+
+  .text-lg {
+    font-size: 1.125rem !important;
+  }
+
+  /* Padding and margin adjustments */
+  .p-10 {
+    padding: 24px !important;
+  }
+
+  .p-8 {
+    padding: 20px !important;
+  }
+
+  .py-20 {
+    padding-top: 48px !important;
+    padding-bottom: 48px !important;
+  }
+
+  .mb-8 {
+    margin-bottom: 24px !important;
+  }
+
+  .mb-6 {
+    margin-bottom: 20px !important;
+  }
+
+  /* Form optimizations */
+  input, textarea, select {
+    font-size: 16px !important;
+    padding: 12px !important;
+    border-radius: 8px;
+    min-height: 44px;
+  }
+
+  /* Navigation mobile fixes */
+  .fixed.bottom-6 {
+    bottom: 16px !important;
+    left: 16px !important;
+    right: 16px !important;
+    transform: none !important;
+    max-width: none !important;
+  }
+
+  /* Table responsiveness */
+  .table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  table {
+    min-width: 600px;
+  }
+
+  /* Card layouts */
+  .grid {
+    grid-template-columns: 1fr !important;
+    gap: 16px;
+  }
+
+  /* Image responsiveness */
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* Video responsiveness */
+  video {
+    width: 100%;
+    height: auto;
+  }
+
+  /* Modal and overlay fixes */
+  .backdrop-blur-xl {
+    backdrop-filter: blur(8px);
+  }
+
+  /* Touch targets */
+  a, button, [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+/* Small mobile devices */
+@media (max-width: 480px) {
+  .text-4xl, .text-5xl {
+    font-size: 1.75rem !important;
+  }
+
+  .text-3xl {
+    font-size: 1.5rem !important;
+  }
+
+  .p-10 {
+    padding: 16px !important;
+  }
+
+  .py-20 {
+    padding-top: 32px !important;
+    padding-bottom: 32px !important;
+  }
+
+  /* Smaller containers on very small screens */
+  .container {
+    padding: 0 12px;
+  }
+
+  /* Adjust button sizes for small screens */
+  .glass-button, button {
+    font-size: 14px;
+    padding: 10px 16px;
+  }
+}
+
+/* Tablet optimizations */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .container {
+    padding: 0 24px;
+  }
+
+  .text-4xl, .text-5xl {
+    font-size: 2.5rem !important;
+  }
+
+  .grid {
+    grid-template-columns: repeat(2, 1fr) !important;
   }
 }

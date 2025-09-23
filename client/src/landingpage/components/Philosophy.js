@@ -1,6 +1,6 @@
 import React from 'react';
 import InteractiveElement from './InteractiveElement.js';
-import { Cpu, ShieldCheck, Handshake } from 'https://esm.sh/lucide-react@0.381.0';
+import { Cpu, ShieldCheck, Handshake } from 'lucide-react';
 
 const e = React.createElement;
 
@@ -35,8 +35,8 @@ function Philosophy() {
                 }),
                 e(PrincipleCard, {
                     icon: Handshake,
-                    title: 'Long-Term Strategic Partnership',
-                    text: 'We build enduring relationships, not transactional ones. Our strategies are crafted with a long-term horizon, focusing on compounding wealth and achieving generational goals. Your objectives define our mandate.',
+                    title: 'Technology-Driven Research',
+                    text: 'We build enduring relationships, not transactional ones. Our strategies are guided by a long-term discipline—balancing opportunity with risk management and clear accountability.',
                     depth: 0.003
                 })
             )

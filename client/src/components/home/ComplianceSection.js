@@ -108,7 +108,7 @@ const ComplianceSection = () => {
 									KYC Policy
 								</h3>
 								<p className="mb-4 text-sm">
-									LUXHEDGE follows strict Know Your Customer (KYC) and
+									THE DIGITAL TRADING follows strict Know Your Customer (KYC) and
 									Anti-Money Laundering (AML) procedures to ensure the
 									safety and compliance of all investors. All data is
 									encrypted and handled with the utmost confidentiality.

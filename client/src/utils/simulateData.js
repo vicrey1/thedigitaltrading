@@ -21,7 +21,7 @@ export function simulatePerformance(months = 12, min = 5, max = 12) {
 export function simulateTestimonials(count = 3) {
   const names = ['John D.', 'Sophia L.', 'Michael B.', 'Ava R.', 'Lucas W.'];
   const comments = [
-    'LUXHEDGE made investing effortless and rewarding!',
+    'THE DIGITAL TRADING made our processes clearer and more disciplined.',
     'My portfolio has never looked better. Highly recommend!',
     'The simulated returns are impressive and the UI is stunning.',
     'I love the fund variety and the luxury experience.',

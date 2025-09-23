@@ -38,7 +38,7 @@ const Leaderboard = () => {
                 <th className="p-3">Rank</th>
                 <th className="p-3">Investor</th>
                 <th className="p-3">Country</th>
-                <th className="p-3">Total ROI</th>
+                <th className="p-3">Total Return</th>
                 <th className="p-3">Best Fund</th>
                 <th className="p-3">Performance</th>
               </tr>

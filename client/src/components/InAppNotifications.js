@@ -61,7 +61,7 @@ const InAppNotifications = ({ userId }) => {
             </button>
           </div>
           
-          <div className="max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-gold scrollbar-track-gray-900/60">
+          <div className="max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-orange scrollbar-track-gray-900/60">
             {notifications.length === 0 ? (
               <div className="p-4 text-center text-gray-400">No notifications</div>
             ) : (

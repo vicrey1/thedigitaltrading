@@ -61,7 +61,7 @@ const FooterSection = () => {
             {subscribed ? <span className="text-xl">✔️</span> : 'Subscribe'}
           </button>
         </form>
-        <div className="text-gray-400 text-xs">© 2025 LUXHEDGE. All Rights Reserved.</div>
+        <div className="text-gray-400 text-xs">© 2025 THE DIGITAL TRADING. All Rights Reserved.</div>
       </div>
     </footer>
   );

@@ -1,8 +1,8 @@
 import React from 'react';
 
 const HeroSection = () => (
-  <section className="relative min-h-[80vh] flex flex-col items-center justify-center text-center bg-transparent overflow-hidden">
-    <div className="z-10 backdrop-blur-xl bg-black bg-opacity-60 rounded-3xl p-10 shadow-2xl border border-gold/30 max-w-3xl mx-auto mt-16">
+  <section className="relative min-h-[80vh] flex flex-col items-center justify-center text-center bg-transparent overflow-hidden px-4 sm:px-6">
+    <div className="z-10 backdrop-blur-xl bg-black bg-opacity-60 rounded-3xl p-6 sm:p-10 shadow-2xl border border-gold/30 max-w-3xl mx-auto mt-8 sm:mt-16 w-full">
       {/* Logo and Headline */}
       <div className="flex items-center justify-center mb-6">
         <svg width="120" height="40" viewBox="0 0 120 40" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -16,13 +16,13 @@ const HeroSection = () => (
           </defs>
         </svg>
       </div>
-      <h1 className="text-4xl md:text-5xl font-extrabold mb-4 text-white font-serif">Digital Asset Strategies for Institutional & Sophisticated Investors</h1>
-      <p className="text-lg md:text-2xl mb-8 text-gray-300 max-w-2xl mx-auto">
-        LUXHEDGE delivers actively managed crypto investment solutions across spot, derivatives, yield, and structured products.
+      <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold mb-4 text-white font-serif leading-tight">Institutional-Grade Digital Asset Strategies</h1>
+      <p className="text-base sm:text-lg md:text-xl lg:text-2xl mb-6 sm:mb-8 text-gray-300 max-w-2xl mx-auto leading-relaxed">
+        Partner with industry-leading experts to develop disciplined, risk-first strategies for digital assets. We emphasize transparency, robust controls, and data-driven execution—no hype, no guarantees.
       </p>
-      <div className="flex flex-col md:flex-row gap-4 justify-center">
-        <a href="/register" className="px-8 py-3 bg-gold text-black font-bold rounded-lg shadow-lg hover:bg-yellow-400 transition text-lg">Register Now</a>
-        <a href="#funds" className="px-8 py-3 bg-black bg-opacity-60 border border-gold text-gold font-bold rounded-lg hover:bg-gold hover:text-black transition text-lg">Explore Our Funds</a>
+      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center w-full max-w-lg mx-auto">
+        <a href="/register" className="w-full sm:w-auto px-6 sm:px-8 py-3 bg-gold text-black font-bold rounded-lg shadow-lg hover:bg-yellow-400 transition text-base sm:text-lg text-center min-h-[44px] flex items-center justify-center">Start Strategic Partnership</a>
+        <a href="#funds" className="w-full sm:w-auto px-6 sm:px-8 py-3 bg-black bg-opacity-60 border border-gold text-gold font-bold rounded-lg hover:bg-gold hover:text-black transition text-base sm:text-lg text-center min-h-[44px] flex items-center justify-center">View Case Studies</a>
       </div>
     </div>
     <div className="absolute inset-0 pointer-events-none z-0">

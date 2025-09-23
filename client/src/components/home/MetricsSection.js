@@ -2,10 +2,10 @@ import React from 'react';
 import { motion } from 'framer-motion';
 
 const metrics = [
-	{ icon: '📊', label: 'Avg. ROI (12mo)', value: 8.6, suffix: '%', prefix: '+', decimals: 1 },
-	{ icon: '🏦', label: 'Total AUM', value: 2.3, suffix: ' Billion', prefix: '$', decimals: 1 },
-	{ icon: '👥', label: 'Verified Investors', value: 12482, suffix: '+', prefix: '', decimals: 0 },
-	{ icon: '🌐', label: 'Global Coverage', value: 65, suffix: ' Countries', prefix: '', decimals: 0 },
+	{ icon: '🎯', label: 'Strategic Campaigns Delivered', value: 500, suffix: '+', prefix: '', decimals: 0 },
+	{ icon: '📊', label: 'Client Satisfaction Rate', value: 98, suffix: '%', prefix: '', decimals: 0 },
+	{ icon: '🚀', label: 'Years of Excellence', value: 8, suffix: '+', prefix: '', decimals: 0 },
+	{ icon: '🤝', label: 'Strategic Partnerships', value: 50, suffix: '+', prefix: '', decimals: 0 },
 ];
 
 function useCountUp(target, duration = 1200, decimals = 0) {

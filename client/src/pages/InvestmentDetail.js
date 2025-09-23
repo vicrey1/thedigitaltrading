@@ -36,7 +36,12 @@ const InvestmentDetail = () => {
     if (!investment) return [];
     // If real performance data is missing, simulate
     if (!investment.performance || !investment.performance.length) {
-      return simulatePerformance(30, 5, 8);
+      const simulatedData = simulatePerformance(30, 5, 8);
+      // Validate simulated data for NaN values
+      return simulatedData.map(item => ({
+        ...item,
+        value: (typeof item.value === 'number' && !isNaN(item.value)) ? item.value : 0
+      }));
     }
     const days = [];
     const roiFactor = {
@@ -47,12 +52,16 @@ const InvestmentDetail = () => {
       'Arbitrage': 0.0008
     };
     const baseDate = new Date(investment.startDate);
+    const safeAmount = (typeof investment.amount === 'number' && !isNaN(investment.amount)) ? investment.amount : 0;
+    const safeFactor = roiFactor[investment.fundType] || 0.001;
+    
     for (let i = 0; i <= investment.daysInvested; i++) {
       const date = new Date(baseDate);
       date.setDate(baseDate.getDate() + i);
+      const calculatedValue = safeAmount * (1 + safeFactor * i);
       days.push({
         name: `${date.getMonth()+1}/${date.getDate()}`,
-        value: investment.amount * (1 + roiFactor[investment.fundType] * i)
+        value: (typeof calculatedValue === 'number' && !isNaN(calculatedValue)) ? calculatedValue : 0
       });
     }
     return days;
@@ -97,7 +106,7 @@ const InvestmentDetail = () => {
   //   doc.text('This is a simulated investment statement for demonstration purposes only.', 105, 220, null, null, 'center');
     
   //   // Save the PDF
-  //   doc.save(`LuxYield_Statement_${investment.id}.pdf`);
+  //   doc.save(`TheDigitalTrading_Statement_${investment.id}.pdf`);
   // };
   
   if (loading) return <div className="text-white p-8">Loading...</div>;
@@ -105,6 +114,9 @@ const InvestmentDetail = () => {
   if (!investment) return <div className="text-white p-8">Investment not found.</div>;
   
   const performanceData = generatePerformanceData();
+  const safePerf = (Array.isArray(performanceData) && performanceData.length)
+    ? performanceData
+    : [{ name: '-', value: 0 }];
   
   return (
     <div className="space-y-8 px-2 sm:px-4 md:px-6 py-6 sm:py-8">
@@ -148,7 +160,7 @@ const InvestmentDetail = () => {
               <p className={`text-sm mt-2 ${
                 investment.roi >= 0 ? 'text-green-500' : 'text-red-500'
               }`}>
-                {investment.roi >= 0 ? '+' : ''}{investment.roi.toFixed(2)}% ROI
+                {investment.roi >= 0 ? '+' : ''}{investment.roi.toFixed(2)}% Change
               </p>
             </div>
             <div className={`p-3 rounded-full ${
@@ -188,25 +200,13 @@ const InvestmentDetail = () => {
         <h3 className="text-xl font-bold mb-4">Performance History</h3>
         <div className="h-64">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={performanceData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#333" />
-              <XAxis dataKey="name" stroke="#aaa" />
-              <YAxis stroke="#aaa" tickFormatter={(value) => `$${value.toFixed(0)}`} />
-              <Tooltip 
-                contentStyle={{ backgroundColor: '#1a1a1a', borderColor: '#333' }}
-                labelStyle={{ color: '#fff' }}
-                formatter={(value, name, props) => [`$${value.toFixed(2)}`, 'Portfolio Value']}
-              />
+            <LineChart data={safePerf}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <YAxis tickFormatter={(v)=> (typeof v==='number' && isFinite(v))? v: 0} />
+              <Tooltip formatter={(v)=> (typeof v==='number' && isFinite(v))? v: 0} />
               <Legend />
-              <Line
-                type="monotone"
-                dataKey="value"
-                stroke="#D4AF37"
-                strokeWidth={2}
-                dot={{ fill: '#D4AF37', strokeWidth: 2, r: 4 }}
-                activeDot={{ r: 6 }}
-                name="Portfolio Value"
-              />
+              <Line type="monotone" dataKey="value" stroke="#D4AF37" strokeWidth={2} dot={false}/>
             </LineChart>
           </ResponsiveContainer>
         </div>
@@ -240,7 +240,7 @@ const InvestmentDetail = () => {
           </div>
           <div className="flex justify-between items-center p-3 border-b border-gray-800">
             <div>
-              <p className="font-medium">ROI Credit</p>
+              <p className="font-medium">Performance Credit</p>
               <p className="text-sm text-gray-400">Daily Earnings</p>
             </div>
             <div className="text-right">

@@ -2,20 +2,20 @@ import React, { useState } from 'react';
 
 const faqs = [
   {
-    q: 'Is LUXHEDGE regulated?',
-    a: 'Yes, LUXHEDGE operates under strict regulatory compliance and partners with regulated custodians.'
+    q: 'How do you measure campaign success?',
+    a: 'We use comprehensive analytics to track key performance indicators including engagement rates, conversion metrics, and long-term business growth. Our reporting provides clear insights into campaign effectiveness and strategic recommendations.'
   },
   {
-    q: 'How secure are my assets?',
-    a: 'All assets are held in institutional-grade, multi-signature wallets with 256-bit SSL encryption.'
+    q: 'What makes your approach different?',
+    a: 'Our strategic methodology combines data-driven insights with innovative technology solutions. We focus on sustainable growth through comprehensive market analysis, competitive intelligence, and customized digital strategies tailored to your business objectives.'
   },
   {
-    q: 'What is the minimum investment?',
-    a: 'The minimum investment is $5,000, designed for serious investors.'
+    q: 'What investment level do you recommend?',
+    a: 'We work with businesses ready to make strategic investments in their digital presence. Our recommendations are based on your specific goals, market position, and growth objectives to ensure optimal resource allocation.'
   },
   {
-    q: 'Can I withdraw at any time?',
-    a: 'Withdrawals are processed weekly, subject to compliance checks.'
+    q: 'Do you work across different industries?',
+    a: 'Yes, our strategic framework adapts to various industries and business models. We have experience across technology, professional services, e-commerce, and other sectors, applying industry-specific insights to drive results.'
   },
 ];
 

@@ -1,8 +1,8 @@
 {
-  "name": "client",
+  "name": "the-digital-trading",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://www.luxyield.com",
+  "homepage": "https://www.thedigitaltrading.com",
   "dependencies": {
     "@testing-library/dom": "^9.3.3",
     "@testing-library/jest-dom": "^5.17.0",

@@ -73,11 +73,11 @@ export default function ForgotPassword() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-black bg-opacity-80">
       <div className="glass-card p-8 rounded-xl shadow-lg w-full max-w-md">
-        <h1 className="text-2xl font-bold mb-6 text-gold flex items-center gap-2"><FiMail /> Forgot Password</h1>
+        <h1 className="text-2xl font-bold mb-6 text-orange-400 flex items-center gap-2"><FiMail /> Forgot Password</h1>
         {step === 1 ? (
           <>
-            <input type="email" className="w-full p-2 rounded bg-gray-800 text-white border border-gray-700 focus:border-gold outline-none mb-4" placeholder="Enter your email" value={email} onChange={e => setEmail(e.target.value)} />
-            <button className="w-full bg-gold text-black px-4 py-2 rounded-lg flex items-center justify-center gap-2 hover:bg-yellow-400" onClick={handleRequest}><FiMail /> Send Recovery Email</button>
+            <input type="email" className="w-full p-2 rounded bg-gray-800 text-white border border-gray-700 focus:border-orange-400 outline-none mb-4" placeholder="Enter your email" value={email} onChange={e => setEmail(e.target.value)} />
+            <button className="w-full bg-orange-500 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 hover:bg-orange-600" onClick={handleRequest}><FiMail /> Send Recovery Email</button>
           </>
         ) : (
           <>
@@ -111,22 +111,22 @@ export default function ForgotPassword() {
                     }
                   }}
                   id={`forgot-otp-input-${idx}`}
-                  className="w-10 h-10 text-center text-2xl bg-dark border border-gray-700 rounded-lg focus:border-gold focus:outline-none"
+                  className="w-10 h-10 text-center text-2xl bg-dark border border-gray-700 rounded-lg focus:border-orange-400 focus:outline-none"
                   autoFocus={idx === 0}
                 />
               ))}
             </div>
             <button
-              className="text-xs text-gold underline mb-2"
+              className="text-xs text-orange-400 underline mb-2"
               style={{ width: 'fit-content' }}
               onClick={handleResend}
               disabled={resendLoading}
             >
               {resendLoading ? 'Resending...' : 'Resend Code'}
             </button>
-            <input type="password" className="w-full p-2 rounded bg-gray-800 text-white border border-gray-700 focus:border-gold outline-none mb-2" placeholder="New password" value={newPass} onChange={e => setNewPass(e.target.value)} />
-            <input type="password" className="w-full p-2 rounded bg-gray-800 text-white border border-gray-700 focus:border-gold outline-none mb-2" placeholder="Confirm new password" value={confirmPass} onChange={e => setConfirmPass(e.target.value)} />
-            <button className="w-full bg-gold text-black px-4 py-2 rounded-lg flex items-center justify-center gap-2 hover:bg-yellow-400" onClick={handleReset}><FiSave /> Reset Password</button>
+            <input type="password" className="w-full p-2 rounded bg-gray-800 text-white border border-gray-700 focus:border-orange-400 outline-none mb-2" placeholder="New password" value={newPass} onChange={e => setNewPass(e.target.value)} />
+            <input type="password" className="w-full p-2 rounded bg-gray-800 text-white border border-gray-700 focus:border-orange-400 outline-none mb-2" placeholder="Confirm new password" value={confirmPass} onChange={e => setConfirmPass(e.target.value)} />
+            <button className="w-full bg-orange-500 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 hover:bg-orange-600" onClick={handleReset}><FiSave /> Reset Password</button>
           </>
         )}
         {error && <div className="text-red-400 mt-4 text-center">{error}</div>}

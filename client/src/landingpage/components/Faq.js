@@ -1,26 +1,30 @@
 import React, { useState } from 'react';
-import { ChevronDown } from 'https://esm.sh/lucide-react@0.381.0';
+import { ChevronDown } from 'lucide-react';
 import InteractiveElement from './InteractiveElement.js';
 
 const e = React.createElement;
 
 const faqData = [
     {
-        question: 'What is the minimum investment?',
-        answer: 'The minimum investment is detailed during the account creation process. Create your account to view strategy-specific investment tiers.'
+        question: 'How is THE DIGITAL TRADING different?',
+        answer: 'We emphasize disciplined research, risk-first processes, and transparent reporting—no hype, no guarantees.',
     },
     {
-        question: 'How is LUXYIELD regulated?',
-        answer: 'LUXYIELD Capital is a Registered Investment Adviser with the U.S. Securities and Exchange Commission (SEC). We adhere to the highest standards of fiduciary duty and regulatory compliance.'
+        question: 'What if I\'ve been burned by agencies before?',
+        answer: 'Our research and tooling can support different operating contexts. We focus on clarity, robust controls, and process. We do not make revenue promises or guarantees.',
     },
     {
-        question: 'What are your fees?',
-        answer: 'We operate on a transparent, performance-based fee structure that aligns our interests with yours. A detailed fee schedule is provided and discussed during the onboarding process.'
+        question: 'How quickly will I see results?',
+        answer: 'Outcomes vary. We do not promise results or performance. We focus on process quality, documentation, and clarity so you can make informed decisions.',
     },
     {
-        question: 'How do I access my performance reports?',
-        answer: 'Clients have 24/7 access to our secure online portal, which provides real-time performance data, detailed portfolio analysis, market commentary, and historical statements.'
+        question: 'What are the eligibility requirements?',
+        answer: 'Eligibility and minimums vary by product, jurisdiction, and risk tolerance. We onboard organizations prepared to implement disciplined processes. Please review program terms for details.',
     },
+    {
+        question: 'Do you work with my industry?',
+        answer: 'We support a range of industries. Applicability depends on your objectives, constraints, and controls. We do not make performance claims—reach out to discuss your specific use case.',
+    }
 ];
 
 const FaqItem = ({ question, answer, isActive, onClick }) => {

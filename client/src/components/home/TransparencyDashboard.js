@@ -4,7 +4,7 @@ const stats = [
   { label: 'Total AUM', value: '$2.3B' },
   { label: 'Active Investors', value: '12,482' },
   { label: 'Funds Available', value: '4' },
-  { label: 'Avg. 12mo ROI', value: '+8.6%' },
+  { label: '12-Month Performance (net %)', value: '+8.6%' },
   { label: 'Withdrawals Processed', value: '3,200+' },
 ];
 

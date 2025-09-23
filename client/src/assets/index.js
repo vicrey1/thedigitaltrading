@@ -6,4 +6,4 @@ export { default as feature3 } from './feature3.jpg';
 export { default as testimonial1 } from './testimonial1.jpg';
 export { default as testimonial2 } from './testimonial2.jpg';
 export { default as testimonial3 } from './testimonial3.jpg';
-export { default as logo } from './luxhedge-logo-gold.svg';
+export { default as logo } from './thedigitaltrading-logo-gold.svg';

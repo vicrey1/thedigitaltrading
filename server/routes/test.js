@@ -6,7 +6,7 @@ router.get('/send-otp', async (req, res) => {
   const to = req.query.email || 'your@email.com';
   const sent = await sendEmail(
     to,
-    "LUXYIELD OTP Verification",
+    "THE DIGITAL TRADING OTP Verification",
     `
     <div style="font-family:sans-serif;padding:20px;background:#111;color:#fff;border-radius:12px;text-align:center;">
       <h2 style="color:#FFD700;">Verify Your Email</h2>

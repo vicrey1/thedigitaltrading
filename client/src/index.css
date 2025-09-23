@@ -1,51 +1,105 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+/* Import responsive styles */
+@import './responsive.css';
 
 body {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Dark mode styles */
+.dark body {
   background-color: #0F0F0F;
   color: white;
 }
 
+/* Light mode styles */
+.light body {
+  background-color: #FFFFFF;
+  color: #1A1A1A;
+}
+
 .glassmorphic {
-  background: rgba(15, 15, 15, 0.7);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+  transition: all 0.3s ease;
+}
+
+.dark .glassmorphic {
+  background: rgba(15, 15, 15, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.light .glassmorphic {
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(0, 0, 0, 0.1);
 }
 /* Add to your index.css */
 .glass-card {
-  background: rgba(15, 15, 15, 0.5);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
 }
 
-.glass-card:hover {
-  border-color: rgba(212, 175, 55, 0.3);
-  box-shadow: 0 4px 30px rgba(212, 175, 55, 0.1);
+.dark .glass-card {
+  background: rgba(15, 15, 15, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.light .glass-card {
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.dark .glass-card:hover {
+  border-color: rgba(247, 147, 26, 0.3);
+  box-shadow: 0 4px 30px rgba(247, 147, 26, 0.1);
+}
+
+.light .glass-card:hover {
+  border-color: rgba(232, 133, 28, 0.3);
+  box-shadow: 0 4px 30px rgba(232, 133, 28, 0.1);
 }
 
 .chart-tooltip {
-  background: rgba(30, 30, 30, 0.95) !important;
-  border: 1px solid rgba(212, 175, 55, 0.2) !important;
   border-radius: 4px !important;
   padding: 8px 12px !important;
+  transition: all 0.3s ease !important;
 }
 
-/* Gold gradient text */
+.dark .chart-tooltip {
+  background: rgba(30, 30, 30, 0.95) !important;
+  border: 1px solid rgba(247, 147, 26, 0.2) !important;
+}
+
+.light .chart-tooltip {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border: 1px solid rgba(232, 133, 28, 0.2) !important;
+}
+
+/* Crypto gradient text */
+.text-crypto-gradient {
+  background: linear-gradient(90deg, #F7931A 0%, #FF9F2A 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Legacy gold gradient (updated to crypto colors) */
 .text-gold-gradient {
-  background: linear-gradient(90deg, #D4AF37 0%, #F9D423 100%);
+  background: linear-gradient(90deg, #F7931A 0%, #FF9F2A 100%);
+  background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 /* Add to your index.css */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
 
 /* Mobile menu toggle */
 .mobile-menu {
@@ -67,7 +121,8 @@ body {
 
 /* Tap targets for mobile */
 button, a {
-  @apply min-w-[44px] min-h-[44px];
+  min-width: 44px;
+  min-height: 44px;
 }
 
 /* Hide scrollbar but allow scrolling */

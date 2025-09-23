@@ -8,7 +8,9 @@ import { RefreshProvider } from './contexts/RefreshContext';
 import { UserProvider } from './contexts/UserContext';
 import { AdminAuthProvider } from './auth/AdminAuthProvider';
 import { UserDataRefreshProvider } from './contexts/UserDataRefreshContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 import Sidebar from './components/Sidebar';
+import ThemeToggle from './components/ThemeToggle';
 import './App.css';
 
 // Admin imports
@@ -28,8 +30,12 @@ import SupportAdmin from './pages/SupportAdmin';
 import AdminMirror from './pages/admin/AdminMirror';
 import RoiApprovals from './pages/admin/RoiApprovals';
 import AdminColdWallet from './pages/admin/AdminColdWallet';
+import AdminCars from './pages/admin/Cars';
+import AdminSupportChat from './components/admin/AdminSupportChat';
 
 // Client imports
+import CarShop from './pages/CarShop';
+import CarDetail from './pages/CarDetail';
 import Dashboard from './pages/Dashboard';
 import Portfolio from './pages/Portfolio';
 import Deposit from './pages/Deposit';
@@ -54,7 +60,8 @@ import ResetPassword from './pages/ResetPassword';
 import KYCPage from './pages/KYCPage';
 import FundProspectus from './pages/FundProspectus';
 import Statements from './pages/Statements';
-import SupportChat from './pages/SupportChat';
+import SupportChat from './components/support/SupportChat';
+
 import VerifyEmail from './pages/VerifyEmail';
 import InviteFriends from './pages/InviteFriends';
 import VerifySuccess from './pages/VerifySuccess';
@@ -67,11 +74,19 @@ function AppLayout({ sidebarCollapsed, setSidebarCollapsed, hasNewAnnouncement, 
   // Hide sidebar for /dashboard and its subroutes
   const hideSidebar = hideSidebarRoutes.some((route) => location.pathname.startsWith(route));
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
       {!hideSidebar && (
         <Sidebar collapsed={sidebarCollapsed} setCollapsed={setSidebarCollapsed} hasNewAnnouncement={hasNewAnnouncement} />
       )}
-      <div className="flex-1 transition-all duration-300">{children}</div>
+      <div className={`
+        flex-1 content-transition
+        ${!hideSidebar ? (sidebarCollapsed ? 'ml-16' : 'ml-72') : 'ml-0'}
+        max-md:ml-0
+      `}>
+        <div className="animate-fadeIn">
+          {children}
+        </div>
+      </div>
     </div>
   );
 }
@@ -83,12 +98,14 @@ function App() {
 
   return (
     <BrowserRouter>
-      <NotificationProvider>
-        <UserDataRefreshProvider>
-          <AdminAuthProvider>
-            <UserProvider>
-              <RefreshProvider>
+      <ThemeProvider>
+        <NotificationProvider>
+          <UserDataRefreshProvider>
+            <AdminAuthProvider>
+              <UserProvider>
+                <RefreshProvider>
                 <AppLayout sidebarCollapsed={sidebarCollapsed} setSidebarCollapsed={setSidebarCollapsed} hasNewAnnouncement={hasNewAnnouncement}>
+                  <ThemeToggle />
                   <Routes>
                     {/* Admin Routes */}
                   <Route path="/admin/login" element={<AdminLogin />} />
@@ -103,11 +120,12 @@ function App() {
                     <Route path="settings" element={<AdminSettings />} />
                     <Route path="send-email" element={<AdminSendEmail />} />
                     <Route path="announcements" element={<AdminAnnouncements />} />
-                    <Route path="support" element={<SupportAdmin />} />
+                    <Route path="support" element={<AdminSupportChat />} />
                     <Route path="mirror" element={<AdminMirror />} />
                     <Route path="roi-approvals" element={<RoiApprovals />} />
                     {/* <Route path="market-updates" element={<AdminMarketUpdates />} /> */}
                     <Route path="cold-wallet" element={<AdminColdWallet />} />
+                    <Route path="cars" element={<AdminCars />} />
                   </Route>
 
                   {/* Client Routes */}
@@ -115,6 +133,8 @@ function App() {
                   <Route path="/legal" element={<LegalDisclaimerPage />} />
                   <Route path="/about" element={<AboutPage />} />
                   <Route path="/group-chat" element={<GroupChat />} />
+                  <Route path="/cars" element={<CarShop />} />
+                  <Route path="/cars/:id" element={<CarDetail />} />
                   <Route path="/dashboard" element={<DashboardLayout sidebarCollapsed={sidebarCollapsed} setSidebarCollapsed={setSidebarCollapsed} />}>
                     <Route index element={<Dashboard />} />
                     <Route path="portfolio" element={<Portfolio />} />
@@ -130,6 +150,7 @@ function App() {
                     <Route path="fund-prospectus" element={<FundProspectus />} />
                     <Route path="statements" element={<Statements />} />
                     <Route path="support" element={<SupportChat />} />
+
                     <Route path="invite-friends" element={<InviteFriends />} />
                   </Route>
                   <Route path="/register" element={<Register />} />
@@ -145,11 +166,12 @@ function App() {
                   <Route path="/events/:slug" element={<EventDetailPage />} />
                 </Routes>
                 </AppLayout>
-              </RefreshProvider>
-            </UserProvider>
-          </AdminAuthProvider>
-        </UserDataRefreshProvider>
-      </NotificationProvider>
+                </RefreshProvider>
+              </UserProvider>
+            </AdminAuthProvider>
+          </UserDataRefreshProvider>
+        </NotificationProvider>
+      </ThemeProvider>
     </BrowserRouter>
   );
 }

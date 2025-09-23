@@ -89,10 +89,12 @@ const UserDetail = ({ user, onClose, onUpdate }) => {
     }
   };
 
+
+
   return (
     <>
       <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
-        <div className="bg-gray-800 rounded-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-gold scrollbar-track-gray-900/60">
+        <div className="bg-gray-800 rounded-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-orange scrollbar-track-gray-900/60">
           <div className="p-6">
             <div className="flex justify-between items-start mb-6">
               <div>
@@ -131,6 +133,7 @@ const UserDetail = ({ user, onClose, onUpdate }) => {
               >
                 Notes
               </button>
+
             </div>
             {activeTab === 'overview' && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -289,6 +292,8 @@ const UserDetail = ({ user, onClose, onUpdate }) => {
                 </div>
               </div>
             )}
+
+
 
             {/* Other tabs would be implemented similarly */}
           </div>

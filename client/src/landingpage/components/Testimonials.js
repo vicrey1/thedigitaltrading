@@ -23,13 +23,13 @@ function Testimonials() {
             ),
             e('div', { className: 'grid lg:grid-cols-2 gap-12' },
                 e(TestimonialCard, {
-                    text: '"LUXYIELD transformed our approach to capital growth. Their synthesis of AI-driven analytics and human oversight is, without question, the future of asset management. Their performance has consistently exceeded benchmarks while mitigating downside risk."',
+                    text: '"THE DIGITAL TRADING brought structure and clarity to our digital asset program. Their process, documentation, and reporting give us confidence in disciplined execution."',
                     author: 'Marcus Thorne',
                     title: 'Chief Investment Officer, Tectonics Endowment Fund',
                     depth: 0.003
                 }),
                 e(TestimonialCard, {
-                    text: '"The level of transparency and personalized service is unlike anything I\'ve experienced. I don\'t just feel like a client; I feel like a partner. They have earned my complete trust and delivered exceptional results for my family\'s wealth."',
+                    text: '"The level of transparency and personalized service stands out. We feel like true partners, and the team consistently provides clear, professional guidance."',
                     author: 'Elena Vostrov',
                     title: 'Private Wealth Client & Tech Entrepreneur',
                     depth: 0.003

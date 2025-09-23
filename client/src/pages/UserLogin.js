@@ -43,58 +43,58 @@ const UserLogin = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-dark p-2 sm:p-4">
-      <div className="w-full max-w-md bg-gray-800 rounded-xl shadow-lg p-4 sm:p-8">
+    <div className="min-h-screen flex items-center justify-center bg-dark p-4 sm:p-6">
+      <div className="w-full max-w-md bg-gray-800 rounded-xl shadow-lg p-6 sm:p-8 mx-4">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gold mb-2">LUXYIELD</h1>
-          <h2 className="text-xl text-white">User Login</h2>
+          <h1 className="text-3xl font-bold text-orange-400 mb-2">CRYPTO TRADING</h1>
+          <h2 className="text-xl sm:text-2xl text-white mb-4 sm:mb-6">User Login</h2>
         </div>
         {error && (
           <div className="mb-4 p-3 bg-red-500 bg-opacity-20 text-red-400 rounded-lg">{error}</div>
         )}
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="w-full">
-            <label htmlFor="login-email" className="block text-gray-400 mb-2">Email</label>
+          <div className="w-full mb-4 sm:mb-6">
+            <label htmlFor="login-email" className="block text-gray-400 mb-2 text-sm sm:text-base">Email</label>
             <input
               id="login-email"
               name="email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold"
+              className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 text-base min-h-[44px]"
               placeholder="user@email.com"
               required
               autoComplete="email"
             />
           </div>
-          <div className="w-full">
-            <label htmlFor="login-password" className="block text-gray-400 mb-2">Password</label>
+          <div className="w-full mb-4 sm:mb-6">
+            <label htmlFor="login-password" className="block text-gray-400 mb-2 text-sm sm:text-base">Password</label>
             <input
               id="login-password"
               name="password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold"
+              className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 text-base min-h-[44px]"
               placeholder="Password"
               required
               autoComplete="current-password"
             />
             <div className="mt-2 text-right">
-              <a href="/forgot-password" className="text-gold hover:underline text-sm">Forgot password?</a>
+              <a href="/forgot-password" className="text-orange-400 hover:underline text-sm">Forgot password?</a>
             </div>
           </div>
           <button
             type="submit"
-            className="w-full bg-gold text-black font-bold py-3 rounded hover:bg-yellow-600 transition text-base sm:text-lg"
+            className="w-full bg-orange-500 text-white font-bold py-3 px-4 rounded hover:bg-orange-600 transition text-base sm:text-lg min-h-[44px] mb-4"
             disabled={loading}
           >
             {loading ? 'Logging in...' : 'Login'}
           </button>
         </form>
-        <div className="mt-4 text-center">
+        <div className="mt-4 sm:mt-6 text-center text-sm sm:text-base">
           Don't have an account?{' '}
-          <a href="https://www.luxyield.com/register" className="text-gold hover:underline">Register here</a>
+          <a href="https://www.thedigitaltrading.com/register" className="text-orange-400 hover:underline font-medium">Register here</a>
         </div>
       </div>
     </div>

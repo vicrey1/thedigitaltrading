@@ -38,10 +38,22 @@ const FundPerformance = () => {
   const [returns, setReturns] = useState([]);
 
   useEffect(() => {
-    // In a real app, fetch from API
-    setPerformanceData(mockPerformanceData);
-    setAllocation(mockAllocation);
-    setReturns(mockReturns);
+    const safePerformanceData = mockPerformanceData.map(d => ({
+      ...d,
+      value: (typeof d.value === 'number' && isFinite(d.value)) ? d.value : 0
+    }));
+    const safeAllocation = mockAllocation.map(d => ({
+      ...d,
+      value: (typeof d.value === 'number' && isFinite(d.value)) ? d.value : 0
+    })).filter(d => d.value > 0);
+    const safeReturns = mockReturns.map(d => ({
+      ...d,
+      value: (typeof d.value === 'number' && isFinite(d.value)) ? d.value : 0
+    }));
+
+    setPerformanceData(safePerformanceData.length ? safePerformanceData : [{ month: '-', value: 0 }]);
+    setAllocation(safeAllocation.length ? safeAllocation : [{ name: '-', value: 0 }]);
+    setReturns(safeReturns.length ? safeReturns : [{ name: '-', value: 0 }]);
   }, []);
 
   return (
@@ -55,8 +67,8 @@ const FundPerformance = () => {
             <LineChart data={performanceData}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="month" />
-              <YAxis />
-              <Tooltip />
+              <YAxis tickFormatter={(v)=> (typeof v==='number' && isFinite(v))? v: 0} />
+              <Tooltip formatter={(v)=> (typeof v==='number' && isFinite(v))? v: 0} />
               <Legend />
               <Line type="monotone" dataKey="value" stroke="#D4AF37" strokeWidth={3} />
             </LineChart>
@@ -84,8 +96,8 @@ const FundPerformance = () => {
           <BarChart data={returns}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="name" />
-            <YAxis />
-            <Tooltip />
+            <YAxis tickFormatter={(v)=> (typeof v==='number' && isFinite(v))? v: 0} />
+            <Tooltip formatter={(v)=> (typeof v==='number' && isFinite(v))? v: 0} />
             <Legend />
             <Bar dataKey="value" fill="#D4AF37" />
           </BarChart>

@@ -1,7 +1,9 @@
 require('dotenv').config({ path: __dirname + '/.env' });
 console.log('==============================');
-console.log('LuxYield Backend Server Starting');
+console.log('THE DIGITAL TRADING Backend Server Starting');
 console.log('[DEBUG] MONGO_URI:', process.env.MONGO_URI);
+console.log('[DEBUG] PORT from env:', process.env.PORT);
+console.log('[DEBUG] NODE_ENV:', process.env.NODE_ENV);
 console.log('==============================');
 const express = require('express');
 const mongoose = require('mongoose');
@@ -20,7 +22,12 @@ app.use('/socket.io', (req, res, next) => {
 });
 const server = http.createServer(app);
 
-const io = socketio(server, { cors: { origin: ['https://www.luxyield.com'], credentials: true } });
+const io = socketio(server, { cors: { origin: '*', credentials: true } });
+
+io.use((socket, next) => {
+  console.log('Socket connection attempt with headers:', socket.handshake.headers);
+  next();
+});
 
 // Basic Socket.IO connection handler
 io.on('connection', (socket) => {
@@ -32,7 +39,7 @@ io.on('connection', (socket) => {
 
 // CORS Middleware
 app.use(cors({
-  origin: 'https://www.luxyield.com',
+  origin: ['https://www.thedigitaltrading.com', 'http://localhost:3000'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'], // Added PATCH
   credentials: true,
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
@@ -40,7 +47,7 @@ app.use(cors({
 }));
 // Handle preflight requests for all routes
 app.options('*', cors({
-  origin: 'https://www.luxyield.com',
+  origin: ['https://www.thedigitaltrading.com', 'http://localhost:3000'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'], // Added PATCH
   credentials: true,
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept']
@@ -94,28 +101,19 @@ app.use('/uploads/announcements', express.static(__dirname + '/uploads/announcem
 app.use('/api', require('./routes/announcementUploads'));
 app.use('/api/performance', require('./routes/performance')); // Add performance metrics API route
 app.use('/api/news', require('./routes/news')); // Add news API route
-const supportChat = require('./routes/supportChat');
-app.use('/api/support', supportChat(io));
+
 app.use('/api/investment', require('./routes/investment'));
 app.use('/api/ai-chat', require('./routes/aiChat'));
 app.use('/api/withdrawal', require('./routes/withdrawal'));
+app.use('/api/cars', require('./routes/cars'));
+app.use('/api/fees', require('./routes/fees'));
+app.use('/api/support', require('./routes/supportChat'));
+app.use('/api/admin/support', require('./routes/admin/supportChat'));
 
+// Serve car uploads statically
+app.use('/uploads/cars', express.static(__dirname + '/uploads/cars'));
 // Serve support uploads statically
 app.use('/uploads/support', express.static(__dirname + '/uploads/support'));
-
-// Logging middleware for support uploads
-app.use('/uploads/support/:filename', (req, res, next) => {
-  const filePath = require('path').join(__dirname, 'uploads', 'support', req.params.filename);
-  const fs = require('fs');
-  fs.access(filePath, fs.constants.F_OK, (err) => {
-    if (err) {
-      console.error(`[UPLOADS LOG] File not found: ${filePath}`);
-    } else {
-      console.log(`[UPLOADS LOG] File found: ${filePath}`);
-    }
-    next();
-  });
-});
 
 // Socket.IO logic
 io.on('connection', (socket) => {
@@ -164,13 +162,62 @@ app.get('/api/health', async (req, res) => {
     if (dbState === 1) dbStatus = 'connected';
     else if (dbState === 2) dbStatus = 'connecting';
     else if (dbState === 3) dbStatus = 'disconnecting';
-    res.json({
-      status: 'ok',
-      dbStatus,
-      serverTime: new Date().toISOString()
-    });
+    
+    const health = {
+      status: dbStatus === 'connected' ? 'healthy' : 'unhealthy',
+      timestamp: new Date().toISOString(),
+      database: {
+        status: dbStatus,
+        name: mongoose.connection.name || 'unknown'
+      },
+      server: {
+        uptime: Math.round(process.uptime()),
+        environment: process.env.NODE_ENV || 'development',
+        nodeVersion: process.version
+      }
+    };
+    
+    // Return appropriate status code
+    const statusCode = health.status === 'healthy' ? 200 : 503;
+    res.status(statusCode).json(health);
   } catch (err) {
-    res.status(500).json({ status: 'error', error: err.message });
+    res.status(500).json({ 
+      status: 'error', 
+      timestamp: new Date().toISOString(),
+      error: err.message 
+    });
+  }
+});
+
+// Detailed metrics endpoint (for monitoring systems)
+app.get('/api/metrics', async (req, res) => {
+  try {
+    const { SystemMetrics, requestMetrics, dbMetrics } = require('./middleware/monitoring');
+    
+    const metrics = {
+      timestamp: new Date().toISOString(),
+      system: {
+        memory: SystemMetrics.getMemoryUsage(),
+        cpu: SystemMetrics.getCpuUsage(),
+        process: SystemMetrics.getProcessInfo()
+      },
+      requests: requestMetrics.getMetrics(),
+      database: {
+        connection: {
+          status: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
+          name: mongoose.connection.name
+        },
+        metrics: dbMetrics.getMetrics()
+      }
+    };
+    
+    res.json(metrics);
+  } catch (err) {
+    res.status(500).json({ 
+      status: 'error', 
+      timestamp: new Date().toISOString(),
+      error: err.message 
+    });
   }
 });
 
@@ -179,6 +226,7 @@ app.get('/', (req, res) => {
   res.send('API is running');
 });
 
-server.listen(process.env.PORT || 5001, () => {
-  console.log('Server running on port', process.env.PORT || 5001);
+console.log(`[DEBUG] Final port check before listen: ${process.env.PORT}`);
+server.listen(process.env.PORT, () => {
+  console.log('Server running on port', process.env.PORT);
 });

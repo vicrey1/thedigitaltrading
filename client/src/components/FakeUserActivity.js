@@ -4,7 +4,7 @@ const NAMES = ['Alice', 'Bob', 'Charlie', 'Diana', 'Eve', 'Frank', 'Grace', 'Hei
 const ACTIONS = [
   name => `${name} just invested $${(Math.random()*5000+500).toFixed(0)} in Crypto Fund`,
   name => `${name} withdrew $${(Math.random()*2000+100).toFixed(0)}`,
-  name => `${name} earned a profit of $${(Math.random()*1000+100).toFixed(0)}`,
+  name => `${name} completed a portfolio review`,
   name => `${name} started a new investment plan`,
   name => `${name} received a referral bonus of $${(Math.random()*200+20).toFixed(0)}`
 ];

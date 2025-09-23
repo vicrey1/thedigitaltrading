@@ -16,6 +16,7 @@ import axios from 'axios';
 import InvestmentDetail from '../components/InvestmentDetail';
 import { useUser } from '../contexts/UserContext';
 import { useUserDataRefresh } from '../contexts/UserDataRefreshContext';
+import { useTheme } from '../contexts/ThemeContext';
 import '../custom-scrollbar.css';
 
 // API endpoint for plans
@@ -25,6 +26,7 @@ const PLANS_API = '/api/plans';
 
 
 const Portfolio = ({ adminView = false, portfolioData: adminPortfolioData }) => {
+  const { isDarkMode } = useTheme();
   // Dynamically loaded plans
   const [planConfig, setPlanConfig] = useState({});
   const [investmentPlans, setInvestmentPlans] = useState([]);
@@ -121,7 +123,7 @@ const Portfolio = ({ adminView = false, portfolioData: adminPortfolioData }) => 
   }) || [];
 
   // COLORS for charts
-  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#D4AF37', '#8884D8'];
+  const COLORS = ['#F7931A', '#16A085', '#3498DB', '#9B59B6', '#E74C3C', '#F39C12'];
 
   // Find active investment (if any)
   const activeInvestment = portfolioData?.investments?.find(inv => inv.status === 'active');
@@ -217,11 +219,24 @@ const Portfolio = ({ adminView = false, portfolioData: adminPortfolioData }) => 
   // Check if user has any active investment
   const hasActiveInvestment = filteredInvestments.some(inv => inv.status === 'active');
 
+  // Validate chart data to prevent NaN errors
+  const safePerformanceData = portfolioData?.performanceData?.map(item => ({
+    ...item,
+    portfolioValue: isNaN(item.portfolioValue) || !isFinite(item.portfolioValue) ? 0 : item.portfolioValue,
+    benchmark: isNaN(item.benchmark) || !isFinite(item.benchmark) ? 0 : item.benchmark,
+    roiPercent: isNaN(item.roiPercent) || !isFinite(item.roiPercent) ? 0 : item.roiPercent,
+  })) || [];
+
+  const safeAllocationData = portfolioData?.allocationData?.map(item => ({
+    ...item,
+    value: isNaN(item.value) || !isFinite(item.value) ? 0 : item.value,
+  })).filter(item => item.value > 0) || [];
+
   return (
     <div className="space-y-8 px-2 sm:px-4 md:px-6 py-6 sm:py-8 w-full max-w-full overflow-x-auto">
       {/* Portfolio Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0">
-        <h1 className="text-2xl font-bold">Investment Portfolio</h1>
+        <h1 className="text-2xl font-bold">Crypto Trading Portfolio</h1>
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-2">
           <button className="flex items-center text-sm bg-gray-800 bg-opacity-50 hover:bg-opacity-70 px-3 py-2 rounded-lg transition">
             <FiRefreshCw className="mr-2" /> Refresh
@@ -229,7 +244,7 @@ const Portfolio = ({ adminView = false, portfolioData: adminPortfolioData }) => 
           <select
             value={timeRange}
             onChange={(e) => setTimeRange(e.target.value)}
-            className="bg-gray-800 bg-opacity-50 hover:bg-opacity-70 px-3 py-2 rounded-lg text-sm focus:outline-none"
+            className={`${isDarkMode ? 'bg-gray-800' : 'bg-gray-200'} bg-opacity-50 hover:bg-opacity-70 px-3 py-2 rounded-lg text-sm focus:outline-none ${isDarkMode ? 'text-white' : 'text-gray-900'}`}
           >
             <option value="1m">1 Month</option>
             <option value="3m">3 Months</option>
@@ -248,8 +263,8 @@ const Portfolio = ({ adminView = false, portfolioData: adminPortfolioData }) => 
               <p className="text-gray-400">Total Invested</p>
               <h2 className="text-2xl font-bold">${portfolioData.summary.totalInvested.toLocaleString()}</h2>
             </div>
-            <div className="bg-blue-500 bg-opacity-20 p-3 rounded-full text-blue-500">
-              <FiDollarSign size={20} />
+            <div className="bg-crypto-blue bg-opacity-20 p-3 rounded-full text-crypto-blue">
+              <FiTrendingUp size={20} />
             </div>
           </div>
         </div>
@@ -259,15 +274,15 @@ const Portfolio = ({ adminView = false, portfolioData: adminPortfolioData }) => 
               <p className="text-gray-400">Current Value</p>
               <h2 className="text-2xl font-bold">${Number(activeCurrentValue).toLocaleString(undefined, {maximumFractionDigits: 2})}</h2>
             </div>
-            <div className="bg-green-500 bg-opacity-20 p-3 rounded-full text-green-500">
-              <FiTrendingUp size={20} />
+            <div className="bg-crypto-green bg-opacity-20 p-3 rounded-full text-crypto-green">
+              <FiDollarSign size={20} />
             </div>
           </div>
         </div>
         <div className="glassmorphic p-4 sm:p-6 rounded-xl">
           <div className="flex justify-between items-start">
             <div>
-              <p className="text-gray-400">Total ROI (Expected)</p>
+              <p className="text-gray-400">Total Performance (Expected)</p>
               <h2 className="text-2xl font-bold">
                 {(() => {
                   if (!activeInvestment) return '--';
@@ -276,7 +291,7 @@ const Portfolio = ({ adminView = false, portfolioData: adminPortfolioData }) => 
                 })()}
               </h2>
             </div>
-            <div className="bg-purple-500 bg-opacity-20 p-3 rounded-full text-purple-500">
+            <div className="bg-crypto-orange bg-opacity-20 p-3 rounded-full text-crypto-orange">
               <FiPieChart size={20} />
             </div>
           </div>
@@ -287,7 +302,7 @@ const Portfolio = ({ adminView = false, portfolioData: adminPortfolioData }) => 
               <p className="text-gray-400">Active Investments</p>
               <h2 className="text-2xl font-bold">{portfolioData.summary.activeInvestments}</h2>
             </div>
-            <div className="bg-yellow-500 bg-opacity-20 p-3 rounded-full text-yellow-500">
+            <div className="bg-crypto-orange bg-opacity-20 p-3 rounded-full text-crypto-orange">
               <FiClock size={20} />
             </div>
           </div>
@@ -301,38 +316,43 @@ const Portfolio = ({ adminView = false, portfolioData: adminPortfolioData }) => 
           <h3 className="text-xl font-bold mb-4">Portfolio Growth</h3>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={portfolioData.performanceData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#333" />
+              <LineChart data={safePerformanceData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? "#333" : "#E5E7EB"} />
                 <XAxis 
                   dataKey="name" 
-                  stroke="#aaa" 
+                  stroke={isDarkMode ? "#aaa" : "#6B7280"} 
                   tickFormatter={(name) => name}
                   interval={0} // Show every tick (daily)
                   tick={{ angle: -35, fontSize: 10, dy: 10 }}
                 />
-                <YAxis stroke="#aaa" />
+                <YAxis stroke={isDarkMode ? "#aaa" : "#6B7280"} />
                 <Tooltip 
-                  contentStyle={{ backgroundColor: '#1a1a1a', borderColor: '#333', borderRadius: '8px' }}
+                  contentStyle={{ 
+                    backgroundColor: isDarkMode ? '#1a1a1a' : '#FFFFFF', 
+                    borderColor: isDarkMode ? '#333' : '#E5E7EB', 
+                    borderRadius: '8px',
+                    color: isDarkMode ? '#fff' : '#111827'
+                  }}
                   formatter={(value) => [`$${value.toLocaleString()}`, 'Value']}
-                  labelStyle={{ color: '#fff' }}
+                  labelStyle={{ color: isDarkMode ? '#fff' : '#111827' }}
                 />
                 <Legend />
                 <Line
                   type="monotone"
                   dataKey="nav"
                   name="Fund NAV"
-                  stroke="#D4AF37"
+                  stroke="#F7931A"
                   strokeWidth={2}
-                  dot={{ fill: '#D4AF37', strokeWidth: 2, r: 4 }}
+                  dot={{ fill: '#F7931A', strokeWidth: 2, r: 4 }}
                   activeDot={{ r: 6 }}
                 />
                 <Line
                   type="monotone"
                   dataKey="benchmark"
                   name="Benchmark"
-                  stroke="#8884d8"
+                  stroke="#16A085"
                   strokeWidth={2}
-                  dot={{ fill: '#8884d8', strokeWidth: 2, r: 4 }}
+                  dot={{ fill: '#16A085', strokeWidth: 2, r: 4 }}
                   activeDot={{ r: 6 }}
                 />
               </LineChart>
@@ -346,7 +366,7 @@ const Portfolio = ({ adminView = false, portfolioData: adminPortfolioData }) => 
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
-                  data={portfolioData.allocationData}
+                  data={safeAllocationData}
                   cx="50%"
                   cy="50%"
                   labelLine={false}
@@ -355,14 +375,19 @@ const Portfolio = ({ adminView = false, portfolioData: adminPortfolioData }) => 
                   dataKey="value"
                   label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                 >
-                  {portfolioData.allocationData.map((entry, index) => (
+                  {safeAllocationData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
                 <Tooltip 
-                  contentStyle={{ backgroundColor: '#1a1a1a', borderColor: '#333', borderRadius: '8px' }}
+                  contentStyle={{ 
+                    backgroundColor: isDarkMode ? '#1a1a1a' : '#FFFFFF', 
+                    borderColor: isDarkMode ? '#333' : '#E5E7EB', 
+                    borderRadius: '8px',
+                    color: isDarkMode ? '#fff' : '#111827'
+                  }}
                   formatter={(value) => [`$${value.toLocaleString()}`, 'Value']}
-                  labelStyle={{ color: '#fff' }}
+                  labelStyle={{ color: isDarkMode ? '#fff' : '#111827' }}
                 />
                 <Legend />
               </PieChart>
@@ -379,7 +404,7 @@ const Portfolio = ({ adminView = false, portfolioData: adminPortfolioData }) => 
             <button
               onClick={() => setActiveTab('all')}
               className={`px-4 py-2 rounded-lg text-sm ${
-                activeTab === 'all' ? 'bg-gold text-black' : 'bg-gray-800 bg-opacity-50 hover:bg-opacity-70'
+                activeTab === 'all' ? 'bg-crypto-orange text-black' : `${isDarkMode ? 'bg-gray-800' : 'bg-gray-200'} bg-opacity-50 hover:bg-opacity-70 ${isDarkMode ? 'text-white' : 'text-gray-900'}`
               } transition`}
             >
               All
@@ -387,7 +412,7 @@ const Portfolio = ({ adminView = false, portfolioData: adminPortfolioData }) => 
             <button
               onClick={() => setActiveTab('active')}
               className={`px-4 py-2 rounded-lg text-sm ${
-                activeTab === 'active' ? 'bg-gold text-black' : 'bg-gray-800 bg-opacity-50 hover:bg-opacity-70'
+                activeTab === 'active' ? 'bg-crypto-orange text-black' : `${isDarkMode ? 'bg-gray-800' : 'bg-gray-200'} bg-opacity-50 hover:bg-opacity-70 ${isDarkMode ? 'text-white' : 'text-gray-900'}`
               } transition`}
             >
               Active
@@ -395,7 +420,7 @@ const Portfolio = ({ adminView = false, portfolioData: adminPortfolioData }) => 
             <button
               onClick={() => setActiveTab('completed')}
               className={`px-4 py-2 rounded-lg text-sm ${
-                activeTab === 'completed' ? 'bg-gold text-black' : 'bg-gray-800 bg-opacity-50 hover:bg-opacity-70'
+                activeTab === 'completed' ? 'bg-crypto-orange text-black' : `${isDarkMode ? 'bg-gray-800' : 'bg-gray-200'} bg-opacity-50 hover:bg-opacity-70 ${isDarkMode ? 'text-white' : 'text-gray-900'}`
               } transition`}
             >
               Completed
@@ -411,7 +436,7 @@ const Portfolio = ({ adminView = false, portfolioData: adminPortfolioData }) => 
                 <th className="pb-4">Plan</th>
                 <th className="pb-4 text-right">Invested</th>
                 <th className="pb-4 text-right">Current Value</th>
-                <th className="pb-4 text-right">ROI (Expected)</th>
+                <th className="pb-4 text-right">Expected Return</th>
                 <th className="pb-4">Duration</th>
                 <th className="pb-4 text-right">Actions</th>
               </tr>
@@ -478,14 +503,14 @@ const Portfolio = ({ adminView = false, portfolioData: adminPortfolioData }) => 
                 <div className="mb-1 text-sm"><span className="font-bold">Plan:</span> {investment.planName}</div>
                 <div className="mb-1 text-sm"><span className="font-bold">Invested:</span> ${investment.initialAmount.toLocaleString()}</div>
                 <div className="mb-1 text-sm"><span className="font-bold">Current Value:</span> ${Number(value).toLocaleString(undefined, {maximumFractionDigits: 2})}</div>
-                <div className="mb-1 text-sm"><span className="font-bold">ROI (Expected):</span> {(() => {
+                <div className="mb-1 text-sm"><span className="font-bold">Expected Return:</span> {(() => {
                   const cfg = findPlanConfigByName(investment.planName);
                   return cfg ? (typeof cfg.roi === 'number' ? `${cfg.roi}%` : `${cfg.roi}`) : '--';
                 })()}</div>
                 <div className="mb-1 text-sm"><span className="font-bold">Duration:</span> {investment.startDate ? new Date(investment.startDate).toLocaleDateString() : ''} - {investment.endDate ? new Date(investment.endDate).toLocaleDateString() : ''}</div>
                 <button 
                   onClick={() => setSelectedInvestment(investment)}
-                  className="mt-2 w-full bg-gold text-black px-4 py-2 rounded-lg font-bold hover:bg-yellow-500 transition text-sm"
+                  className="mt-2 w-full bg-crypto-orange text-black px-4 py-2 rounded-lg font-bold hover:bg-yellow-500 transition text-sm"
                 >
                   Details
                 </button>
@@ -512,11 +537,11 @@ const Portfolio = ({ adminView = false, portfolioData: adminPortfolioData }) => 
               {investmentPlans.slice(0,2).map(plan => (
                 <div key={plan.name} className="bg-gray-900 rounded-xl p-4 flex flex-col items-center border-2" style={{ borderColor: plan.color || '#D4AF37' }}>
                   <div className="text-2xl font-bold mb-2" style={{ color: plan.color || '#D4AF37' }}>{plan.name}</div>
-                  <div className="mb-1">ROI (Expected): <span className="font-bold">{plan.percentReturn}%</span></div>
+                  <div className="mb-1">Expected Return: <span className="font-bold">{plan.percentReturn}%</span></div>
                   <div className="mb-1">Duration: <span className="font-bold">{plan.durationDays} days</span></div>
                   <div className="mb-1">Min: <span className="font-bold">${plan.minInvestment}</span></div>
                   <div className="mb-1">Max: <span className="font-bold">${plan.maxInvestment}</span></div>
-                  <button className="mt-2 bg-gold text-black px-4 py-2 rounded-lg font-bold hover:bg-yellow-500 transition" onClick={() => { if (!hasActiveInvestment) { setSelectedPlan(plan); setShowPlanModal(true); }}} disabled={hasActiveInvestment}>
+                  <button className="mt-2 bg-crypto-orange text-black px-4 py-2 rounded-lg font-bold hover:bg-yellow-500 transition" onClick={() => { if (!hasActiveInvestment) { setSelectedPlan(plan); setShowPlanModal(true); }}} disabled={hasActiveInvestment}>
                     Start Investment
                   </button>
                   {hasActiveInvestment && <div className="text-xs text-red-400 mt-2">You can only have one active investment at a time.</div>}
@@ -527,11 +552,11 @@ const Portfolio = ({ adminView = false, portfolioData: adminPortfolioData }) => 
               {investmentPlans.slice(2,4).map(plan => (
                 <div key={plan.name} className="bg-gray-900 rounded-xl p-4 flex flex-col items-center border-2" style={{ borderColor: plan.color || '#D4AF37' }}>
                   <div className="text-2xl font-bold mb-2" style={{ color: plan.color || '#D4AF37' }}>{plan.name}</div>
-                  <div className="mb-1">ROI (Expected): <span className="font-bold">{plan.percentReturn}%</span></div>
+                  <div className="mb-1">Expected Return: <span className="font-bold">{plan.percentReturn}%</span></div>
                   <div className="mb-1">Duration: <span className="font-bold">{plan.durationDays} days</span></div>
                   <div className="mb-1">Min: <span className="font-bold">${plan.minInvestment}</span></div>
                   <div className="mb-1">Max: <span className="font-bold">${plan.maxInvestment}</span></div>
-                  <button className="mt-2 bg-gold text-black px-4 py-2 rounded-lg font-bold hover:bg-yellow-500 transition" onClick={() => { setSelectedPlan(plan); setShowPlanModal(true); }}>Start Investment</button>
+                  <button className="mt-2 bg-crypto-orange text-black px-4 py-2 rounded-lg font-bold hover:bg-yellow-500 transition" onClick={() => { setSelectedPlan(plan); setShowPlanModal(true); }}>Start Investment</button>
                 </div>
               ))}
             </div>
@@ -543,14 +568,14 @@ const Portfolio = ({ adminView = false, portfolioData: adminPortfolioData }) => 
       {showPlanModal && selectedPlan && (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
           <div className="bg-gray-900 rounded-xl p-8 w-full max-w-md relative">
-            <button className="absolute top-2 right-2 text-gold" onClick={() => setShowPlanModal(false)}>✕</button>
+            <button className="absolute top-2 right-2 text-crypto-orange" onClick={() => setShowPlanModal(false)}>✕</button>
             <h2 className="text-xl font-bold mb-4">Invest in {selectedPlan.name} Plan</h2>
             {/* Available Balance Display */}
             <div className="mb-4 p-3 rounded-lg bg-gray-800 flex items-center justify-between">
               <span className="text-gray-300 font-medium">Available Balance</span>
-              <span className="text-2xl font-bold text-gold">${portfolioData?.userInfo?.availableBalance !== undefined ? Number(portfolioData.userInfo.availableBalance).toLocaleString() : '0'}</span>
+              <span className="text-2xl font-bold text-crypto-orange">${portfolioData?.userInfo?.availableBalance !== undefined ? Number(portfolioData.userInfo.availableBalance).toLocaleString() : '0'}</span>
             </div>
-            <div className="mb-2">ROI (Expected): <span className="font-bold">{selectedPlan.percentReturn ?? selectedPlan.roi}%</span></div>
+            <div className="mb-2">Expected Return: <span className="font-bold">{selectedPlan.percentReturn ?? selectedPlan.roi}%</span></div>
             <div className="mb-2">Duration: <span className="font-bold">{selectedPlan.durationDays ?? selectedPlan.duration} days</span></div>
             <div className="mb-2">Min: <span className="font-bold">${selectedPlan.minInvestment ?? selectedPlan.min}</span></div>
             <div className="mb-2">Max: <span className="font-bold">${selectedPlan.maxInvestment ?? selectedPlan.max}</span></div>
@@ -602,7 +627,7 @@ const Portfolio = ({ adminView = false, portfolioData: adminPortfolioData }) => 
                 placeholder={`Enter amount ($${selectedPlan.minInvestment ?? selectedPlan.min} - $${selectedPlan.maxInvestment ?? selectedPlan.max})`}
               />
               {investError && <div className="text-red-400 mb-2">{investError}</div>}
-              <button type="submit" className="mt-2 bg-gold text-black px-4 py-2 rounded-lg font-bold hover:bg-yellow-500 transition w-full" disabled={investLoading}>
+              <button type="submit" className="mt-2 bg-crypto-orange text-black px-4 py-2 rounded-lg font-bold hover:bg-yellow-500 transition w-full" disabled={investLoading}>
                 {investLoading ? 'Investing...' : 'Confirm Investment'}
               </button>
             </form>
@@ -613,7 +638,7 @@ const Portfolio = ({ adminView = false, portfolioData: adminPortfolioData }) => 
       {/* Recent Activity Section */}
       <div className="glassmorphic p-4 sm:p-6 rounded-xl overflow-x-auto">
         <h3 className="text-xl font-bold mb-4">Recent Activity</h3>
-        <div className="space-y-4 max-h-80 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gold scrollbar-track-gray-900/60">
+        <div className="space-y-4 max-h-80 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-crypto-orange scrollbar-track-gray-900/60">
           {portfolioData.recentActivity && portfolioData.recentActivity.length > 0 ? (
             portfolioData.recentActivity.map((activity, idx) => (
               <div key={idx} className="flex justify-between items-center p-3 border-b border-gray-800 last:border-0">

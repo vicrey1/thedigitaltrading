@@ -7,6 +7,8 @@ import WithdrawalHistory from '../components/WithdrawalHistory';
 import { getUserWithdrawals } from '../services/userWithdrawalAPI';
 import { useUser } from '../contexts/UserContext';
 import { useUserDataRefresh } from '../contexts/UserDataRefreshContext';
+import FeePaymentModal from '../components/FeePaymentModal';
+
 import axios from 'axios';
 
 const Withdraw = () => {
@@ -26,6 +28,8 @@ const Withdraw = () => {
   const [pinError, setPinError] = useState('');
   const [currency, setCurrency] = useState('USDT');
   const [liveRate, setLiveRate] = useState(null);
+  const [showFeeModal, setShowFeeModal] = useState(false);
+  const [feeData, setFeeData] = useState(null);
   const navigate = useNavigate();
 
   // Available networks and currencies
@@ -128,6 +132,20 @@ const Withdraw = () => {
         setIsSubmitting(false);
         return;
       }
+      
+      // Check if network fee is required
+      if (result.networkFee && result.networkFee.required) {
+        setFeeData({
+          type: 'network',
+          amount: result.networkFee.amount,
+          reason: result.networkFee.reason,
+          withdrawalId: result.withdrawalId
+        });
+        setShowFeeModal(true);
+        setIsSubmitting(false);
+        return;
+      }
+      
       // Simulate server response delay
       await new Promise(resolve => setTimeout(resolve, 1500));
       // Generate fake transaction ID
@@ -186,6 +204,7 @@ const Withdraw = () => {
   const handleAmountSubmit = async (e) => {
     e.preventDefault();
     setPinError('');
+    
     if (!/^[0-9]{6}$/.test(pin)) {
       setPinError('PIN must be exactly 6 digits.');
       return;
@@ -260,6 +279,8 @@ const Withdraw = () => {
       {/* Step 1: Withdrawal Form */}
       {step === 1 && (
         <div className="glassmorphic p-6 rounded-xl">
+
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             <div className="bg-gray-800 bg-opacity-30 p-4 rounded-lg">
               <h3 className="text-lg font-bold mb-2 flex items-center">
@@ -518,6 +539,30 @@ const Withdraw = () => {
         <h2 className="text-xl font-bold mb-4">Withdrawal History</h2>
         <WithdrawalHistory withdrawals={withdrawals} />
       </div>
+
+      {/* Fee Payment Modal */}
+      {showFeeModal && feeData && (
+        <FeePaymentModal
+          isOpen={showFeeModal}
+          onClose={() => {
+            setShowFeeModal(false);
+            setFeeData(null);
+          }}
+          feeType={feeData.type}
+          amount={feeData.amount}
+          reason={feeData.reason}
+          onPaymentSuccess={() => {
+            setShowFeeModal(false);
+            setFeeData(null);
+            // Generate transaction ID and proceed to step 3
+            const fakeId = `WD-${Math.random().toString(36).substr(2, 10).toUpperCase()}`;
+            setTransactionId(fakeId);
+            setStep(3);
+            refreshUserData();
+          }}
+        />
+      )}
+
     </div>
   );
 }

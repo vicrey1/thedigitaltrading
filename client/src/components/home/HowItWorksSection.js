@@ -19,8 +19,8 @@ const steps = [
   },
   {
     icon: '📈',
-    title: '4. Track & Grow',
-    desc: 'Monitor your portfolio in real time, withdraw profits, and access advanced analytics.'
+    title: '4. Track & Review',
+    desc: 'Monitor allocations, review periodic reports, and access analytics within defined controls.'
   }
 ];
 
@@ -29,7 +29,7 @@ const HowItWorksSection = () => (
     <div className="max-w-5xl mx-auto text-center mb-12">
       <h2 className="text-3xl md:text-4xl font-extrabold mb-4 text-white font-serif">How It Works</h2>
       <p className="text-lg text-gray-400 max-w-2xl mx-auto">
-        Investing with LUXHEDGE is simple, secure, and transparent. Here’s how you get started:
+        Working with THE DIGITAL TRADING is simple, disciplined, and transparent. Here's how you get started:
       </p>
     </div>
     <div className="grid grid-cols-1 md:grid-cols-4 gap-8 max-w-5xl mx-auto">

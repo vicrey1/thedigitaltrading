@@ -6,7 +6,6 @@ import { FiTrash2, FiInfo, FiClock } from 'react-icons/fi';
 import '../Announcements.css';
 
 const AdminAnnouncements = () => {
-  console.log('AdminAnnouncements rendered');
   const [title, setTitle] = useState('');
   const [richMessage, setRichMessage] = useState('');
   const [loading, setLoading] = useState(false);
@@ -23,7 +22,6 @@ const AdminAnnouncements = () => {
       const res = await axios.get('/api/admin/announcements', {
         headers: { Authorization: `Bearer ${token}` }
       });
-      console.log('Fetched announcements:', res.data.announcements);
       setAnnouncements(res.data.announcements || []);
     } catch (err) {
       setAnnouncements([]);
@@ -94,7 +92,6 @@ const AdminAnnouncements = () => {
       const formData = new FormData();
       formData.append('image', file);
       const token = localStorage.getItem('adminToken');
-      console.log('adminToken for image upload:', token);
       try {
         const res = await axios.post('/api/upload-announcement-image', formData, {
           headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${token}` }
@@ -116,8 +113,8 @@ const AdminAnnouncements = () => {
         }, 0);
         e.target.value = '';
       } catch (err) {
-        console.error('Image upload failed:', err);
-        alert('Image upload failed');
+        // Handle error with user-friendly message
+        alert('Image upload failed. Please try again.');
       }
     }
   };

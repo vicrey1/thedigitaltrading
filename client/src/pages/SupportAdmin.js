@@ -26,7 +26,7 @@ export default function SupportAdmin() {
   const [authBlobCache, setAuthBlobCache] = useState({});
   const authBlobCacheRef = useRef({});
 
-  const UPLOADS_BASE_URL = process.env.REACT_APP_API_URL || 'https://api.luxyield.com';
+  const UPLOADS_BASE_URL = process.env.REACT_APP_API_URL || 'https://api.thedigitaltrading.com';
 
   const fetchProtectedFileAsBlobUrl = async (url, cacheKey) => {
     if (!url) return null;
@@ -337,7 +337,7 @@ export default function SupportAdmin() {
             </div>
           )}
         </div>
-        <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gold scrollbar-track-gray-900/60">
+        <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-orange scrollbar-track-gray-900/60">
           {users.length === 0 && <div className="text-gray-400 p-4">No users yet.</div>}
           {users.map(user => (
             <div
@@ -403,7 +403,7 @@ export default function SupportAdmin() {
           </div>
           <div
             ref={chatContainerRef}
-            className="flex-1 overflow-y-auto p-4 bg-white scrollbar-thin scrollbar-thumb-gold scrollbar-track-gray-900/60"
+            className="flex-1 overflow-y-auto p-4 bg-white scrollbar-thin scrollbar-thumb-orange scrollbar-track-gray-900/60"
             style={{ minHeight: 0 }}
           >
             {(!userSelected || filteredMessages.length === 0) && (

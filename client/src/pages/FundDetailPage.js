@@ -1,5 +1,6 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
+import { useTheme } from '../contexts/ThemeContext';
 
 const fundData = {
   'eth-btc-basket': {
@@ -30,15 +31,37 @@ const fundData = {
 
 export default function FundDetailPage() {
   const { slug } = useParams();
+  const { isDarkMode, colors } = useTheme();
   const fund = fundData[slug];
-  if (!fund) return <div className="text-white p-8">Fund not found.</div>;
+  
+  if (!fund) return (
+    <div className={`p-8 min-h-screen ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'}`}>
+      Fund not found.
+    </div>
+  );
+  
   return (
-    <div className="max-w-3xl mx-auto p-8 text-white">
-      <h1 className="text-3xl font-bold mb-4 text-gold">{fund.title}</h1>
-      <div className="mb-2 text-lg text-gray-300">{fund.description}</div>
-      <div className="mb-4 text-gold font-mono">Projected ROI: {fund.roi}</div>
-      <div className="mb-8 text-base text-white/90">{fund.details}</div>
-      <a href="/" className="text-gold underline">Back to Home</a>
+    <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900' : 'bg-white'}`}>
+      <div className="max-w-3xl mx-auto p-8">
+        <h1 className={`text-3xl font-bold mb-4 ${isDarkMode ? 'text-crypto-orange' : 'text-crypto-orange-dark'}`}>
+          {fund.title}
+        </h1>
+        <div className={`mb-2 text-lg ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+          {fund.description}
+        </div>
+        <div className={`mb-4 font-mono ${isDarkMode ? 'text-crypto-orange' : 'text-crypto-orange-dark'}`}>
+          Illustrative Range: {fund.roi}
+        </div>
+        <div className={`mb-8 text-base ${isDarkMode ? 'text-white/90' : 'text-gray-800'}`}>
+          {fund.details}
+        </div>
+        <a 
+          href="/" 
+          className={`${isDarkMode ? 'text-crypto-orange hover:text-crypto-orange/80' : 'text-crypto-orange-dark hover:text-crypto-orange'} underline transition-colors`}
+        >
+          Back to Home
+        </a>
+      </div>
     </div>
   );
 }

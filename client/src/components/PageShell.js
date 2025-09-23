@@ -1,8 +1,11 @@
 import React from 'react';
+import { useTheme } from '../contexts/ThemeContext';
 
 export default function PageShell({ title, imageSrc, imageAlt, children }) {
+  const { isDarkMode, colors } = useTheme();
+  
   return (
-    <div className="min-h-screen bg-black text-brand-light/90">
+    <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'}`}>
       <div className="relative w-full h-64 md:h-80 overflow-hidden flex items-center justify-center">
         {imageSrc && (
           <img
@@ -12,7 +15,9 @@ export default function PageShell({ title, imageSrc, imageAlt, children }) {
           />
         )}
         <div className="relative z-10 text-center">
-          <h1 className="text-4xl md:text-5xl font-serif font-bold text-brand-accent drop-shadow-lg mb-2">{title}</h1>
+          <h1 className={`text-4xl md:text-5xl font-serif font-bold drop-shadow-lg mb-2 ${isDarkMode ? 'text-crypto-orange' : 'text-crypto-orange-dark'}`}>
+            {title}
+          </h1>
         </div>
       </div>
       <div className="container mx-auto px-4 py-12">

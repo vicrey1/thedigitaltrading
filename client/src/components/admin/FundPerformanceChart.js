@@ -3,9 +3,15 @@ import React from 'react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 const FundPerformanceChart = ({ data }) => {
+  // Validate data to prevent NaN values
+  const safeData = (data || []).map(item => ({
+    ...item,
+    roi: (typeof item.roi === 'number' && !isNaN(item.roi)) ? item.roi : 0
+  }));
+
   return (
     <ResponsiveContainer width="100%" height="100%">
-      <LineChart data={data}>
+      <LineChart data={safeData}>
         <XAxis dataKey="month" stroke="#aaa" />
         <YAxis stroke="#aaa" unit="%" />
         <Tooltip 

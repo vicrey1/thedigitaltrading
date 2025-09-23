@@ -5,8 +5,10 @@ import Webcam from 'react-webcam';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { FiCamera, FiUpload, FiCheckCircle, FiAlertCircle } from 'react-icons/fi';
+import { useTheme } from '../contexts/ThemeContext';
 
 const KYCPage = () => {
+  const { isDarkMode, colors } = useTheme();
   const [step, setStep] = useState(1); // 1: Info, 2: ID, 3: Selfie, 4: Review
   const [country, setCountry] = useState('');
   const [documentType, setDocumentType] = useState('');
@@ -162,7 +164,7 @@ const KYCPage = () => {
       <div className="max-w-md w-full mx-auto p-4 sm:p-8 glassmorphic rounded-xl mt-6 sm:mt-10 text-center overflow-auto">
         <ToastContainer />
         <FiAlertCircle className="mx-auto text-yellow-400 text-4xl mb-2" />
-        <h2 className="text-2xl font-bold mb-4 text-gold">KYC Verification</h2>
+        <h2 className="text-2xl font-bold mb-4 text-orange-400">KYC Verification</h2>
         <div className="text-yellow-400 font-bold">KYC Submitted! Under Review</div>
       </div>
     );
@@ -203,8 +205,18 @@ const KYCPage = () => {
       <div className="flex justify-between mb-8">
         {steps.map((s, i) => (
           <div key={i} className="flex-1 flex flex-col items-center">
-            <div className={`rounded-full w-8 h-8 flex items-center justify-center font-bold text-lg mb-1 border-2 ${step > i+1 ? 'bg-gold text-black border-gold' : step === i+1 ? 'bg-yellow-500 text-black border-yellow-500' : 'bg-gray-800 text-gray-400 border-gray-600'}`}>{i+1}</div>
-            <span className={`text-xs ${step === i+1 ? 'text-yellow-400' : 'text-gray-400'}`}>{s.label}</span>
+            <div className={`rounded-full w-8 h-8 flex items-center justify-center font-bold text-lg mb-1 border-2 ${
+              step > i+1 
+                ? `${isDarkMode ? 'bg-crypto-orange text-white border-crypto-orange' : 'bg-crypto-orange-dark text-white border-crypto-orange-dark'}` 
+                : step === i+1 
+                  ? `${isDarkMode ? 'bg-crypto-orange/80 text-white border-crypto-orange/80' : 'bg-crypto-orange-dark/80 text-white border-crypto-orange-dark/80'}` 
+                  : `${isDarkMode ? 'bg-gray-700 text-gray-400 border-gray-600' : 'bg-gray-200 text-gray-500 border-gray-300'}`
+            }`}>{i+1}</div>
+            <span className={`text-xs ${
+              step === i+1 
+                ? `${isDarkMode ? 'text-crypto-orange' : 'text-crypto-orange-dark'}` 
+                : `${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`
+            }`}>{s.label}</span>
           </div>
         ))}
       </div>
@@ -235,7 +247,7 @@ const KYCPage = () => {
               <option value="Other (Front & Back)">Other (Front & Back)</option>
               <option value="Other (Single Side)">Other (Single Side)</option>
             </select>
-            <button type="button" className="mt-6 bg-gold text-black px-4 py-2 rounded-lg font-bold hover:bg-yellow-500 transition w-full" disabled={!country || !documentType} onClick={() => setStep(2)}>Next</button>
+            <button type="button" className="mt-6 bg-orange-500 text-white px-4 py-2 rounded-lg font-bold hover:bg-orange-600 transition w-full" disabled={!country || !documentType} onClick={() => setStep(2)}>Next</button>
           </div>
         )}
         {step === 2 && (
@@ -264,9 +276,9 @@ const KYCPage = () => {
                     audio={false}
                     ref={idFrontWebcamRef}
                     screenshotFormat="image/jpeg"
-                    className="rounded border-2 border-gold w-48 h-32 object-contain mb-2"
+                    className="rounded border-2 border-orange-400 w-48 h-32 object-contain mb-2"
                   />
-                  <button type="button" className="bg-gold text-black px-4 py-2 rounded-lg font-bold hover:bg-yellow-500 transition mt-2" onClick={handleIdFrontCapture}>Capture</button>
+                  <button type="button" className="bg-orange-500 text-white px-4 py-2 rounded-lg font-bold hover:bg-orange-600 transition mt-2" onClick={handleIdFrontCapture}>Capture</button>
                   <button type="button" className="bg-gray-700 text-gray-200 px-4 py-2 rounded-lg mt-2" onClick={() => setUseIdFrontCamera(false)}>Cancel</button>
                 </div>
               )}
@@ -295,9 +307,9 @@ const KYCPage = () => {
                       audio={false}
                       ref={idBackWebcamRef}
                       screenshotFormat="image/jpeg"
-                      className="rounded border-2 border-gold w-48 h-32 object-contain mb-2"
+                      className="rounded border-2 border-orange-400 w-48 h-32 object-contain mb-2"
                     />
-                    <button type="button" className="bg-gold text-black px-4 py-2 rounded-lg font-bold hover:bg-yellow-500 transition mt-2" onClick={handleIdBackCapture}>Capture</button>
+                    <button type="button" className="bg-orange-500 text-white px-4 py-2 rounded-lg font-bold hover:bg-orange-600 transition mt-2" onClick={handleIdBackCapture}>Capture</button>
                     <button type="button" className="bg-gray-700 text-gray-200 px-4 py-2 rounded-lg mt-2" onClick={() => setUseIdBackCamera(false)}>Cancel</button>
                   </div>
                 )}
@@ -305,7 +317,7 @@ const KYCPage = () => {
             )}
             <div className="flex justify-between mt-6">
               <button type="button" className="bg-gray-700 text-gray-200 px-4 py-2 rounded-lg" onClick={() => setStep(1)}>Back</button>
-              <button type="button" className="bg-gold text-black px-4 py-2 rounded-lg font-bold hover:bg-yellow-500 transition" disabled={!idFrontFile || (['National ID',"Driver's License",'Residence Permit','Voter Card','Other (Front & Back)'].includes(documentType) && !idBackFile)} onClick={() => setStep(3)}>Next</button>
+              <button type="button" className="bg-orange-500 text-white px-4 py-2 rounded-lg font-bold hover:bg-orange-600 transition" disabled={!idFrontFile || (['National ID',"Driver's License",'Residence Permit','Voter Card','Other (Front & Back)'].includes(documentType) && !idBackFile)} onClick={() => setStep(3)}>Next</button>
             </div>
           </div>
         )}
@@ -314,7 +326,7 @@ const KYCPage = () => {
             <label className="block text-gray-300 mb-1">Selfie</label>
             <div className="flex flex-col items-center gap-2">
               {selfiePreview ? (
-                <img src={selfiePreview} alt="Selfie Preview" className="w-32 h-32 object-cover rounded-full border-2 border-gold mb-2" />
+                <img src={selfiePreview} alt="Selfie Preview" className="w-32 h-32 object-cover rounded-full border-2 border-orange-400 mb-2" />
               ) : (
                 <div className="w-32 h-32 flex items-center justify-center bg-gray-800 rounded-full border-2 border-gray-700 mb-2 text-gray-500">No selfie</div>
               )}
@@ -333,34 +345,34 @@ const KYCPage = () => {
                     audio={false}
                     ref={webcamRef}
                     screenshotFormat="image/jpeg"
-                    className="rounded-full border-2 border-gold w-32 h-32 object-cover mb-2"
+                    className="rounded-full border-2 border-orange-400 w-32 h-32 object-cover mb-2"
                   />
-                  <button type="button" className="bg-gold text-black px-4 py-2 rounded-lg font-bold hover:bg-yellow-500 transition mt-2" onClick={handleCapture}>Capture</button>
+                  <button type="button" className="bg-orange-500 text-white px-4 py-2 rounded-lg font-bold hover:bg-orange-600 transition mt-2" onClick={handleCapture}>Capture</button>
                   <button type="button" className="bg-gray-700 text-gray-200 px-4 py-2 rounded-lg mt-2" onClick={() => setUseCamera(false)}>Cancel</button>
                 </div>
               )}
             </div>
             <div className="flex justify-between mt-6">
               <button type="button" className="bg-gray-700 text-gray-200 px-4 py-2 rounded-lg" onClick={() => setStep(2)}>Back</button>
-              <button type="button" className="bg-gold text-black px-4 py-2 rounded-lg font-bold hover:bg-yellow-500 transition" disabled={!selfieFile} onClick={() => setStep(4)}>Next</button>
+              <button type="button" className="bg-orange-500 text-white px-4 py-2 rounded-lg font-bold hover:bg-orange-600 transition" disabled={!selfieFile} onClick={() => setStep(4)}>Next</button>
             </div>
           </div>
         )}
         {step === 4 && (
           <div>
-            <h3 className="text-lg font-bold mb-2 text-gold">Review & Submit</h3>
+            <h3 className="text-lg font-bold mb-2 text-orange-400">Review & Submit</h3>
             <div className="mb-4">
               <div className="mb-2"><span className="font-semibold text-gray-300">Country:</span> <span className="text-white">{country}</span></div>
               <div className="mb-2 flex items-center gap-2"><span className="font-semibold text-gray-300">ID Front:</span> {idFrontPreview && <img src={idFrontPreview} alt="ID Front Preview" className="w-24 h-16 object-contain rounded border border-gray-700" />}</div>
               {['National ID',"Driver's License",'Residence Permit','Voter Card','Other (Front & Back)'].includes(documentType) && (
                 <div className="mb-2 flex items-center gap-2"><span className="font-semibold text-gray-300">ID Back:</span> {idBackPreview && <img src={idBackPreview} alt="ID Back Preview" className="w-24 h-16 object-contain rounded border border-gray-700" />}</div>
               )}
-              <div className="mb-2 flex items-center gap-2"><span className="font-semibold text-gray-300">Selfie:</span> {selfiePreview && <img src={selfiePreview} alt="Selfie Preview" className="w-16 h-16 object-cover rounded-full border-2 border-gold" />}</div>
+              <div className="mb-2 flex items-center gap-2"><span className="font-semibold text-gray-300">Selfie:</span> {selfiePreview && <img src={selfiePreview} alt="Selfie Preview" className="w-16 h-16 object-cover rounded-full border-2 border-orange-400" />}</div>
             </div>
             {error && <div className="text-red-400 mb-2">{error}</div>}
             <div className="flex justify-between">
               <button type="button" className="bg-gray-700 text-gray-200 px-4 py-2 rounded-lg" onClick={() => setStep(3)}>Back</button>
-              <button type="submit" className="bg-gold text-black px-4 py-2 rounded-lg font-bold hover:bg-yellow-500 transition" disabled={loading}>{loading ? 'Submitting...' : 'Submit KYC'}</button>
+              <button type="submit" className="bg-orange-500 text-white px-4 py-2 rounded-lg font-bold hover:bg-orange-600 transition" disabled={loading}>{loading ? 'Submitting...' : 'Submit KYC'}</button>
             </div>
           </div>
         )}
@@ -369,11 +381,13 @@ const KYCPage = () => {
   }
 
   return (
-    <div className="max-w-md mx-auto p-8 glassmorphic rounded-xl mt-10">
-      <ToastContainer />
-      <h2 className="text-2xl font-bold mb-4 text-gold text-center">KYC Verification</h2>
-      {renderStepper()}
-      {renderKYCForm()}
+    <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900' : 'bg-white'} py-10`}>
+      <div className={`max-w-md mx-auto p-8 rounded-xl border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} shadow-lg`}>
+        <ToastContainer />
+        <h2 className={`text-2xl font-bold mb-4 text-center ${isDarkMode ? 'text-crypto-orange' : 'text-crypto-orange-dark'}`}>KYC Verification</h2>
+        {renderStepper()}
+        {renderKYCForm()}
+      </div>
     </div>
   );
 };

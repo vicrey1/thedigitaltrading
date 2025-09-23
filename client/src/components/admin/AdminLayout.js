@@ -1,120 +1,267 @@
 // src/components/admin/AdminLayout.js
-import React, { useState } from 'react';
-import { Outlet, Link } from 'react-router-dom';
-import { FiUsers, FiDollarSign, FiDownload, FiSettings, FiHome, FiBell, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+import React, { useState, useEffect } from 'react';
+import { Outlet, Link, useLocation } from 'react-router-dom';
+import { 
+  FiUsers, FiDollarSign, FiDownload, FiSettings, FiHome, FiBell, 
+  FiChevronLeft, FiChevronRight, FiMenu, FiX, FiBarChart2, 
+  FiMail, FiShield, FiCreditCard, FiTrendingUp, FiMessageSquare,
+  FiTruck, FiEye, FiLogOut, FiSun, FiMoon
+} from 'react-icons/fi';
 import { useAdminAuth } from '../../auth/AdminAuthProvider';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const AdminLayout = () => {
   const { admin, logout } = useAdminAuth();
-  const [sidebarOpen, setSidebarOpen] = useState(true); // default open on desktop
-  const [darkMode, setDarkMode] = useState(true);
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+  const { isDarkMode, toggleTheme } = useTheme();
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
+  const location = useLocation();
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+      if (window.innerWidth < 768) {
+        setSidebarOpen(false);
+      }
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  const navigationItems = [
+    { path: '/admin', icon: FiHome, label: 'Dashboard', exact: true },
+    { path: '/admin/users', icon: FiUsers, label: 'User Management' },
+    { path: '/admin/funds', icon: FiTrendingUp, label: 'Funds & Investments' },
+    { path: '/admin/deposits', icon: FiCreditCard, label: 'Deposits' },
+    { path: '/admin/withdrawals', icon: FiDownload, label: 'Withdrawals' },
+    { path: '/admin/plans', icon: FiBarChart2, label: 'Investment Plans' },
+    { path: '/admin/user-investments', icon: FiDollarSign, label: 'User Investments' },
+    { path: '/admin/cars', icon: FiTruck, label: 'Car Management' },
+    { path: '/admin/announcements', icon: FiBell, label: 'Announcements' },
+    { path: '/admin/send-email', icon: FiMail, label: 'Email Marketing' },
+    { path: '/admin/support', icon: FiMessageSquare, label: 'Support Chat' },
+
+    { path: '/admin/mirror', icon: FiEye, label: 'User Mirror' },
+    { path: '/admin/roi-approvals', icon: FiShield, label: 'ROI Approvals' },
+    { path: '/admin/cold-wallet', icon: FiDollarSign, label: 'Cold Wallet' },
+    { path: '/admin/settings', icon: FiSettings, label: 'Settings' },
+  ];
+
+  const isActiveRoute = (path, exact = false) => {
+    if (exact) {
+      return location.pathname === path;
+    }
+    return location.pathname.startsWith(path);
+  };
 
   return (
-    <div className={
-      `flex h-screen font-sans text-base relative transition-colors duration-300 ${darkMode ? 'bg-black text-gray-100' : 'bg-white text-gray-900'}`
-    }>
-      {/* Theme Toggle Button */}
-      <button
-        className="fixed top-6 right-6 z-50 bg-gray-900 bg-opacity-80 p-2 rounded-lg text-gold hover:bg-gray-800 transition md:right-8"
-        onClick={() => setDarkMode((prev) => !prev)}
-        aria-label="Toggle theme"
-      >
-        {darkMode ? (
-          <svg width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-sun"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-        ) : (
-          <svg width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-moon"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 109.79 9.79z"/></svg>
-        )}
-      </button>
-      {/* Mobile Sidebar Overlay */}
-      {sidebarOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-70 z-30 md:hidden" onClick={() => setSidebarOpen(false)} />
+    <div className={`flex h-screen font-sans transition-colors duration-300 ${
+      isDarkMode ? 'bg-gray-900 text-gray-100' : 'bg-gray-50 text-gray-900'
+    }`}>
+      {/* Mobile Overlay */}
+      {sidebarOpen && isMobile && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden" 
+          onClick={() => setSidebarOpen(false)} 
+        />
       )}
+
       {/* Sidebar */}
-      <aside
-        className={`fixed md:static top-0 left-0 h-full ${sidebarOpen ? 'w-64' : 'w-16'} ${darkMode ? 'bg-gradient-to-b from-gray-950 to-gray-900 border-gray-800' : 'bg-gradient-to-b from-gray-100 to-white border-gray-200'} border-r shadow-lg z-40 transform ${sidebarOpen || isMobile ? 'translate-x-0' : '-translate-x-full'} transition-all duration-300 ease-in-out flex flex-col`}
-        style={{ pointerEvents: sidebarOpen || isMobile ? 'auto' : 'none' }}
-        aria-hidden={!sidebarOpen && isMobile}
-      >
-        <div className={`flex items-center h-20 px-4 border-b ${darkMode ? 'border-gray-800' : 'border-gray-200'}`}>
-          <span className={`text-2xl font-extrabold tracking-widest ${darkMode ? 'text-gold' : 'text-yellow-700'} transition-all duration-300 ${!sidebarOpen ? 'opacity-0 w-0' : 'opacity-100 w-auto'}`}>LUXHEDGE</span>
-          <button className="ml-auto text-gray-400 hover:text-gold" onClick={() => setSidebarOpen(false)} style={{display: sidebarOpen && !isMobile ? 'block' : 'none'}} aria-label="Collapse sidebar">
-            <FiChevronLeft size={24} />
-          </button>
-          <button className="ml-auto md:hidden text-gray-400 hover:text-gold" onClick={() => setSidebarOpen(false)} style={{display: isMobile ? 'block' : 'none'}}>&times;</button>
-        </div>
-        <nav className={`flex-1 py-8 ${sidebarOpen ? 'px-4' : 'px-1'} space-y-2 overflow-y-auto`}>
-          <Link to="/admin" className="flex items-center px-4 py-3 rounded-lg transition hover:bg-gray-800 text-gray-200 hover:text-gold font-medium">
-            <FiHome className="mr-3 text-lg" /> Dashboard
-          </Link>
-          <Link to="/admin/users" className="flex items-center px-4 py-3 rounded-lg transition hover:bg-gray-800 text-gray-200 hover:text-gold font-medium">
-            <FiUsers className="mr-3 text-lg" /> Users
-          </Link>
-          <Link to="/admin/funds" className="flex items-center px-4 py-3 rounded-lg transition hover:bg-gray-800 text-gray-200 hover:text-gold font-medium">
-            <FiDollarSign className="mr-3 text-lg" /> Funds
-          </Link>
-          <Link to="/admin/deposits" className="flex items-center px-4 py-3 rounded-lg transition hover:bg-gray-800 text-gray-200 hover:text-gold font-medium">
-            <FiDollarSign className="mr-3 text-lg" /> Deposits
-          </Link>
-          <Link to="/admin/withdrawals" className="flex items-center px-4 py-3 rounded-lg transition hover:bg-gray-800 text-gray-200 hover:text-gold font-medium">
-            <FiDownload className="mr-3 text-lg" /> Withdrawals
-          </Link>
-          <Link to="/admin/settings" className="flex items-center px-4 py-3 rounded-lg transition hover:bg-gray-800 text-gray-200 hover:text-gold font-medium">
-            <FiSettings className="mr-3 text-lg" /> Settings
-          </Link>
-          <Link to="/admin/send-email" className="flex items-center px-4 py-3 rounded-lg transition hover:bg-gray-800 text-gray-200 hover:text-gold font-medium">
-            <FiSettings className="mr-3 text-lg" /> Send Email
-          </Link>
-          <Link to="/admin/announcements" className="flex items-center px-4 py-3 rounded-lg transition hover:bg-gray-800 text-gray-200 hover:text-gold font-medium">
-            <FiBell className="mr-3 text-lg" /> Announcements
-          </Link>
-          <Link to="/admin/support" className="flex items-center px-4 py-3 rounded-lg transition hover:bg-gray-800 text-gray-200 hover:text-gold font-medium">
-            <FiBell className="mr-3 text-lg" /> Support Chat
-          </Link>
-          <Link to="/admin/mirror" className="flex items-center px-4 py-3 rounded-lg transition hover:bg-gray-800 text-gray-200 hover:text-gold font-medium">
-            <FiUsers className="mr-3 text-lg" /> Mirror User
-          </Link>
-          <Link to="/admin/roi-approvals" className="flex items-center px-4 py-3 rounded-lg transition hover:bg-gray-800 text-gray-200 hover:text-gold font-medium">
-            <FiSettings className="mr-3 text-lg" /> ROI Approvals
-          </Link>
-        </nav>
-        <div className={`px-4 py-6 border-t ${darkMode ? 'border-gray-800' : 'border-gray-200'} flex items-center transition-all duration-300 ${!sidebarOpen ? 'justify-center' : ''}`}>
-          <div className={`w-10 h-10 rounded-full ${darkMode ? 'bg-gray-700 text-gold' : 'bg-gray-200 text-yellow-700'} flex items-center justify-center text-lg font-bold ${!sidebarOpen ? 'mx-auto' : 'mr-3'}`}>
-            {admin?.name?.charAt(0) || 'A'}
-          </div>
-          {sidebarOpen && (
-            <div className={`${darkMode ? 'text-gray-200' : 'text-gray-900'} flex-1`}>
-              <div className="font-semibold">{admin?.name || 'Admin'}</div>
-              <div className="text-xs text-gray-500">Administrator</div>
+      <aside className={`
+        fixed md:static top-0 left-0 h-full z-50 transition-all duration-300 ease-in-out
+        ${sidebarOpen ? 'w-72' : 'w-16'} 
+        ${sidebarOpen && isMobile ? 'translate-x-0' : isMobile ? '-translate-x-full' : 'translate-x-0'}
+        ${isDarkMode 
+          ? 'bg-gradient-to-b from-gray-800 to-gray-900 border-gray-700' 
+          : 'bg-gradient-to-b from-white to-gray-50 border-gray-200'
+        } 
+        border-r shadow-xl flex flex-col
+      `}>
+        {/* Header */}
+        <div className={`
+          flex items-center justify-between h-16 px-4 border-b
+          ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}
+        `}>
+          <div className={`flex items-center transition-all duration-300 ${!sidebarOpen ? 'opacity-0 w-0' : 'opacity-100'}`}>
+            <div className="w-8 h-8 bg-gradient-to-r from-orange-400 to-orange-600 rounded-lg flex items-center justify-center mr-3">
+              <FiShield className="text-white text-lg" />
             </div>
-          )}
-          {sidebarOpen && (
-            <button
-              onClick={logout}
-              className={`ml-4 px-4 py-2 rounded-lg font-semibold transition ${darkMode ? 'bg-gray-900 text-red-400 hover:bg-red-900 hover:text-white' : 'bg-gray-100 text-red-600 hover:bg-red-200 hover:text-white'}`}
-            >
+            <div>
+              <h1 className="text-lg font-bold bg-gradient-to-r from-orange-400 to-orange-600 bg-clip-text text-transparent">
+                THE DIGITAL TRADING
+              </h1>
+              <p className="text-xs text-gray-500">Admin Panel</p>
+            </div>
+          </div>
+          
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className={`p-2 rounded-lg transition-colors ${
+              isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'
+            }`}
+          >
+            {sidebarOpen ? <FiChevronLeft size={20} /> : <FiChevronRight size={20} />}
+          </button>
+        </div>
+
+        {/* Navigation */}
+        <nav className="flex-1 py-4 px-2 overflow-y-auto">
+          <div className="space-y-1">
+            {navigationItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = isActiveRoute(item.path, item.exact);
+              
+              return (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className={`
+                    flex items-center px-3 py-3 rounded-lg transition-all duration-200 group
+                    ${isActive 
+                      ? isDarkMode 
+                        ? 'bg-orange-600 text-white shadow-lg' 
+                        : 'bg-orange-500 text-white shadow-lg'
+                      : isDarkMode 
+                        ? 'text-gray-300 hover:bg-gray-700 hover:text-white' 
+                        : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                    }
+                  `}
+                >
+                  <Icon className={`
+                    ${sidebarOpen ? 'mr-3' : 'mx-auto'} 
+                    text-lg transition-all duration-300
+                    ${isActive ? 'text-white' : ''}
+                  `} />
+                  <span className={`
+                    font-medium transition-all duration-300 
+                    ${!sidebarOpen ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100'}
+                  `}>
+                    {item.label}
+                  </span>
+                  {isActive && sidebarOpen && (
+                    <div className="ml-auto w-2 h-2 bg-white rounded-full"></div>
+                  )}
+                </Link>
+              );
+            })}
+          </div>
+        </nav>
+
+        {/* User Profile & Actions */}
+        <div className={`
+          p-4 border-t ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}
+        `}>
+          {/* Theme Toggle */}
+          <button
+            onClick={toggleTheme}
+            className={`
+              w-full flex items-center px-3 py-2 mb-3 rounded-lg transition-colors
+              ${isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}
+            `}
+          >
+            {isDarkMode ? <FiSun className="mr-3" /> : <FiMoon className="mr-3" />}
+            <span className={`transition-all duration-300 ${!sidebarOpen ? 'opacity-0 w-0' : 'opacity-100'}`}>
+              {isDarkMode ? 'Light Mode' : 'Dark Mode'}
+            </span>
+          </button>
+
+          {/* Admin Profile */}
+          <div className={`
+            flex items-center transition-all duration-300 
+            ${!sidebarOpen ? 'justify-center' : ''}
+          `}>
+            <div className="w-10 h-10 bg-gradient-to-r from-orange-400 to-orange-600 rounded-full flex items-center justify-center text-white font-bold">
+              {admin?.name?.charAt(0) || 'A'}
+            </div>
+            {sidebarOpen && (
+              <div className="ml-3 flex-1">
+                <div className="font-semibold text-sm">{admin?.name || 'Administrator'}</div>
+                <div className="text-xs text-gray-500">Super Admin</div>
+              </div>
+            )}
+          </div>
+
+          {/* Logout Button */}
+          <button
+            onClick={logout}
+            className={`
+              w-full mt-3 flex items-center px-3 py-2 rounded-lg transition-all duration-300
+              ${!sidebarOpen ? 'justify-center' : 'justify-start'}
+              ${isDarkMode 
+                ? 'bg-red-600 hover:bg-red-700 text-white' 
+                : 'bg-red-500 hover:bg-red-600 text-white'
+              }
+            `}
+          >
+            <FiLogOut className={`${!sidebarOpen ? 'mx-auto' : 'mr-3'}`} />
+            <span className={`transition-all duration-300 ${!sidebarOpen ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100 w-auto'}`}>
               Logout
-            </button>
-          )}
+            </span>
+          </button>
         </div>
       </aside>
-      {/* Sidebar Toggle Button (Mobile & Desktop Collapsed) */}
-      {!sidebarOpen && (
+
+      {/* Mobile Menu Button */}
+      {isMobile && (
         <button
-          className="fixed top-6 left-4 z-50 bg-gray-900 bg-opacity-80 p-2 rounded-lg text-gold hover:bg-gray-800 transition"
           onClick={() => setSidebarOpen(true)}
-          aria-label="Expand sidebar"
+          className={`
+            fixed top-4 left-4 z-30 p-3 rounded-lg shadow-lg transition-colors
+            ${isDarkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'}
+            ${sidebarOpen ? 'hidden' : 'block'}
+          `}
         >
-          <FiChevronRight size={24} />
+          <FiMenu size={20} />
         </button>
       )}
+
       {/* Main Content */}
-      <main
-        className={`flex-1 h-screen ${darkMode ? 'bg-black text-gray-100' : 'bg-white text-gray-900'} overflow-y-auto p-0 flex flex-col transition-all duration-300`}
-        style={{ marginLeft: sidebarOpen ? '16rem' : '4rem', transition: 'margin-left 0.3s cubic-bezier(0.4,0,0.2,1)' }}
-      >
-        <div className="w-full max-w-6xl mx-auto flex-1 flex flex-col min-h-screen p-4 md:p-8 lg:p-12 xl:p-16 2xl:p-20">
-          <Outlet />
+      <main className={`
+        flex-1 flex flex-col min-h-screen overflow-hidden
+        ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}
+      `}>
+        {/* Top Bar */}
+        <header className={`
+          h-16 flex items-center justify-between px-6 border-b
+          ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}
+          shadow-sm
+        `}>
+          <div className="flex items-center">
+            <h2 className="text-xl font-semibold">
+              {navigationItems.find(item => isActiveRoute(item.path, item.exact))?.label || 'Dashboard'}
+            </h2>
+          </div>
+          
+          <div className="flex items-center space-x-4">
+            {/* Notifications */}
+            <button className={`
+              p-2 rounded-lg transition-colors relative
+              ${isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}
+            `}>
+              <FiBell size={20} />
+              <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
+            </button>
+            
+            {/* Theme Toggle for Desktop */}
+            <button
+              onClick={toggleTheme}
+              className={`
+                p-2 rounded-lg transition-colors
+                ${isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}
+              `}
+            >
+              {isDarkMode ? <FiSun size={20} /> : <FiMoon size={20} />}
+            </button>
+          </div>
+        </header>
+
+        {/* Content Area */}
+        <div className="flex-1 overflow-auto p-6">
+          <div className="max-w-7xl mx-auto">
+            <Outlet />
+          </div>
         </div>
       </main>
     </div>

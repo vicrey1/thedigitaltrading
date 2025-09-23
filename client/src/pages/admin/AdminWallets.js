@@ -16,7 +16,7 @@ const AdminWallets = () => {
     setWallets(null);
     try {
       const res = await axios.get(`/api/wallets/admin/search?q=${encodeURIComponent(query)}`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` }
       });
       setUsers(res.data.users || []);
     } catch (err) {
@@ -30,7 +30,7 @@ const AdminWallets = () => {
     setSelectedUser(userId);
     try {
       const res = await axios.get(`/api/wallets/admin/${userId}`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` }
       });
       setWallets(res.data.wallets);
     } catch (err) {

@@ -22,7 +22,7 @@ export default function AutoProfitReport() {
   return (
     <div className="glass-card p-4 mb-4 bg-gradient-to-r from-yellow-900 to-yellow-700 text-white">
       <div className="font-bold mb-2">Profit Report</div>
-      <div>Estimated ROI: <span className="text-gold font-bold">{roi}%</span></div>
+      <div>Estimated Return: <span className="text-gold font-bold">{roi}%</span></div>
       <div>Yield this month: <span className="text-green-400 font-bold">${yieldAmt}</span></div>
     </div>
   );

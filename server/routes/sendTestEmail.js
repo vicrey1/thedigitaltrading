@@ -6,9 +6,9 @@ router.post('/api/send-test', async (req, res) => {
   const { to } = req.body;
   try {
     const info = await transporter.sendMail({
-      from: `"LUXYIELD" <${process.env.EMAIL_USER}>`,
+      from: `"THE DIGITAL TRADING" <${process.env.EMAIL_USER}>`,
       to: to || 'your@email.com',
-      subject: '✅ LUXYIELD Email Test (via Brevo)',
+      subject: '✅ THE DIGITAL TRADING Email Test (via Brevo)',
       html: '<h2>This email was sent using Brevo SMTP and Nodemailer!</h2>'
     });
     res.json({ message: 'Email sent ✅', info });

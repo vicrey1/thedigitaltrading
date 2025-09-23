@@ -25,7 +25,7 @@ const MobileAppPreviewSection = () => (
       </div>
       <div className="flex flex-col items-center md:items-start">
         <h2 className="text-2xl md:text-3xl font-bold mb-4 text-gold font-serif">Track your performance anywhere</h2>
-        <p className="text-gray-300 mb-6 max-w-md text-center md:text-left">The LUXHEDGE mobile app puts your portfolio, performance, and fund analytics at your fingertips. Coming soon for iOS and Android.</p>
+        <p className="text-gray-300 mb-6 max-w-md text-center md:text-left">THE DIGITAL TRADING mobile app puts your portfolio, analytics, and risk insights at your fingertips. Coming soon for iOS and Android.</p>
         <div className="flex gap-4">
           <button className="px-6 py-2 bg-gold text-black font-bold rounded-lg shadow-lg opacity-70 cursor-not-allowed">App Store</button>
           <button className="px-6 py-2 bg-gold text-black font-bold rounded-lg shadow-lg opacity-70 cursor-not-allowed">Google Play</button>

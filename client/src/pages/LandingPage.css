@@ -1,4 +1,4 @@
-/* LUXYIELD Landing Page Styles - Glassmorphism, Black/White/Gold Theme */
+/* CRYPTO TRADING Landing Page Styles - Glassmorphism, Black/White/Crypto Theme */
 .lux-landing {
   min-height: 100vh;
   background: linear-gradient(135deg, #111 0%, #222 100%);
@@ -13,7 +13,7 @@
   position: fixed;
   inset: 0;
   pointer-events: none;
-  background: radial-gradient(circle at var(--mouse-x, 50vw) var(--mouse-y, 50vh), rgba(255,215,0,0.08) 0%, transparent 60%);
+  background: radial-gradient(circle at var(--mouse-x, 50vw) var(--mouse-y, 50vh), rgba(249,115,22,0.08) 0%, transparent 60%);
   z-index: 0;
   transition: background 0.2s;
 }
@@ -63,20 +63,20 @@
 }
 .lux-cta {
   display: inline-block;
-  background: linear-gradient(90deg, #ffd700 0%, #fffbe6 100%);
-  color: #111;
+  background: linear-gradient(90deg, #f97316 0%, #fb923c 100%);
+  color: #fff;
   font-weight: 700;
   padding: 0.9rem 2.2rem;
   border-radius: 32px;
   font-size: 1.1rem;
   text-decoration: none;
-  box-shadow: 0 2px 12px 0 rgba(255,215,0,0.12);
+  box-shadow: 0 2px 12px 0 rgba(249,115,22,0.12);
   transition: background 0.2s, color 0.2s, box-shadow 0.2s;
 }
 .lux-cta:hover {
-  background: #fffbe6;
-  color: #bfa100;
-  box-shadow: 0 4px 24px 0 rgba(255,215,0,0.18);
+  background: #fb923c;
+  color: #fff;
+  box-shadow: 0 4px 24px 0 rgba(249,115,22,0.18);
 }
 .lux-hero-img {
   width: 90vw;
@@ -92,7 +92,7 @@
 }
 .lux-features h2 {
   font-size: 2.2rem;
-  color: #ffd700;
+  color: #f97316;
   margin-bottom: 2rem;
   font-weight: 600;
 }
@@ -135,7 +135,7 @@
   background: rgba(30,30,30,0.65);
 }
 .lux-about h2 {
-  color: #ffd700;
+  color: #f97316;
   font-size: 2rem;
   margin-bottom: 1rem;
 }
@@ -147,7 +147,7 @@
 .lux-about ul {
   list-style: none;
   padding: 0;
-  color: #ffd700;
+  color: #f97316;
   font-weight: 500;
 }
 .lux-about li {
@@ -159,7 +159,7 @@
   text-align: center;
 }
 .lux-testimonials h2 {
-  color: #ffd700;
+  color: #f97316;
   font-size: 2rem;
   margin-bottom: 2rem;
 }
@@ -184,7 +184,7 @@
   object-fit: cover;
   border-radius: 50%;
   margin-bottom: 1rem;
-  border: 2px solid #ffd700;
+  border: 2px solid #f97316;
 }
 .lux-testimonial blockquote {
   color: #fff;
@@ -193,7 +193,7 @@
   font-style: italic;
 }
 .lux-testimonial-name {
-  color: #ffd700;
+  color: #f97316;
   font-weight: 600;
   font-size: 1rem;
 }
@@ -215,7 +215,7 @@
   box-shadow: none;
   padding: 2.5rem 1rem 1rem 1rem;
   margin: 0;
-  border-top: 2px solid #ffd70033;
+  border-top: 2px solid #f9731633;
 }
 .lux-footer-main {
   display: flex;
@@ -230,7 +230,7 @@
   margin-bottom: 1rem;
 }
 .lux-footer h4 {
-  color: #ffd700;
+  color: #f97316;
   font-size: 1.1rem;
   margin-bottom: 0.7rem;
 }
@@ -243,13 +243,13 @@
   transition: color 0.2s;
 }
 .lux-footer a:hover {
-  color: #ffd700;
+  color: #f97316;
 }
 .lux-footer-bottom {
   text-align: center;
   color: #bbb;
   font-size: 0.95rem;
-  border-top: 1px solid #ffd70022;
+  border-top: 1px solid #f9731622;
   padding-top: 1rem;
 }
 /* Sidebar */
@@ -259,7 +259,7 @@
   right: 2rem;
   z-index: 100;
   background: rgba(30,30,30,0.7);
-  border: 1.5px solid #ffd70055;
+  border: 1.5px solid #f9731655;
   border-radius: 16px;
   width: 48px;
   height: 48px;
@@ -275,7 +275,7 @@
   display: block;
   width: 28px;
   height: 4px;
-  background: #ffd700;
+  background: #f97316;
   margin: 3px 0;
   border-radius: 2px;
   transition: background 0.2s;
@@ -301,7 +301,7 @@
 .lux-sidebar-close {
   background: none;
   border: none;
-  color: #ffd700;
+  color: #f97316;
   font-size: 2.2rem;
   align-self: flex-end;
   margin-bottom: 2rem;
@@ -321,7 +321,7 @@
   transition: color 0.2s;
 }
 .lux-sidebar nav a:hover {
-  color: #ffd700;
+  color: #f97316;
 }
 @media (max-width: 900px) {
   .lux-features-list, .lux-testimonials-list, .lux-footer-main {

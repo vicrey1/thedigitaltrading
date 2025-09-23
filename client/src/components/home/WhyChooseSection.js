@@ -4,30 +4,30 @@ import { motion } from 'framer-motion';
 const features = [
 	{
 		icon: '📊',
-		title: 'Real Fund Strategies',
-		desc: 'Built by professional asset managers with proven track records.',
+		title: 'Strategic Digital Marketing',
+		desc: 'Comprehensive digital strategies designed to drive sustainable business growth.',
 		tooltip:
-			'Our funds are managed by industry veterans with a history of outperformance.',
+			'Our strategic approach combines market analysis, competitive intelligence, and data-driven insights.',
 	},
 	{
 		icon: '🔒',
-		title: 'Institutional-Grade Security',
-		desc: 'ISO-certified, multi-sig wallets, and 256-bit SSL encryption.',
-		tooltip: 'We use the same security standards as top global banks.',
+		title: 'Data Security & Privacy',
+		desc: 'Enterprise-grade security protocols protecting your business data and customer information.',
+		tooltip: 'We maintain the highest standards of data protection and privacy compliance.',
 	},
 	{
 		icon: '🧠',
-		title: 'Expert-Led Asset Allocation',
-		desc: 'AI-augmented models and human oversight for optimal results.',
+		title: 'Technology Integration',
+		desc: 'Advanced marketing technology stack with intelligent automation and analytics.',
 		tooltip:
-			'AI and human experts work together for optimal risk-adjusted returns.',
+			'Cutting-edge technology combined with strategic expertise for optimal performance.',
 	},
 	{
 		icon: '🪪',
-		title: 'Full KYC & 2FA',
-		desc: 'Comprehensive investor verification and compliance.',
+		title: 'Compliance & Transparency',
+		desc: 'Full regulatory compliance with transparent reporting and accountability.',
 		tooltip:
-			'Your account is protected by strict KYC and two-factor authentication.',
+			'Complete transparency in our processes with regular performance reporting and compliance.',
 	},
 ];
 
@@ -45,7 +45,7 @@ const WhyChooseSection = () => {
 	return (
 		<section className="py-20 bg-transparent">
 			<h2 className="text-3xl md:text-4xl font-bold mb-8 text-gold text-center font-serif">
-				Why Choose LUXHEDGE?
+				Why Choose THE DIGITAL TRADING?
 			</h2>
 			<div className="grid grid-cols-1 md:grid-cols-4 gap-8 max-w-6xl mx-auto">
 				{features.map((f, i) => (

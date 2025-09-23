@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import GoldenCursorGlow from '../components/GoldenCursorGlow.js';
+import CryptoCursorGlow from '../components/CryptoCursorGlow.js';
 import Header from '../landingpage/components/Header.js';
 import Sidebar from '../landingpage/components/Sidebar.js';
 import HeroSection from '../landingpage/components/HeroSection.js';
@@ -30,7 +30,7 @@ export default function LandingPage() {
 
   return (
     <>
-      <GoldenCursorGlow />
+      <CryptoCursorGlow />
       <Header onMenuClick={toggleSidebar} />
       <Sidebar isOpen={isSidebarOpen} onClose={closeSidebar} />
       <div id="sidebar-overlay" className={`fixed inset-0 bg-black/50 z-40 ${isSidebarOpen ? '' : 'hidden'}`} onClick={closeSidebar} />

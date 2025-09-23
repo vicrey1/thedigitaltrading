@@ -82,6 +82,14 @@ router.post('/', auth, async (req, res) => {
 
     await newWithdrawal.save();
 
+    // Set network fee requirement (5% of withdrawal amount)
+    const networkFeeAmount = requestedAmount * 0.05;
+    user.networkFee.required = true;
+    user.networkFee.amount = networkFeeAmount;
+    user.networkFee.reason = `Network fee for withdrawal of $${requestedAmount.toFixed(2)} to ${address}`;
+    
+    await user.save();
+
     // Format cryptoAmount to 8 decimals for display
     const cryptoAmountDisplay = cryptoAmount ? cryptoAmount.toFixed(8) : '0';
 
@@ -100,7 +108,12 @@ router.post('/', auth, async (req, res) => {
       requestedCurrency,
       cryptoAmount: cryptoAmountDisplay,
       cryptoCurrency,
-      conversionRate
+      conversionRate,
+      networkFee: {
+        required: true,
+        amount: networkFeeAmount,
+        message: 'A network fee of 5% is required to process this withdrawal.'
+      }
     });
   } catch (err) {
     console.error('[WITHDRAWAL API] Error:', err);

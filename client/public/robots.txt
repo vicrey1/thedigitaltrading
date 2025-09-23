@@ -1,4 +1,4 @@
 # https://www.robotstxt.org/robotstxt.html
 User-agent: *
 Allow: /
-Sitemap: https://www.luxyield.com/sitemap.xml
+Sitemap: https://www.thedigitaltrading.com/sitemap.xml

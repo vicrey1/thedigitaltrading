@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 
 const events = [
-  'James from London joined LUXHEDGE',
+  'James from London partnered with THE DIGITAL TRADING',
   'Maria invested $25,000 in ETH & BTC Basket',
-  'Wei from Singapore withdrew profits',
+  'Wei from Singapore completed a portfolio review',
   'Family Office Zurich increased allocation',
   'DAO Seed Accelerator hit new milestone',
 ];

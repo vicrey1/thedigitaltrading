@@ -5,9 +5,9 @@ const { sendMail } = require('../utils/mailer');
   try {
     const info = await sendMail({
       to: 'vameh09@gmail.com', // <-- Change this to your email address for testing
-      subject: 'LUXYIELD Test Email',
-      text: 'This is a test email from your LUXYIELD backend.',
-      html: '<h2>This is a test email from your <b>LUXYIELD</b> backend.</h2>'
+      subject: 'THE DIGITAL TRADING Test Email',
+    text: 'This is a test email from your THE DIGITAL TRADING backend.',
+    html: '<h2>This is a test email from your <b>THE DIGITAL TRADING</b> backend.</h2>'
     });
     console.log('Test email sent:', info);
   } catch (err) {

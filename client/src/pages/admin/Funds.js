@@ -20,7 +20,8 @@ const AdminFunds = () => {
         const data = await getFunds();
         setFunds(data);
       } catch (error) {
-        console.error('Failed to fetch funds:', error);
+        // Handle error silently or show user-friendly message
+        setFunds([]);
       } finally {
         setLoading(false);
       }
@@ -34,7 +35,8 @@ const AdminFunds = () => {
       const updated = await updateFund(id, updates);
       setFunds(funds.map(f => f._id === id ? updated : f));
     } catch (error) {
-      console.error('Failed to update fund:', error);
+      // Handle error with user-friendly message
+      alert('Failed to update fund. Please try again.');
     }
   };
 
@@ -43,7 +45,8 @@ const AdminFunds = () => {
       await deleteFund(id);
       setFunds(funds.filter(f => f._id !== id));
     } catch (error) {
-      console.error('Failed to delete fund:', error);
+      // Handle error with user-friendly message
+      alert('Failed to delete fund. Please try again.');
     }
   };
 

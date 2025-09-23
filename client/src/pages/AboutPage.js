@@ -1,51 +1,54 @@
 import React from 'react';
 import PageShell from '../components/PageShell';
+import { useTheme } from '../contexts/ThemeContext';
 
 const e = React.createElement;
 
 const values = [
-    { name: 'Integrity', description: "Our clients' trust is our most valued asset. We operate with absolute transparency, ethical rigor, and a profound sense of fiduciary duty." },
-    { name: 'Innovation', description: "We are in a perpetual state of evolution. We relentlessly push the boundaries of technology and financial theory to maintain our competitive edge and anticipate market transformations." },
-    { name: 'Excellence', description: "We pursue excellence in every facet of our operations—from the precision of our algorithms to the quality of our client service. Good is never good enough." },
-    { name: 'Partnership', description: "We view our clients as partners. Our success is inextricably linked to theirs, and we cultivate deep, long-term relationships built on mutual respect and shared objectives." },
+    { name: 'Excellence', description: "We maintain the highest standards in everything we do, from strategic planning to campaign execution. Our commitment to excellence ensures that every project delivers exceptional results that exceed expectations." },
+    { name: 'Innovation', description: "We embrace cutting-edge technologies and methodologies to stay ahead of industry trends. Our innovative approach combines proven strategies with emerging technologies to create competitive advantages for our clients." },
+    { name: 'Integrity', description: "We build trust through transparent communication, honest reporting, and ethical business practices. Our clients can rely on us for straightforward advice and clear insights into their marketing performance." },
+    { name: 'Partnership', description: "We view our clients as strategic partners, working collaboratively to achieve shared goals. Our success is measured by the long-term growth and success of the businesses we serve." },
 ];
 
 function AboutPage() {
+    const { isDarkMode, colors } = useTheme();
+    
     return e(PageShell, {
         title: 'About Us',
         imageSrc: 'https://www.dgicommunications.com/wp-content/uploads/2022/11/DGI-Communications-modern-office-design.jpg',
         imageAlt: 'Modern high-tech office interior'
     },
         e('div', { className: 'max-w-4xl mx-auto' },
-            e('h2', { className: 'text-4xl md:text-5xl font-serif text-brand-light text-center mb-6' }, 'Pioneering the Future of Investment'),
-            e('p', { className: 'text-brand-light/80 leading-relaxed text-center mb-12' }, "LUXYIELD was founded on a single, powerful conviction: that the future of finance lies at the intersection of human expertise and artificial intelligence. Traditional investment models, constrained by human cognitive limits and emotional bias, are no longer sufficient to navigate the complexities of modern global markets. We saw an opportunity to build a new paradigm."),
+            e('h2', { className: `text-4xl md:text-5xl font-serif text-center mb-6 ${isDarkMode ? 'text-white' : 'text-gray-900'}` }, 'Strategic Digital Excellence'),
+            e('p', { className: `leading-relaxed text-center mb-12 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}` }, "THE DIGITAL TRADING was founded to develop disciplined, research-led digital asset capabilities. We emphasize transparency, robust controls, and thorough documentation—no hype, no guarantees."),
             e('div', { className: 'grid md:grid-cols-2 gap-12 items-center mb-20' },
                 e('div', {},
-                    e('h3', { className: 'text-3xl font-serif text-brand-accent mb-4' }, 'Our Mission'),
-                    e('p', { className: 'text-brand-light/80 leading-relaxed' }, "To deliver superior, risk-adjusted returns for our clients by deploying the world's most advanced proprietary AI engine, AURA, to unlock market insights unattainable through conventional analysis. We are committed to redefining the benchmarks of wealth preservation and growth.")
+                    e('h3', { className: `text-3xl font-serif mb-4 ${isDarkMode ? 'text-crypto-orange' : 'text-crypto-orange-dark'}` }, 'Our Mission'),
+                    e('p', { className: `leading-relaxed ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}` }, "To empower businesses with sophisticated digital marketing strategies that drive sustainable growth through innovative technology, strategic insights, and data-driven decision making. We're committed to delivering measurable results that align with our clients' long-term business objectives.")
                 ),
                 e('div', {},
-                    e('h3', { className: 'text-3xl font-serif text-brand-accent mb-4' }, 'Our Vision'),
-                    e('p', { className: 'text-brand-light/80 leading-relaxed' }, "To be the undisputed leader in technology-driven asset management, recognized for our relentless innovation, uncompromising integrity, and unwavering dedication to client success.")
+                    e('h3', { className: `text-3xl font-serif mb-4 ${isDarkMode ? 'text-crypto-orange' : 'text-crypto-orange-dark'}` }, 'Our Vision'),
+                    e('p', { className: `leading-relaxed ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}` }, "To be the premier strategic partner for businesses seeking digital transformation, recognized for our innovative approach, exceptional results, and commitment to long-term client success in an ever-evolving digital landscape.")
                 )
             ),
-            e('h2', { className: 'text-4xl md:text-5xl font-serif text-brand-light text-center mb-12' }, 'Our Core Values'),
+            e('h2', { className: `text-4xl md:text-5xl font-serif text-center mb-12 ${isDarkMode ? 'text-white' : 'text-gray-900'}` }, 'Our Core Values'),
             e('div', { className: 'grid md:grid-cols-2 gap-8' },
-                ...values.map(value => e('div', { key: value.name, className: 'glass-card p-6' },
-                    e('h4', { className: 'text-2xl font-serif text-brand-accent mb-3' }, value.name),
-                    e('p', { className: 'text-brand-light/70' }, value.description)
+                ...values.map(value => e('div', { key: value.name, className: `p-6 rounded-lg border transition-colors ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-200'}` },
+                    e('h4', { className: `text-2xl font-serif mb-3 ${isDarkMode ? 'text-crypto-orange' : 'text-crypto-orange-dark'}` }, value.name),
+                    e('p', { className: `${isDarkMode ? 'text-gray-300' : 'text-gray-600'}` }, value.description)
                 ))
             ),
             // Legal section with address
             e('div', { className: 'mt-16' },
-                e('h3', { className: 'text-2xl font-serif text-brand-accent mb-4' }, 'Legal'),
-                e('p', { className: 'text-brand-light/80' }, 'Office Address: Feldstrasse 20, 8004 Zürich, Switzerland')
+                e('h3', { className: `text-2xl font-serif mb-4 ${isDarkMode ? 'text-crypto-orange' : 'text-crypto-orange-dark'}` }, 'Legal'),
+                e('p', { className: `${isDarkMode ? 'text-gray-300' : 'text-gray-600'}` }, 'Office Address: Feldstrasse 20, 8004 Zürich, Switzerland')
             ),
             // Partnership section with address and Google Map
             e('div', { className: 'mt-16' },
-                e('h3', { className: 'text-2xl font-serif text-brand-accent mb-4' }, 'Partnership'),
-                e('p', { className: 'text-brand-light/80 mb-4' }, 'We view our clients as partners. Our success is inextricably linked to theirs, and we cultivate deep, long-term relationships built on mutual respect and shared objectives.'),
-                e('div', { className: 'mb-4' },
+                e('h3', { className: `text-2xl font-serif mb-4 ${isDarkMode ? 'text-crypto-orange' : 'text-crypto-orange-dark'}` }, 'Partnership'),
+                e('p', { className: `mb-4 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}` }, 'We view our clients as partners. Our success is inextricably linked to theirs, and we cultivate deep, long-term relationships built on mutual respect and shared objectives.'),
+                e('div', { className: `mb-4 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}` },
                     e('strong', null, 'Office Address: '),
                     'Feldstrasse 20, 8004 Zürich, Switzerland'
                 ),

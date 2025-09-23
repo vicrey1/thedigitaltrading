@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import axios from 'axios';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
@@ -34,18 +35,37 @@ const Dashboard = ({ adminView = false, portfolioData: adminPortfolioData }) => 
   const getActiveInvestmentPerformance = () => {
     if (!activeInvestment || !activeInvestment.performance) return [];
     const perf = activeInvestment.performance;
-    if (range === 'all') return perf;
-    if (range === '1d') return perf.slice(-1);
-    if (range === '7d') return perf.slice(-7);
-    if (range === '1m') return perf.slice(-30);
-    if (range === '3m') return perf.slice(-90);
-    if (range === '1y') return perf.slice(-365);
-    return perf;
+    let filteredData = [];
+    if (range === 'all') filteredData = perf;
+    else if (range === '1d') filteredData = perf.slice(-1);
+    else if (range === '7d') filteredData = perf.slice(-7);
+    else if (range === '1m') filteredData = perf.slice(-30);
+    else if (range === '3m') filteredData = perf.slice(-90);
+    else if (range === '1y') filteredData = perf.slice(-365);
+    else filteredData = perf;
+    
+    // Validate and clean data to prevent NaN values
+    return filteredData.map(item => ({
+      ...item,
+      portfolioValue: (typeof item.portfolioValue === 'number' && !isNaN(item.portfolioValue)) ? item.portfolioValue : 0,
+      roiPercent: (typeof item.roiPercent === 'number' && !isNaN(item.roiPercent)) ? item.roiPercent : 0
+    }));
   };
 
   // Get the latest value for the selected range for the active investment
   const filteredPerf = getActiveInvestmentPerformance();
-  const latestPerf = filteredPerf.length > 0 ? filteredPerf[filteredPerf.length - 1] : null; // No dash to replace here, but checked for context.
+  const latestPerf = filteredPerf.length > 0 ? filteredPerf[filteredPerf.length - 1] : null;
+  
+  // Ensure the chart always receives at least one data point to avoid NaN domains
+  const safeFilteredPerf = (Array.isArray(filteredPerf) && filteredPerf.length > 0)
+    ? filteredPerf
+    : [{ name: '-', portfolioValue: 0, roiPercent: 0 }];
+  
+  // Safe allocation data with NaN validation
+  const safeAllocationData = (portfolioData?.allocation || []).map(item => ({
+    ...item,
+    value: (typeof item.value === 'number' && !isNaN(item.value)) ? item.value : 0
+  })).filter(item => item.value > 0); // No dash to replace here, but checked for context.
   // ...existing code...
 
   useEffect(() => {
@@ -382,11 +402,11 @@ const Dashboard = ({ adminView = false, portfolioData: adminPortfolioData }) => 
           </div>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={filteredPerf}>
+              <LineChart data={safeFilteredPerf}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#333" />
                 <XAxis dataKey="name" stroke="#aaa" />
                 <YAxis yAxisId="left" stroke="#aaa" tickFormatter={v => typeof v === 'number' ? `$${v.toLocaleString()}` : '$0'}/>
-                <YAxis yAxisId="right" orientation="right" stroke="#4ade80" tickFormatter={v => `${v}%`}/>
+                <YAxis yAxisId="right" orientation="right" stroke="#4ade80" tickFormatter={v => (typeof v === 'number' && isFinite(v)) ? `${v}%` : '0%'}/>
                 <Tooltip contentStyle={{ backgroundColor: '#1a1a1a', borderColor: '#333', borderRadius: '8px' }} formatter={(value, name) => name === 'ROI %' ? `${value}%` : (typeof value === 'number' ? `$${value.toLocaleString()}` : '$0')}/>
                 <Legend />
                 <Line yAxisId="left" type="monotone" dataKey="portfolioValue" stroke="#D4AF37" strokeWidth={2} name="Portfolio Value" dot={false} />
@@ -400,8 +420,8 @@ const Dashboard = ({ adminView = false, portfolioData: adminPortfolioData }) => 
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
-                <Pie data={portfolioData.allocation || []} cx="50%" cy="50%" labelLine={false} outerRadius={80} fill="#8884d8" dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
-                  {(portfolioData.allocation || []).map((entry, index) => (
+                <Pie data={safeAllocationData} cx="50%" cy="50%" labelLine={false} outerRadius={80} fill="#8884d8" dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
+                  {safeAllocationData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
@@ -599,8 +619,8 @@ const Dashboard = ({ adminView = false, portfolioData: adminPortfolioData }) => 
         </div>
         <div className="glassmorphic p-6 rounded-xl">
           <h3 className="text-lg font-bold mb-2">Fund Information</h3>
-          <div className="mb-1" style={{fontFamily: 'serif', color: '#e5e7eb'}}>Fund Name: <span className="font-bold">LuxYield Alpha</span></div>
-          <div className="mb-1" style={{fontFamily: 'serif', color: '#e5e7eb'}}>Manager: <span className="font-bold">LuxYield</span></div>
+          <div className="mb-1" style={{fontFamily: 'serif', color: '#e5e7eb'}}>Fund Name: <span className="font-bold">THE DIGITAL TRADING Alpha</span></div>
+                        <div className="mb-1" style={{fontFamily: 'serif', color: '#e5e7eb'}}>Manager: <span className="font-bold">THE DIGITAL TRADING</span></div>
           <div className="mb-1" style={{fontFamily: 'serif', color: '#e5e7eb'}}>Fees: <span className="font-bold">2% management, 20% performance</span></div>
           <div className="text-xs text-gray-400 mt-1" style={{fontFamily: 'serif'}}>
             Annual management fee on invested capital. Performance fee applies only to net profits.
@@ -618,13 +638,14 @@ const Dashboard = ({ adminView = false, portfolioData: adminPortfolioData }) => 
         <div className="glassmorphic p-6 rounded-xl mb-6">
           <h3 className="text-lg font-bold mb-2">Chat & Support</h3>
           <div className="flex flex-col gap-4 mb-2">
-            <button
+            <Link
+              to="/dashboard/support"
               className="w-full bg-blue-500 text-white py-4 sm:py-6 rounded-xl font-bold text-base sm:text-lg flex items-center justify-center gap-3 shadow-lg hover:bg-blue-600 transition min-h-[56px] sm:min-h-[72px]"
-              onClick={() => window.location.href = '/dashboard/support'}
             >
-              <FiMessageCircle className="h-6 w-6 sm:h-7 sm:w-7" />
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 sm:h-7 sm:w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192L5.636 18.364M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
               Support Chat
-            </button>
+            </Link>
+
             <button
               className="w-full bg-green-500 text-white py-4 sm:py-6 rounded-xl font-bold text-base sm:text-lg flex items-center justify-center gap-3 shadow-lg hover:bg-green-600 transition min-h-[56px] sm:min-h-[72px]"
             >

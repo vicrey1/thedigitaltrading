@@ -12,16 +12,16 @@ export default function QuickContactWidget() {
     setForm({ name: '', email: '', message: '' });
   };
   return (
-    <div className="fixed bottom-8 left-8 z-50">
-      <button onClick={() => setOpen(o => !o)} className="bg-gold text-black rounded-full w-14 h-14 flex items-center justify-center text-2xl shadow-lg focus:outline-none border-2 border-gold/40">
+    <div className="fixed bottom-4 sm:bottom-8 left-4 sm:left-8 z-50">
+      <button onClick={() => setOpen(o => !o)} className="bg-gold text-black rounded-full w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center text-xl sm:text-2xl shadow-lg focus:outline-none border-2 border-gold/40 min-h-[44px] min-w-[44px]">
         <span role="img" aria-label="contact">📞</span>
       </button>
       {open && (
-        <form onSubmit={handleSubmit} className="mt-2 bg-black bg-opacity-95 border border-gold/30 rounded-2xl p-6 shadow-2xl flex flex-col gap-3 min-w-[260px]">
-          <input name="name" value={form.name} onChange={handleChange} placeholder="Your Name" className="px-3 py-2 rounded bg-gray-900 text-white border border-gold/10 focus:outline-none" required />
-          <input name="email" value={form.email} onChange={handleChange} placeholder="Your Email" type="email" className="px-3 py-2 rounded bg-gray-900 text-white border border-gold/10 focus:outline-none" required />
-          <textarea name="message" value={form.message} onChange={handleChange} placeholder="Message" className="px-3 py-2 rounded bg-gray-900 text-white border border-gold/10 focus:outline-none" required />
-          <button type="submit" className="bg-gold text-black font-bold rounded-lg px-4 py-2 mt-2 hover:bg-yellow-400 transition">{sent ? 'Sent!' : 'Send'}</button>
+        <form onSubmit={handleSubmit} className="mt-2 bg-black bg-opacity-95 border border-gold/30 rounded-2xl p-4 sm:p-6 shadow-2xl flex flex-col gap-3 min-w-[280px] sm:min-w-[320px] max-w-[calc(100vw-2rem)]">
+          <input name="name" value={form.name} onChange={handleChange} placeholder="Your Name" className="px-3 py-3 rounded bg-gray-900 text-white border border-gold/10 focus:outline-none focus:border-gold text-base min-h-[44px]" required />
+          <input name="email" value={form.email} onChange={handleChange} placeholder="Your Email" type="email" className="px-3 py-3 rounded bg-gray-900 text-white border border-gold/10 focus:outline-none focus:border-gold text-base min-h-[44px]" required />
+          <textarea name="message" value={form.message} onChange={handleChange} placeholder="Message" className="px-3 py-3 rounded bg-gray-900 text-white border border-gold/10 focus:outline-none focus:border-gold text-base min-h-[88px] resize-none" required />
+          <button type="submit" className="bg-gold text-black font-bold rounded-lg px-4 py-3 mt-2 hover:bg-yellow-400 transition min-h-[44px] text-base">{sent ? 'Sent!' : 'Send'}</button>
         </form>
       )}
     </div>

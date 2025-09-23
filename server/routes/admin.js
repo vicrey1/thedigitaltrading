@@ -33,6 +33,7 @@ router.post('/investment/:id/set-gain-loss', async (req, res) => {
 });
 // server/routes/admin.js
 const express = require('express');
+const auth = require('../middleware/auth');
 const authAdmin = require('../middleware/authAdmin');
 const MarketEvent = require('../models/MarketEvent');
 const User = require('../models/User');
@@ -46,31 +47,18 @@ const adminCompleteInvestment = require('./admin_complete_investment');
 const adminContinueInvestment = require('./admin_continue_investment');
 const Investment = require('../models/Investment');
 const MarketUpdate = require('../models/MarketUpdate');
-const SupportUpload = require('../models/SupportUpload');
+
 const path = require('path');
 const fs = require('fs');
 
-// JWT decode middleware for admin routes
-router.use((req, res, next) => {
-  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
-    try {
-      const token = req.headers.authorization.replace('Bearer ', '');
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      console.log('Decoded admin JWT:', decoded); // Debug log
-      req.user = decoded;
-    } catch (err) {
-      console.log('JWT decode error:', err.message); // Debug log
-      // Invalid token, req.user remains undefined
-    }
-  } else {
-    console.log('No Authorization header for admin route'); // Debug log
-  }
-  next();
-});
+// JWT decode middleware removed - handled by auth middleware
 
 // Register the new admin_complete_investment and admin_continue_investment routes
 router.use(adminCompleteInvestment);
 router.use(adminContinueInvestment);
+
+// Register admin fees routes
+router.use('/fees', auth, require('./admin/fees'));
 
 // Create market event
 router.post('/market-events', authAdmin, async (req, res) => {
@@ -104,7 +92,7 @@ router.delete('/market-events/:id', authAdmin, async (req, res) => {
 });
 
 // Get all users
-router.get('/users', authAdmin, async (req, res) => {
+router.get('/users', auth, authAdmin, async (req, res) => {
   try {
     const users = await User.find();
     res.json(users);
@@ -125,7 +113,7 @@ router.patch('/users/:id', authAdmin, auditLog('update_user', 'User', req => req
 });
 
 // Get all withdrawal requests
-router.get('/withdrawals', authAdmin, async (req, res) => {
+router.get('/withdrawals', auth, authAdmin, async (req, res) => {
   try {
     const withdrawals = await Withdrawal.find().sort('-createdAt');
     res.json(withdrawals);
@@ -215,7 +203,7 @@ router.patch('/users/:id/role', authAdmin, async (req, res) => {
 });
 
 // Get all deposits
-router.get('/deposits', authAdmin, async (req, res) => {
+router.get('/deposits', auth, authAdmin, async (req, res) => {
   try {
     const deposits = await Deposit.find().populate('user', 'email username name').sort('-createdAt');
     res.json(deposits);
@@ -310,21 +298,246 @@ router.get('/verify', async (req, res) => {
 });
 
 // Admin dashboard stats
-router.get('/stats', authAdmin, async (req, res) => {
+router.get('/stats', auth, authAdmin, async (req, res) => {
   try {
+    // Basic counts
     const totalUsers = await User.countDocuments();
-    const totalInvestments = await (require('../models/Investment').countDocuments());
-    const totalWithdrawals = await (require('../models/Withdrawal').countDocuments({ status: 'pending' }));
-    const today = new Date();
-    today.setHours(0,0,0,0);
-    const todayROI = 1.2; // Placeholder, replace with real calculation if available
+    const activeInvestments = await Investment.countDocuments({ status: 'active' });
+    const totalInvestments = await Investment.countDocuments();
+    const pendingWithdrawals = await Withdrawal.countDocuments({ status: 'pending' });
+    const totalWithdrawals = await Withdrawal.countDocuments();
+    
+    // Calculate totals
+    const totalDepositsResult = await Deposit.aggregate([
+      { $group: { _id: null, total: { $sum: '$amount' } } }
+    ]);
+    const totalDeposits = totalDepositsResult[0]?.total || 0;
+    
+    const totalWithdrawalsResult = await Withdrawal.aggregate([
+      { $group: { _id: null, total: { $sum: '$amount' } } }
+    ]);
+    const totalWithdrawalsAmount = totalWithdrawalsResult[0]?.total || 0;
+    
+    const totalRevenueResult = await Investment.aggregate([
+      { $group: { _id: null, total: { $sum: '$currentValue' } } }
+    ]);
+    const totalRevenue = totalRevenueResult[0]?.total || 0;
+    
+    // Active users (users with investments or recent activity)
+    const activeUsers = await User.countDocuments({
+      $or: [
+        { lastLogin: { $gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) } },
+        { _id: { $in: await Investment.distinct('userId', { status: 'active' }) } }
+      ]
+    });
+    
+    // Monthly growth calculation (users created in last 30 days vs previous 30 days)
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    const sixtyDaysAgo = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000);
+    
+    const recentUsers = await User.countDocuments({ createdAt: { $gte: thirtyDaysAgo } });
+    const previousUsers = await User.countDocuments({ 
+      createdAt: { $gte: sixtyDaysAgo, $lt: thirtyDaysAgo } 
+    });
+    
+    const monthlyGrowth = previousUsers > 0 ? ((recentUsers - previousUsers) / previousUsers) * 100 : 0;
+    
+    // Chart data - Revenue by month (last 6 months)
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+    
+    const revenueData = await Investment.aggregate([
+      { $match: { createdAt: { $gte: sixMonthsAgo } } },
+      {
+        $group: {
+          _id: {
+            year: { $year: '$createdAt' },
+            month: { $month: '$createdAt' }
+          },
+          revenue: { $sum: '$currentValue' },
+          investments: { $sum: 1 }
+        }
+      },
+      { $sort: { '_id.year': 1, '_id.month': 1 } }
+    ]);
+    
+    // User growth data (last 6 months)
+    const userGrowthData = await User.aggregate([
+      { $match: { createdAt: { $gte: sixMonthsAgo } } },
+      {
+        $group: {
+          _id: {
+            year: { $year: '$createdAt' },
+            month: { $month: '$createdAt' }
+          },
+          newUsers: { $sum: 1 }
+        }
+      },
+      { $sort: { '_id.year': 1, '_id.month': 1 } }
+    ]);
+    
+    // Investment distribution by plan
+    const investmentDistribution = await Investment.aggregate([
+      { $match: { status: 'active' } },
+      {
+        $group: {
+          _id: '$planName',
+          value: { $sum: 1 }
+        }
+      }
+    ]);
+    
+    // Format chart data with proper validation
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    
+    // Helper function to ensure numeric values
+    const ensureNumber = (value, defaultValue = 0) => {
+      const num = Number(value);
+      return isNaN(num) || !isFinite(num) ? defaultValue : num;
+    };
+    
+    const formattedRevenueData = revenueData.map(item => ({
+      month: monthNames[item._id.month - 1] || 'Unknown',
+      revenue: ensureNumber(item.revenue, 0),
+      investments: ensureNumber(item.investments, 0)
+    }));
+    
+    const formattedUserGrowthData = userGrowthData.map(item => ({
+      month: monthNames[item._id.month - 1] || 'Unknown',
+      newUsers: ensureNumber(item.newUsers, 0),
+      totalUsers: 0 // Running total will be calculated
+    }));
+    
+    // Calculate running total for user growth with validation
+    let runningTotal = ensureNumber(totalUsers - recentUsers, 0);
+    formattedUserGrowthData.forEach(item => {
+      runningTotal += ensureNumber(item.newUsers, 0);
+      item.totalUsers = ensureNumber(runningTotal, 0);
+    });
+    
+    const formattedInvestmentDistribution = investmentDistribution.map((item, index) => ({
+      name: item._id || 'Unknown',
+      value: ensureNumber(item.value, 0),
+      color: ['#10B981', '#3B82F6', '#F59E0B', '#EF4444', '#8B5CF6'][index % 5]
+    }));
+    
+    // System metrics (placeholder - can be enhanced with real system monitoring)
+    const systemMetrics = [
+      { metric: 'CPU Usage', value: Math.floor(Math.random() * 30) + 20, max: 100 },
+      { metric: 'Memory', value: Math.floor(Math.random() * 40) + 40, max: 100 },
+      { metric: 'Storage', value: Math.floor(Math.random() * 20) + 30, max: 100 },
+      { metric: 'Network', value: Math.floor(Math.random() * 25) + 15, max: 100 }
+    ];
+    
     res.json({
-      totalUsers,
-      totalInvestments,
-      totalWithdrawals,
-      todayROI
+      // Basic stats with validation
+      totalUsers: ensureNumber(totalUsers, 0),
+      activeInvestments: ensureNumber(activeInvestments, 0),
+      totalDeposits: ensureNumber(totalDeposits, 0),
+      totalWithdrawals: ensureNumber(totalWithdrawalsAmount, 0),
+      pendingWithdrawals: ensureNumber(pendingWithdrawals, 0),
+      totalRevenue: ensureNumber(totalRevenue, 0),
+      monthlyGrowth: ensureNumber(Math.round(monthlyGrowth * 100) / 100, 0),
+      activeUsers: ensureNumber(activeUsers, 0),
+      
+      // Chart data
+      revenueData: formattedRevenueData,
+      userGrowthData: formattedUserGrowthData,
+      investmentDistribution: formattedInvestmentDistribution,
+      systemMetrics: systemMetrics.map(metric => ({
+        ...metric,
+        value: ensureNumber(metric.value, 0),
+        max: ensureNumber(metric.max, 100)
+      })),
+      
+      // Legacy compatibility
+      totalInvestments: ensureNumber(totalInvestments, 0),
+      todayROI: ensureNumber(1.2, 1.2) // Can be enhanced with real calculation
     });
   } catch (err) {
+    console.error('Admin stats error:', err);
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Get recent activities across all users (admin only)
+router.get('/recent-activities', auth, authAdmin, async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 10;
+    
+    // Get recent investments
+    const recentInvestments = await Investment.find()
+      .populate('user', 'name email')
+      .sort('-createdAt')
+      .limit(limit);
+    
+    // Get recent withdrawals
+    const recentWithdrawals = await Withdrawal.find()
+      .populate('userId', 'name email')
+      .sort('-createdAt')
+      .limit(limit);
+    
+    // Get recent deposits
+    const recentDeposits = await Deposit.find({ status: 'confirmed' })
+      .populate('user', 'name email')
+      .sort('-createdAt')
+      .limit(limit);
+    
+    // Get recent user signups
+    const recentSignups = await User.find()
+      .sort('-createdAt')
+      .limit(limit)
+      .select('name email createdAt');
+    
+    // Combine and format all activities
+    const activities = [
+      ...recentInvestments.map(inv => ({
+        id: inv._id,
+        type: 'investment',
+        user: inv.user?.name || 'Unknown User',
+        userEmail: inv.user?.email || '',
+        amount: inv.amount,
+        time: inv.createdAt,
+        description: `Invested in ${inv.planName || 'investment plan'}`,
+        status: inv.status || 'active'
+      })),
+      ...recentWithdrawals.map(wd => ({
+        id: wd._id,
+        type: 'withdrawal',
+        user: wd.userId?.name || 'Unknown User',
+        userEmail: wd.userId?.email || '',
+        amount: wd.amount,
+        time: wd.createdAt,
+        description: `Withdrawal to ${wd.walletAddress?.substring(0, 10)}...`,
+        status: wd.status
+      })),
+      ...recentDeposits.map(dep => ({
+        id: dep._id,
+        type: 'deposit',
+        user: dep.user?.name || 'Unknown User',
+        userEmail: dep.user?.email || '',
+        amount: dep.amount,
+        time: dep.createdAt,
+        description: `Deposit via ${dep.method || 'manual'}`,
+        status: dep.status
+      })),
+      ...recentSignups.map(user => ({
+        id: user._id,
+        type: 'signup',
+        user: user.name || 'Unknown User',
+        userEmail: user.email || '',
+        amount: null,
+        time: user.createdAt,
+        description: 'New user registration',
+        status: 'completed'
+      }))
+    ]
+      .sort((a, b) => new Date(b.time) - new Date(a.time))
+      .slice(0, limit);
+    
+    res.json({ activities });
+  } catch (err) {
+    console.error('Admin recent activities error:', err);
     res.status(500).json({ message: err.message });
   }
 });
@@ -392,7 +605,7 @@ router.get('/users/:id/keys', authAdmin, async (req, res) => {
 // Admin: send email to any user
 router.post('/send-email', authAdmin, async (req, res) => {
   let { to, subject, html, text } = req.body;
-  const logoHtml = '<img src="https://www.luxyield.com/logo192.png" alt="LuxYield Logo" style="width:64px;height:64px;margin-bottom:16px;" />';
+  const logoHtml = '<img src="https://www.thedigitaltrading.com/logo192.png" alt="THE DIGITAL TRADING Logo" style="width:64px;height:64px;margin-bottom:16px;" />';
   if (html) {
     html = logoHtml + html;
   }
@@ -651,54 +864,8 @@ router.delete('/market-updates/:id', authAdmin, async (req, res) => {
   }
 });
 
-// List support uploads (admin)
-router.get('/support/uploads', authAdmin, async (req, res) => {
-  try {
-    const uploads = await SupportUpload.find().sort('-createdAt').lean();
-    const BASE = process.env.API_URL || (req.protocol + '://' + req.get('host')) || 'https://api.luxyield.com';
-    const normalized = uploads.map(u => ({
-      ...u,
-      url: `${BASE}/api/support/file/${u.filename}`,
-      thumbUrl: `${BASE}/api/support/file/${u.filename}_thumb.jpg`
-    }));
-    res.json(normalized);
-  } catch (e) {
-    console.error('List uploads error:', e && e.message);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
 
-// Delete upload (admin): removes file(s) and DB record
-router.delete('/support/uploads/:id', authAdmin, async (req, res) => {
-  try {
-    const id = req.params.id;
-    const record = await SupportUpload.findById(id);
-    if (!record) return res.status(404).json({ message: 'Not found' });
-    // Delete files (original + thumb)
-    const file = path.join(uploadPath, record.filename);
-    const thumb = path.join(uploadPath, record.filename + '_thumb.jpg');
-    try { await fs.promises.unlink(file); } catch (err) { /* ignore */ }
-    try { await fs.promises.unlink(thumb); } catch (err) { /* ignore */ }
-    await SupportUpload.findByIdAndDelete(id);
-    res.json({ success: true });
-  } catch (e) {
-    console.error('Delete upload error:', e && e.message);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
 
-// Reassign upload to another user
-router.patch('/support/uploads/:id/reassign', authAdmin, async (req, res) => {
-  try {
-    const id = req.params.id;
-    const { userId } = req.body;
-    const record = await SupportUpload.findByIdAndUpdate(id, { userId }, { new: true }).lean();
-    if (!record) return res.status(404).json({ message: 'Not found' });
-    res.json(record);
-  } catch (e) {
-    console.error('Reassign upload error:', e && e.message);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
+
 
 module.exports = router;

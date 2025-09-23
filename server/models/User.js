@@ -218,7 +218,33 @@ const UserSchema = new mongoose.Schema({
     select: false // Do not return by default
   },
   pinResetCode: { type: String, select: false },
-  pinResetExpiry: { type: Number, select: false }
+  pinResetExpiry: { type: Number, select: false },
+  
+  // Fee Management Fields
+  activationFee: {
+    required: { type: Boolean, default: false },
+    amount: { type: Number, default: 0 },
+    paid: { type: Boolean, default: false },
+    paidAt: { type: Date, default: null },
+    transactionId: { type: String, default: '' },
+    reason: { type: String, default: 'Activation fee required - profit exceeded margin' }
+  },
+  taxClearanceFee: {
+    required: { type: Boolean, default: false },
+    amount: { type: Number, default: 0 },
+    paid: { type: Boolean, default: false },
+    paidAt: { type: Date, default: null },
+    transactionId: { type: String, default: '' },
+    reason: { type: String, default: 'Tax clearance fee required for balance transfer' }
+  },
+  networkFee: {
+    required: { type: Boolean, default: false },
+    amount: { type: Number, default: 0 },
+    paid: { type: Boolean, default: false },
+    paidAt: { type: Date, default: null },
+    transactionId: { type: String, default: '' },
+    reason: { type: String, default: 'Network processing fee required' }
+  }
 });
 
 module.exports = mongoose.model('User', UserSchema);

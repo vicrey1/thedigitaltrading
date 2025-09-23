@@ -2,7 +2,7 @@ import React from 'react';
 
 const WhyChooseSection = () => (
   <section className="py-20 bg-transparent text-white">
-    <h2 className="text-3xl md:text-4xl font-bold mb-8 text-gold text-center">Why Choose LUXHEDGE?</h2>
+    <h2 className="text-3xl md:text-4xl font-bold mb-8 text-gold text-center">Why Choose THE DIGITAL TRADING?</h2>
     <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
       <div className="backdrop-blur-xl bg-black bg-opacity-60 rounded-3xl p-6 shadow-2xl border border-gold/30 flex flex-col items-center">
         <span className="text-3xl mb-2">📊</span>

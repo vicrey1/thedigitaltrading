@@ -59,7 +59,7 @@ const FundShowcaseSection = () => {
 							to={`/funds/${f.slug}`}
 							className="absolute bottom-4 left-1/2 -translate-x-1/2 px-5 py-2 bg-black bg-opacity-70 border border-gold text-gold font-bold rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-all focus:ring-2 focus:ring-gold/40 focus:outline-none"
 						>
-							Learn More
+							See Our Case Studies
 						</Link>
 					</motion.div>
 				))}

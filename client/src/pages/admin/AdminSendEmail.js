@@ -15,13 +15,13 @@ const AdminSendEmail = () => {
   const templates = [
     {
       label: 'Welcome Email',
-      subject: 'Welcome to LUXYIELD!',
+      subject: 'Welcome to THE DIGITAL TRADING!',
       html: `<div style="font-family:sans-serif;max-width:480px;margin:auto;padding:32px 24px;background:#18181b;border-radius:16px;color:#fff;text-align:center;">
         <div style="font-family:sans-serif; font-size:2.5rem; font-weight:bold; letter-spacing:2px; margin-bottom:24px;">
           <span style="color:#FFD700;">LUX</span><span style="color:#fff;">HEDGE</span>
         </div>
-        <h2 style="color:#FFD700;">Welcome to LUXYIELD!</h2>
-        <p>We’re excited to have you on board. Explore investment opportunities and grow your wealth with us!</p>
+        <h2 style="color:#FFD700;">Welcome to THE DIGITAL TRADING!</h2>
+        <p>We’re excited to have you on board. Explore our research platform, review disclosures, and learn how our process works.</p>
       </div>`
     },
     {

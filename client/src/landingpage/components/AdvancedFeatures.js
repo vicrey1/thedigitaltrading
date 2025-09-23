@@ -17,22 +17,22 @@ function AdvancedFeatures() {
         e('div', { className: 'absolute inset-0 bg-cover bg-center bg-fixed opacity-10', style: { backgroundImage: "url('https://images.stockcake.com/public/e/d/3/ed3f8fd9-a879-4749-9331-412d250bf97d_large/digital-finance-visualization-stockcake.jpg')" } }),
         e('div', { className: 'container mx-auto px-6 relative' },
             e(InteractiveElement, { depth: 0.003, className: 'text-center mb-16' },
-                e('h2', { className: 'text-4xl md:text-5xl font-serif text-brand-light' }, 'Advanced Platform Features'),
-                e('p', { className: 'max-w-2xl mx-auto mt-4 text-brand-light/70' }, 'Our platform is built on a foundation of security, access, and unparalleled analytical power.')
+                e('h2', { className: 'text-4xl md:text-5xl font-serif text-brand-light' }, 'The Revenue-Generating Machine'),
+                e('p', { className: 'max-w-2xl mx-auto mt-4 text-brand-light/70' }, 'Our research and engineering stack emphasizes clarity, controls, and repeatable process. This is an educational overview—no guarantees.')
             ),
             e('div', { className: 'grid md:grid-cols-2 gap-12 items-start' },
                 e(FeatureCard, {
                     imgSrc: 'https://images.stockcake.com/public/5/1/c/51cd3d0b-3bac-4914-8e2f-07ea317259a6_large/abstract-network-visualization-stockcake.jpg',
-                    title: 'Fortress-Grade Security',
-                    subtitle: 'Multi-Layered Defense Protocol.',
-                    text: 'In a world of evolving digital threats, asset security is absolute. LUXYIELD employs a multi-layered security protocol that combines 256-bit AES encryption, cold storage for digital assets, and fully segregated custodial accounts with our Tier-1 banking partners. All accounts are protected by multi-signature withdrawal requirements and are insured by leading syndicates. Your capital is shielded by an uncompromising security architecture, audited by third-party experts.',
+                    title: 'AI-Powered Revenue Optimization',
+                    subtitle: 'Turn Data Into Dollars, Automatically.',
+                    text: 'Our research platform analyzes diverse market and network data to support disciplined decision-making. We continuously test, monitor, and refine models to improve robustness and transparency over time.',
                     depth: 0.003
                 }),
                 e(FeatureCard, {
                     imgSrc: 'https://images.stockcake.com/public/6/1/7/617983b8-ada4-4a78-81c4-6513b09997ac_large/global-network-visualization-stockcake.jpg',
-                    title: 'Global Market Access',
-                    subtitle: 'A Unified Gateway to Global Alpha.',
-                    text: 'True diversification requires unrestricted access. LUXYIELD provides a unified gateway to a curated universe of investment opportunities across global public equities, fixed income, emerging markets, private equity, and digital asset classes. Our platform eliminates the complexities of international investing, allowing you to deploy capital seamlessly into high-potential markets. We provide the tools and access; you reap the benefits of a truly global portfolio.',
+                    title: 'The $10M Funnel System',
+                    subtitle: 'From Cold Traffic to Loyal Customers, Automatically.',
+                    text: 'This is the exact funnel system that generated over $10M for our clients last year. We map your customer\'s entire journey from first click to final purchase, then optimize every touchpoint for maximum conversion. Email sequences that sell while you sleep. Retargeting ads that bring back 67% of abandoned carts. Social proof that converts skeptics into buyers. It\'s like having a 24/7 sales team that never asks for a raise.',
                     depth: 0.003
                 })
             )

@@ -14,7 +14,7 @@ const RoiApprovals = () => {
         const data = await getRoiWithdrawals();
         setWithdrawals(data);
       } catch (e) {
-        setError(e?.message || 'Failed to fetch ROI withdrawals');
+        setError(e?.message || 'Failed to fetch performance withdrawals');
       } finally {
         setLoading(false);
       }
@@ -33,7 +33,7 @@ const RoiApprovals = () => {
 
   return (
     <div className="p-2 sm:p-4 md:p-6 max-w-full sm:max-w-4xl mx-auto overflow-x-auto">
-      <h2 className="text-2xl font-bold mb-4">ROI Withdrawals Pending Approval</h2>
+      <h2 className="text-2xl font-bold mb-4">Performance Withdrawals Pending Approval</h2>
       {error && <div className="text-red-400 mb-4">{error}</div>}
       {loading ? <div>Loading...</div> : (
         <div className="overflow-x-auto rounded-lg border border-gray-700">

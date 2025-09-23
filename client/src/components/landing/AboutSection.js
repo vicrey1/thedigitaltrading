@@ -3,26 +3,26 @@ import React from 'react';
 const AboutSection = () => (
   <section className="py-20 bg-transparent text-white text-center">
     <div className="backdrop-blur-xl bg-black bg-opacity-60 rounded-3xl p-10 shadow-2xl border border-gold/30 max-w-4xl mx-auto">
-      <h2 className="text-3xl md:text-4xl font-bold mb-6 text-gold">Who We Are</h2>
-      <p className="max-w-2xl mx-auto mb-8 text-lg text-gray-300">
-        LUXHEDGE is a licensed and regulated digital asset manager, delivering institutional-grade crypto investment solutions. Our strategies span spot, derivatives, yield, and structured products, with a focus on active risk management and trusted institutional partnerships.
+      <h2 className="text-3xl md:text-4xl font-bold mb-6 text-gold">About THE DIGITAL TRADING</h2>
+      <p className="text-white/90 max-w-3xl mx-auto">
+        We are a research and technology-focused team building disciplined digital asset capabilities. Our approach emphasizes robust controls, transparency, and documentation—no hype, no guarantees.
       </p>
       <div className="flex flex-wrap justify-center gap-8 mb-8">
         <div className="flex flex-col items-center">
-          <span className="text-4xl mb-2">📈</span>
-          <span className="font-semibold">Active Portfolio Management</span>
+          <span className="text-4xl mb-2">📊</span>
+          <span className="font-semibold">Strategic Analytics</span>
         </div>
         <div className="flex flex-col items-center">
-          <span className="text-4xl mb-2">🛡️</span>
-          <span className="font-semibold">Risk-Controlled Exposure</span>
+          <span className="text-4xl mb-2">🎯</span>
+          <span className="font-semibold">Precision Targeting</span>
         </div>
         <div className="flex flex-col items-center">
-          <span className="text-4xl mb-2">🧠</span>
-          <span className="font-semibold">AI-Augmented Strategy Models</span>
+          <span className="text-4xl mb-2">⚡</span>
+          <span className="font-semibold">Technology Integration</span>
         </div>
         <div className="flex flex-col items-center">
-          <span className="text-4xl mb-2">🏦</span>
-          <span className="font-semibold">Investor-Centric Governance</span>
+          <span className="text-4xl mb-2">🤝</span>
+          <span className="font-semibold">Strategic Partnership</span>
         </div>
       </div>
       {/* Optional: Video embed for CEO message */}

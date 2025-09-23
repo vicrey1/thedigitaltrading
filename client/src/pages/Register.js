@@ -93,15 +93,15 @@ const Register = () => {
 
   return (
     <React.Fragment>
-      <div className="min-h-screen flex items-center justify-center bg-dark p-2 sm:p-4">
-        <div className="glassmorphic p-4 sm:p-8 rounded-xl w-full max-w-2xl">
+      <div className="min-h-screen flex items-center justify-center bg-dark p-4 sm:p-6">
+        <div className="glassmorphic p-6 sm:p-8 rounded-xl w-full max-w-2xl mx-4">
           {/* ...Logo and other UI... */}
           <>
-            <h2 className="text-2xl text-gold mb-6">Create Your Account</h2>
+            <h2 className="text-xl sm:text-2xl text-orange-400 mb-4 sm:mb-6 text-center">Create Your Account</h2>
             <form onSubmit={formik.handleSubmit}>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4 mb-2 sm:mb-4 w-full">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-4 sm:mb-6 w-full">
                 <div>
-                  <label htmlFor="register-fullName" className="block mb-2">Full Name</label>
+                  <label htmlFor="register-fullName" className="block mb-2 text-sm sm:text-base">Full Name</label>
                   <input
                     id="register-fullName"
                     name="fullName"
@@ -110,7 +110,7 @@ const Register = () => {
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
                     value={formik.values.fullName}
-                    className="w-full bg-dark border border-gray-700 rounded p-2 sm:p-3"
+                    className="w-full bg-dark border border-gray-700 rounded p-3 text-base min-h-[44px] focus:border-orange-400 focus:outline-none"
                   />
                   {formik.touched.fullName && (
                     <div className="text-red-500 text-sm"><SafeString value={formik.errors.fullName} /></div>
@@ -126,7 +126,7 @@ const Register = () => {
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
                     value={formik.values.username}
-                    className="w-full bg-dark border border-gray-700 rounded p-3"
+                    className="w-full bg-dark border border-gray-700 rounded p-3 text-base min-h-[44px] focus:border-gold focus:outline-none"
                   />
                   {formik.touched.username && (
                     <div className="text-red-500 text-sm"><SafeString value={formik.errors.username} /></div>
@@ -268,14 +268,14 @@ const Register = () => {
               </div>
               <button
                 type="submit"
-                className="w-full bg-gold text-black font-bold py-3 rounded hover:bg-yellow-600 transition"
+                className="w-full bg-orange-500 text-white font-bold py-3 px-4 rounded hover:bg-orange-600 transition min-h-[44px] text-base sm:text-lg mt-2"
               >
                 Register
               </button>
             </form>
-            <div className="mt-4 text-center">
+            <div className="mt-4 sm:mt-6 text-center text-sm sm:text-base">
               Already have an account?{' '}
-              <a href="/login" className="text-gold hover:underline">Sign in</a>
+              <a href="/login" className="text-orange-400 hover:underline font-medium">Sign in</a>
             </div>
           </>
         </div>
@@ -283,14 +283,14 @@ const Register = () => {
       {showVerifyModal && (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
           <div className="bg-gray-900 rounded-xl p-8 w-full max-w-md relative text-center">
-            <h2 className="text-xl font-bold mb-4 text-gold">Verify Your Email</h2>
+            <h2 className="text-xl font-bold mb-4 text-orange-400">Verify Your Email</h2>
             <p className="mb-4 text-white">
               A verification link and OTP have been sent to <span className="font-bold">{registeredEmail}</span>.<br/>
               Please check your inbox and follow the instructions to verify your email address.<br/>
               <span className="text-sm text-gray-400">(You can enter the OTP below if you prefer)</span>
             </p>
             <button
-              className="mb-4 text-gold underline text-sm"
+              className="mb-4 text-orange-400 underline text-sm"
               type="button"
               disabled={isVerifying || otpSuccess}
               onClick={async () => {
@@ -345,7 +345,7 @@ const Register = () => {
                 {otpError && <div className="text-red-400 mb-2">{otpError}</div>}
                 <button
                   type="submit"
-                  className="w-full bg-gold text-black px-6 py-2 rounded-lg font-bold hover:bg-yellow-500 transition disabled:opacity-60"
+                  className="w-full bg-orange-500 text-white px-6 py-2 rounded-lg font-bold hover:bg-orange-600 transition disabled:opacity-60"
                   disabled={isVerifying || otpSuccess}
                 >
                   {isVerifying ? "Verifying..." : "Verify OTP"}

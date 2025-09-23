@@ -3,20 +3,20 @@ import { motion } from 'framer-motion';
 
 const testimonials = [
   {
-    name: 'Olivia R.',
-    text: 'LUXHEDGE gave me access to strategies I never thought possible. The returns and transparency are unmatched.',
-    title: 'Private Investor, London',
+    text: "THE DIGITAL MARKETING transformed our digital strategy with a comprehensive approach that delivered sustainable growth. Their strategic insights and technology integration significantly enhanced our market position.",
+    name: "Sarah Johnson",
+    title: "CEO, TechStart Inc."
   },
   {
-    name: 'Michael S.',
-    text: 'The onboarding was seamless and the team is always available. I trust LUXHEDGE with my digital assets.',
-    title: 'Entrepreneur, Singapore',
+    text: "Their data-driven methodology and professional expertise helped us achieve our business objectives efficiently. The strategic partnership approach made all the difference in our digital transformation.",
+    name: "Michael Chen",
+    title: "Founder, GrowthLab"
   },
   {
-    name: 'Sophia L.',
-    text: 'The performance dashboard and compliance focus make LUXHEDGE stand out from every other platform.',
-    title: 'Family Office, Zurich',
-  },
+    text: "Working with THE DIGITAL MARKETING has been exceptional. Their innovative solutions and strategic guidance have consistently exceeded our expectations and delivered measurable results.",
+    name: "Emily Rodriguez",
+    title: "Marketing Director, InnovateCorp"
+  }
 ];
 
 export default function TestimonialsSection() {
@@ -27,7 +27,7 @@ export default function TestimonialsSection() {
   }, []);
   return (
     <section className="py-20 bg-transparent">
-      <h2 className="text-2xl md:text-3xl font-bold mb-8 text-gold text-center font-serif">What Our Investors Say</h2>
+      <h2 className="text-2xl md:text-3xl font-bold mb-8 text-gold text-center font-serif">What Our Clients Say</h2>
       <div className="max-w-2xl mx-auto">
         <motion.div
           key={idx}
