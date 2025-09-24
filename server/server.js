@@ -37,17 +37,25 @@ io.on('connection', (socket) => {
   });
 });
 
-// CORS Middleware
+// CORS Middleware - Updated for Vercel + Render deployment
+const allowedOrigins = [
+  'https://www.thedigitaltrading.com',
+  'http://localhost:3000',
+  process.env.FRONTEND_URL, // Vercel deployment URL
+  process.env.CORS_ORIGIN   // Additional CORS origin from env
+].filter(Boolean); // Remove undefined values
+
 app.use(cors({
-  origin: ['https://www.thedigitaltrading.com', 'http://localhost:3000'],
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'], // Added PATCH
+  origin: allowedOrigins,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   credentials: true,
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
   exposedHeaders: ['Authorization']
 }));
+
 // Handle preflight requests for all routes
 app.options('*', cors({
-  origin: ['https://www.thedigitaltrading.com', 'http://localhost:3000'],
+  origin: allowedOrigins,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'], // Added PATCH
   credentials: true,
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept']
