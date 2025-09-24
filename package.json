@@ -13,7 +13,8 @@
     "deploy-prep": "bash quick-deploy.sh",
     "render-build": "cd server && npm install",
     "render-start": "cd server && npm start",
-    "vercel-build": "cd client && npm run build"
+    "vercel-build": "cd client && npm run build",
+    "postinstall": "cd server && npm install"
   },
   "keywords": [
     "trading",

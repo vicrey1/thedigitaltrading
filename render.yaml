@@ -4,7 +4,7 @@ services:
     env: node
     plan: starter
     buildCommand: cd server && npm install
-    startCommand: cd server && node server.js
+    startCommand: cd server && node -r dotenv/config server.js
     healthCheckPath: /api/health
     envVars:
       - key: NODE_ENV
