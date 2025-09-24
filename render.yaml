@@ -3,7 +3,7 @@ services:
     name: thedigitaltrading-api
     env: node
     plan: starter
-    buildCommand: cd server && npm install
+    buildCommand: cd server && npm ci --only=production
     startCommand: cd server && npm start
     healthCheckPath: /api/health
     envVars:
@@ -18,11 +18,11 @@ services:
       - key: BCRYPT_ROUNDS
         value: 12
       - key: FRONTEND_URL
-        value: https://your-app-name.vercel.app
+        value: https://thedigitaltrading.vercel.app
       - key: BACKEND_URL
         value: https://thedigitaltrading-api.onrender.com
       - key: CORS_ORIGIN
-        value: https://your-app-name.vercel.app
+        value: https://thedigitaltrading.vercel.app
       - key: RATE_LIMIT_WINDOW_MS
         value: 900000
       - key: RATE_LIMIT_MAX_REQUESTS
@@ -35,6 +35,18 @@ services:
         value: true
       - key: LOG_LEVEL
         value: info
+      - key: MONGO_URI
+        fromDatabase:
+          name: thedigitaltrading-mongodb
+          property: connectionString
+      - key: MONGODB_URI
+        fromDatabase:
+          name: thedigitaltrading-mongodb
+          property: connectionString
+      - key: REDIS_URL
+        fromDatabase:
+          name: thedigitaltrading-redis
+          property: connectionString
 
 databases:
   - name: thedigitaltrading-mongodb
