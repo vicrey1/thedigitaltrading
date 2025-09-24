@@ -3,8 +3,8 @@ services:
     name: thedigitaltrading-api
     env: node
     plan: starter
-    buildCommand: cd server && npm ci --only=production
-    startCommand: cd server && npm start
+    buildCommand: cd server && npm install
+    startCommand: cd server && node server.js
     healthCheckPath: /api/health
     envVars:
       - key: NODE_ENV
