@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useAdminAuth } from '../../auth/AdminAuthProvider';
 import { toast } from 'react-toastify';
 import './AdminSupportChat.css';
@@ -56,11 +56,11 @@ const AdminSupportChat = () => {
     fetchAnalytics();
     fetchAgents();
     fetchTickets();
-  }, []);
+  }, [fetchTickets]);
 
   useEffect(() => {
     fetchTickets();
-  }, [filters, searchTerm]);
+  }, [filters, searchTerm, fetchTickets]);
 
   useEffect(() => {
     if (selectedTicket) {
@@ -76,7 +76,7 @@ const AdminSupportChat = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const fetchAnalytics = async () => {
+  const fetchAnalytics = useCallback(async () => {
     try {
       const response = await fetch('/api/admin/support/analytics', {
         headers: {
@@ -91,9 +91,9 @@ const AdminSupportChat = () => {
     } catch (error) {
       console.error('Error fetching analytics:', error);
     }
-  };
+  }, []);
 
-  const fetchAgents = async () => {
+  const fetchAgents = useCallback(async () => {
     try {
       const response = await fetch('/api/admin/support/agents', {
         headers: {
@@ -108,9 +108,9 @@ const AdminSupportChat = () => {
     } catch (error) {
       console.error('Error fetching agents:', error);
     }
-  };
+  }, []);
 
-  const fetchTickets = async () => {
+  const fetchTickets = useCallback(async () => {
     try {
       const queryParams = new URLSearchParams();
       
@@ -138,9 +138,9 @@ const AdminSupportChat = () => {
       console.error('Error loading tickets:', error);
       toast.error('Failed to load tickets');
     }
-  };
+  }, [filters, searchTerm]);
 
-  const fetchMessages = async (ticketId) => {
+  const fetchMessages = useCallback(async (ticketId) => {
     try {
       const response = await fetch(`/api/admin/support/tickets/${ticketId}/messages`, {
         headers: {
@@ -156,7 +156,7 @@ const AdminSupportChat = () => {
       console.error('Error fetching messages:', error);
       toast.error('Failed to load messages');
     }
-  };
+  }, []);
 
   const assignTicket = async (ticketId, agentId) => {
     try {

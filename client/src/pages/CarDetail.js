@@ -1,5 +1,5 @@
 // src/pages/CarDetail.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { FiArrowLeft, FiPhone, FiMail, FiMapPin, FiCalendar, FiTrendingUp, FiSettings, FiZap } from 'react-icons/fi';
 import { useTheme } from '../contexts/ThemeContext';
@@ -16,9 +16,9 @@ const CarDetail = () => {
 
   useEffect(() => {
     fetchCarDetail();
-  }, [id]);
+  }, [id, fetchCarDetail]);
 
-  const fetchCarDetail = async () => {
+  const fetchCarDetail = useCallback(async () => {
     setLoading(true);
     try {
       const carData = await getCarById(id);
@@ -37,7 +37,7 @@ const CarDetail = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
 
   const nextImage = () => {
     if (car.images && car.images.length > 1) {

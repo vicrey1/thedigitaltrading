@@ -26,7 +26,7 @@ import AdminAnnouncements from './pages/admin/AdminAnnouncements';
 import AdminPlans from './pages/AdminPlans';
 import UserInvestmentsAdmin from './pages/admin/UserInvestmentsAdmin';
 import AdminIndex from './pages/admin';
-import SupportAdmin from './pages/SupportAdmin';
+
 import AdminMirror from './pages/admin/AdminMirror';
 import RoiApprovals from './pages/admin/RoiApprovals';
 import AdminColdWallet from './pages/admin/AdminColdWallet';

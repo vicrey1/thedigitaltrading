@@ -1,9 +1,9 @@
 // src/pages/CarShop.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { FiSearch, FiFilter, FiEye, FiPhone, FiMail, FiMapPin } from 'react-icons/fi';
 import { useTheme } from '../contexts/ThemeContext';
 import { Link } from 'react-router-dom';
-import { getCars, getFilterOptions } from '../services/carAPI';
+import { getCars } from '../services/carAPI';
 import { getCarImageUrl } from '../utils/imageUtils';
 
 const CarShop = () => {
@@ -28,13 +28,13 @@ const CarShop = () => {
 
   useEffect(() => {
     fetchCars();
-  }, []);
+  }, [fetchCars]);
 
   useEffect(() => {
     applyFilters();
-  }, [cars, searchTerm, filters, sortBy]);
+  }, [applyFilters]);
 
-  const fetchCars = async () => {
+  const fetchCars = useCallback(async () => {
     setLoading(true);
     try {
       const response = await getCars();
@@ -44,9 +44,9 @@ const CarShop = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const applyFilters = () => {
+  const applyFilters = useCallback(() => {
     let filtered = cars.filter(car => {
       const matchesSearch = 
         car.make.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -92,7 +92,7 @@ const CarShop = () => {
     }
 
     setFilteredCars(filtered);
-  };
+  }, [cars, searchTerm, filters, sortBy]);
 
   const resetFilters = () => {
     setFilters({

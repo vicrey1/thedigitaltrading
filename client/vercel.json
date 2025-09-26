@@ -29,15 +29,16 @@
     }
   ],
   "env": {
-    "REACT_APP_API_BASE_URL": "@react_app_api_base_url",
-    "REACT_APP_SOCKET_URL": "@react_app_socket_url",
-    "REACT_APP_FRONTEND_URL": "@react_app_frontend_url"
+    "REACT_APP_API_BASE_URL": "https://thedigitaltrading.onrender.com",
+    "REACT_APP_SOCKET_URL": "https://thedigitaltrading.onrender.com",
+    "REACT_APP_FRONTEND_URL": "https://thedigitaltrading.vercel.app"
   },
   "build": {
     "env": {
-      "REACT_APP_API_BASE_URL": "@react_app_api_base_url",
-      "REACT_APP_SOCKET_URL": "@react_app_socket_url",
-      "REACT_APP_FRONTEND_URL": "@react_app_frontend_url"
+      "CI": "false",
+      "REACT_APP_API_BASE_URL": "https://thedigitaltrading.onrender.com",
+      "REACT_APP_SOCKET_URL": "https://thedigitaltrading.onrender.com",
+      "REACT_APP_FRONTEND_URL": "https://thedigitaltrading.vercel.app"
     }
   }
 }

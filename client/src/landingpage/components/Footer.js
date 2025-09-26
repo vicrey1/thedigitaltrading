@@ -9,7 +9,7 @@ function Footer() {
             e('div', { className: 'grid md:grid-cols-4 gap-8 text-brand-light/70' },
                 e('div', null,
                     e('a', { href: '#hero', className: 'block mb-4' },
-                        e('img', { src: 'https://images.stockcake.com/public/f/e/5/fe542cbf-1df2-4cb8-ae53-f967466b5d89_medium/geometric-eagle-warrior-stockcake.jpg', alt: 'THE DIGITAL TRADING Logo', className: 'h-12 w-auto' })
+                        e('span', { className: 'text-xl font-bold text-brand-accent' }, 'THE DIGITAL TRADING')
                     ),
                     e('p', { className: 'text-sm' }, '123 Digital Avenue', e('br'), 'New York, NY 10001'),
                     e('p', { className: 'text-sm mt-4' }, '© 2025 THE DIGITAL TRADING.', e('br'), 'All Rights Reserved.')

@@ -12,3 +12,4 @@ node_modules/
 # Miscellaneous
 *.log
 .DS_Store
+.vercel

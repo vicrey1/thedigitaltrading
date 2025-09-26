@@ -2,7 +2,7 @@ import React from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 
 export default function PageShell({ title, imageSrc, imageAlt, children }) {
-  const { isDarkMode, colors } = useTheme();
+  const { isDarkMode } = useTheme();
   
   return (
     <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'}`}>

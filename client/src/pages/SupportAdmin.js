@@ -88,6 +88,12 @@ export default function SupportAdmin() {
       try {
         const users = await getUsers();
         setAllUsers(users);
+      } catch (error) {
+        console.error('Error fetching users:', error);
+      }
+    }
+    fetchAllUsers();
+  }, [UPLOADS_BASE_URL]);
       } catch (e) {
         setAllUsers([]);
       }
