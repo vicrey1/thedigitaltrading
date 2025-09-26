@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import axios from 'axios';
+import { apiFetch } from '../utils/api';
 import socket from '../utils/socket';
 import { FaCheckDouble, FaArrowLeft } from 'react-icons/fa';
 import { getUsers } from '../services/adminAPI';
@@ -34,7 +34,7 @@ export default function SupportAdmin() {
     try {
       const token = localStorage.getItem('adminToken') || localStorage.getItem('token');
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
-      const res = await fetch(url, { headers });
+      const res = await apiFetch(url, { headers });
       if (!res.ok) throw new Error('Failed to fetch protected file');
       const blob = await res.blob();
       const objUrl = URL.createObjectURL(blob);
@@ -94,12 +94,6 @@ export default function SupportAdmin() {
     }
     fetchAllUsers();
   }, [UPLOADS_BASE_URL]);
-      } catch (e) {
-        setAllUsers([]);
-      }
-    }
-    fetchAllUsers();
-  }, []);
 
   // Track unread messages for each user
   useEffect(() => {
@@ -186,8 +180,9 @@ export default function SupportAdmin() {
   }, [userSelected]);
 
   const fetchSupportMessages = async () => {
-    const res = await axios.get('/api/support/messages');
-    setMessages(res.data);
+    const res = await apiFetch('/api/support/messages');
+    const data = await res.json();
+    setMessages(data);
   };
 
   const sendMessage = async () => {
@@ -201,7 +196,11 @@ export default function SupportAdmin() {
       attachment: null,
     };
     setMessages((prev) => [...prev, msg]);
-    await axios.post('/api/support/message', msg);
+    await apiFetch('/api/support/message', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(msg),
+    });
     setInput('');
   };
 
@@ -251,9 +250,13 @@ export default function SupportAdmin() {
     // Find the latest user message that is not seen
     const unseen = filteredMessages.filter(m => m.sender === 'user' && m.status !== 'seen');
     if (unseen.length > 0) {
-      axios.post('/api/support/message-seen', {
-        userId: userSelected,
-        sender: 'support',
+      apiFetch('/api/support/message-seen', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: userSelected,
+          sender: 'support',
+        }),
       });
     }
   }, [filteredMessages, userSelected]);
