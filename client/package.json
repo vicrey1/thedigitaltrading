@@ -2,7 +2,7 @@
   "name": "the-digital-trading",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://www.thedigitaltrading.com",
+  "homepage": "/",
   "dependencies": {
     "@testing-library/dom": "^9.3.3",
     "@testing-library/jest-dom": "^5.17.0",
@@ -40,7 +40,7 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "postbuild": "node -e \"require('fs').copyFileSync('static.json','build/static.json')\"",
+    "postbuild": "node -e \"require('fs').copyFileSync('static.json','build/static.json') && require('fs').copyFileSync('public/manifest.json','build/manifest.json')\"",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
