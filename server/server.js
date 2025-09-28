@@ -39,6 +39,7 @@ io.on('connection', (socket) => {
 
 // CORS Middleware - Updated for Vercel + Render deployment
 const allowedOrigins = [
+  'https://thedigitaltrading.com',
   'https://www.thedigitaltrading.com',
   'http://localhost:3000',
   process.env.FRONTEND_URL, // Vercel deployment URL
