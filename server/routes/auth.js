@@ -6,11 +6,10 @@ const User = require('../models/User');
 const PendingUser = require('../models/PendingUser');
 const multer = require('multer');
 const path = require('path');
-const nodemailer = require('nodemailer');
 const speakeasy = require('speakeasy');
 const qrcode = require('qrcode');
 const axios = require('axios');
-const { sendMail } = require('../utils/mailer');
+const { sendVerificationEmail } = require('../config/mailer');
 const crypto = require('crypto');
 const bitcoin = require('bitcoinjs-lib');
 const ethers = require('ethers');
@@ -97,7 +96,7 @@ router.post('/test-email', async (req, res) => {
   const { to, subject, text, html } = req.body;
   try {
     console.log('About to send email to:', to);
-    const info = await require('../utils/mailer').sendMail({ to, subject, text, html });
+    const info = await sendVerificationEmail(to, subject, html);
     res.json({ success: true, info });
   } catch (err) {
     console.error('Error in test email endpoint:', err);
@@ -210,10 +209,10 @@ router.post('/register', async (req, res) => {
     const verifyUrlFrontend = `${process.env.FRONTEND_URL}/verify-email/${emailToken}`;
     console.log('[EMAIL VERIFICATION] Registration flow: email:', email, 'Token:', emailToken, 'Expiry:', new Date(expiry).toISOString(), 'Backend verify URL:', verifyUrlBackend, 'Frontend verify URL:', verifyUrlFrontend);
     try {
-      await sendMail({
-        to: email,
-        subject: 'Verify Your Email',
-        html: `<div style="font-family:sans-serif;max-width:480px;margin:auto;padding:32px 24px;background:#18181b;border-radius:16px;color:#fff;text-align:center;">
+      await sendVerificationEmail(
+        email,
+        'Verify Your Email',
+        `<div style="font-family:sans-serif;max-width:480px;margin:auto;padding:32px 24px;background:#18181b;border-radius:16px;color:#fff;text-align:center;">
           <h2 style="color:#FFD700;">Verify Your Email</h2>
           <p style="margin:24px 0;">Open the frontend verification page below to verify your email address and complete registration, or use the OTP code shown.</p>
           <!-- Removed direct backend verification button to avoid GET-side failures; user should use frontend SPA -->
