@@ -41,6 +41,8 @@ io.on('connection', (socket) => {
 const allowedOrigins = [
   'https://thedigitaltrading.com',
   'https://www.thedigitaltrading.com',
+  'https://api.thedigitaltrading.com',
+  'https://thedigitaltrading.vercel.app',
   'http://localhost:3000',
   process.env.FRONTEND_URL, // Vercel deployment URL
   process.env.CORS_ORIGIN   // Additional CORS origin from env
