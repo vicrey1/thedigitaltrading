@@ -60,6 +60,9 @@ router.use(adminContinueInvestment);
 // Register admin fees routes
 router.use('/fees', auth, require('./admin/fees'));
 
+// Register admin deposits routes
+router.use('/deposits', require('./admin/deposits'));
+
 // Create market event
 router.post('/market-events', authAdmin, async (req, res) => {
   try {
