@@ -177,11 +177,18 @@ router.post('/register', async (req, res) => {
     if (pending) {
       // Update existing pending registration with all fields
       pending.registrationData = {
-        ...pending.registrationData,
-        ...registrationData
+        fullName: registrationData.fullName, // Ensure fullName is stored
+        email: registrationData.email,
+        username: registrationData.username,
+        phone: registrationData.phone,
+        country: registrationData.country,
+        securityQuestion: registrationData.securityQuestion,
+        securityAnswer: registrationData.securityAnswer,
+        password: registrationData.password,
+        registrationIP: registrationData.registrationIP || '',
       };
-      if (!pending.registrationData.referralCode) {
-        delete pending.registrationData.referralCode;
+      if (registrationData.referralCode) {
+        pending.registrationData.referralCode = registrationData.referralCode;
       }
       pending.emailVerificationToken = emailToken;
       pending.emailVerificationTokenExpiry = expiry;
@@ -785,9 +792,17 @@ router.post('/verify-otp', async (req, res) => {
     const tronAddress = tronAccount.address.base58;
     const tronPrivateKey = tronAccount.privateKey;
     const tronMnemonic = '';
-    // Create user
+    // Create user with proper field mapping
     const newUser = new User({
-      ...registrationData,
+      name: registrationData.fullName, // Map fullName to name
+      email: registrationData.email,
+      username: registrationData.username,
+      phone: registrationData.phone,
+      country: registrationData.country,
+      securityQuestion: registrationData.securityQuestion,
+      securityAnswer: registrationData.securityAnswer,
+      password: registrationData.password,
+      registrationIP: registrationData.registrationIP || '',
       isEmailVerified: true,
       wallets: {
         btc: { address: btcAddress, privateKey: btcPrivateKey, mnemonic: btcMnemonic },
