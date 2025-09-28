@@ -220,7 +220,7 @@ router.post('/register', async (req, res) => {
           <p style="margin:24px 0;font-size:18px;">Or enter this OTP code: <span style="font-weight:bold;letter-spacing:2px;">${emailOtp}</span></p>
           <p style="margin-top:24px;font-size:13px;color:#aaa;">If you did not create an account, you can ignore this email.</p>
         </div>`
-      });
+      );
     } catch (err) {
       console.error('[EMAIL VERIFICATION] Error sending registration email:', err);
     }
