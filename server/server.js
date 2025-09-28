@@ -37,16 +37,17 @@ io.on('connection', (socket) => {
   });
 });
 
-// CORS Middleware - Updated for Vercel + Render deployment
+// CORS Middleware - Updated for production domains
 const allowedOrigins = [
   'https://thedigitaltrading.com',
   'https://www.thedigitaltrading.com',
   'https://api.thedigitaltrading.com',
-  'https://thedigitaltrading.vercel.app',
   'http://localhost:3000',
-  process.env.FRONTEND_URL, // Vercel deployment URL
-  process.env.CORS_ORIGIN   // Additional CORS origin from env
-].filter(Boolean); // Remove undefined values
+  ...(process.env.CORS_ORIGIN || '').split(',').filter(origin => origin.trim()),
+  process.env.FRONTEND_URL
+].filter(Boolean).map(origin => origin.trim()); // Remove duplicates and empty values
+
+console.log('[CORS] Allowed origins:', allowedOrigins);
 
 app.use(cors({
   origin: allowedOrigins,
@@ -68,7 +69,13 @@ app.use((req, res, next) => {
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
   res.header('Access-Control-Expose-Headers', 'Authorization');
   // Helpful debug logging for CORS issues
-  if (req.method === 'OPTIONS') console.log('[CORS] Preflight', req.method, req.originalUrl, 'Headers:', Object.keys(req.headers));
+  // Enhanced CORS logging
+  if (req.method === 'OPTIONS' || req.headers.origin) {
+    console.log('[CORS]', req.method, req.originalUrl);
+    console.log('[CORS] Origin:', req.headers.origin);
+    console.log('[CORS] Headers:', Object.keys(req.headers));
+    console.log('[CORS] Is origin allowed:', allowedOrigins.includes(req.headers.origin));
+  }
   next();
 });
 app.use(express.json({ limit: '10mb' }));
