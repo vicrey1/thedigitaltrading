@@ -42,15 +42,15 @@ const AdminUsers = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const response = await getUsers();
-      setUsers(response.data || []);
+      const data = await getUsers();
+      setUsers(data.users || []);
       
       // Calculate stats
       const stats = {
-        total: response.data?.length || 0,
-        active: response.data?.filter(user => user.status === 'active').length || 0,
-        verified: response.data?.filter(user => user.isVerified).length || 0,
-        totalInvestments: response.data?.reduce((sum, user) => sum + (user.totalInvestment || 0), 0) || 0
+        total: data.users?.length || 0,
+        active: data.users?.filter(user => user.status === 'active').length || 0,
+        verified: data.users?.filter(user => user.isVerified).length || 0,
+        totalInvestments: data.users?.reduce((sum, user) => sum + (user.totalInvestment || 0), 0) || 0
       };
       setUserStats(stats);
     } catch (error) {
