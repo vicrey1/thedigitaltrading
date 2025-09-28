@@ -5,7 +5,9 @@
   "scripts": {
     "start": "node -r dotenv/config server.js",
     "dev": "nodemon -r dotenv/config server.js",
-    "test": "jest"
+    "test": "jest",
+    "seed": "node scripts/seed-plans.js",
+    "list-plans": "node scripts/list-plans.js"
   },
   "keywords": [],
   "author": "",
