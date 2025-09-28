@@ -1,4 +1,4 @@
-const SibApiV3Sdk = require('@getbrevo/brevo');
+const SibApiV3Sdk = require('sib-api-v3-sdk');
 require('dotenv').config({ path: require('path').resolve(__dirname, '../../.env') });
 
 const client = SibApiV3Sdk.ApiClient.instance;
