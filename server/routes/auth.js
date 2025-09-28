@@ -750,7 +750,7 @@ router.post('/reset-password/:token', async (req, res) => {
 });
 
 // Email OTP verification route (strict flow)
-router.post('/verify-email-otp', async (req, res) => {
+router.post('/verify-otp', async (req, res) => {
   try {
     const { email, otp } = req.body;
     const pending = await PendingUser.findOne({ email, emailOtp: otp, emailOtpExpiry: { $gt: Date.now() } });
