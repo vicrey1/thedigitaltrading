@@ -13,7 +13,7 @@ import { useTheme } from '../../contexts/ThemeContext';
 const AdminLayout = () => {
   const { admin, logout } = useAdminAuth();
   const { isDarkMode, toggleTheme } = useTheme();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   const location = useLocation();
 
@@ -23,10 +23,9 @@ const AdminLayout = () => {
 
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-      if (window.innerWidth < 768) {
-        setSidebarOpen(false);
-      }
+      const isMobileView = window.innerWidth < 768;
+      setIsMobile(isMobileView);
+      setSidebarOpen(!isMobileView);
     };
     
     checkMobile();
@@ -82,7 +81,7 @@ const AdminLayout = () => {
       {/* Sidebar */}
       <aside className={`
         fixed md:static top-0 left-0 h-full z-50 transition-all duration-300 ease-in-out
-        ${isMobile ? 'w-72' : sidebarOpen ? 'w-72' : 'w-16'} 
+        ${sidebarOpen ? 'w-72' : 'w-16'} 
         ${isMobile && !sidebarOpen ? '-translate-x-full' : 'translate-x-0'}
         ${isDarkMode 
           ? 'bg-gradient-to-b from-gray-800 to-gray-900 border-gray-700' 
