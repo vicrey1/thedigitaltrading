@@ -38,11 +38,10 @@
     "yup": "^1.6.1"
   },
   "scripts": {
-  "start": "react-scripts start",
+    "start": "react-scripts start",
     "build": "react-scripts build",
     "postbuild": "node -e \"require('fs').copyFileSync('static.json','build/static.json') && require('fs').copyFileSync('public/manifest.json','build/manifest.json')\"",
-  "test": "react-scripts test",
-  "test:playwright-mobile": "node playwright-mobile-test.js",
+    "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
