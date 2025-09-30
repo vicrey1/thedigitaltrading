@@ -1,7 +1,7 @@
 // src/pages/admin/Withdrawals.js
 import React, { useState, useEffect } from 'react';
 import { 
-  FiDollarSign, FiClock, FiCheck, FiX, FiEye, FiFilter,
+  FiDollarSign, FiClock, FiCheck, FiX, FiEye,
   FiDownload, FiRefreshCw, FiAlertCircle, FiTrendingDown,
   FiCalendar, FiUser, FiCreditCard
 } from 'react-icons/fi';
@@ -43,10 +43,14 @@ const AdminWithdrawals = () => {
 
   useEffect(() => {
     fetchWithdrawals();
+  // Only fetch once on mount
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     filterWithdrawals();
+  // We want this effect to run when these dependencies change
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [withdrawals, searchTerm, filters]);
 
   const fetchWithdrawals = async () => {
@@ -265,18 +269,22 @@ const AdminWithdrawals = () => {
           </p>
         </div>
         
-        <div className="flex items-center space-x-3 mt-4 md:mt-0">
-          <AdminButton variant="secondary" icon={FiRefreshCw} onClick={fetchWithdrawals}>
-            Refresh
-          </AdminButton>
-          <AdminButton variant="primary" icon={FiDownload}>
-            Export
-          </AdminButton>
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center sm:space-x-3 mt-4 sm:mt-0 w-full gap-2 sm:gap-0">
+          <div className="w-full sm:w-auto mb-2 sm:mb-0">
+            <AdminButton variant="secondary" icon={FiRefreshCw} onClick={fetchWithdrawals} className="w-full sm:w-auto">
+              Refresh
+            </AdminButton>
+          </div>
+          <div className="w-full sm:w-auto">
+            <AdminButton variant="primary" icon={FiDownload} className="w-full sm:w-auto">
+              Export
+            </AdminButton>
+          </div>
         </div>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         <AdminCard>
           <div className="flex items-center justify-between">
             <div>
@@ -338,7 +346,7 @@ const AdminWithdrawals = () => {
 
       {/* Filters */}
       <AdminCard>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 p-2 sm:p-4">
           <AdminInput
             placeholder="Search by user, email, or address..."
             value={searchTerm}
@@ -354,6 +362,7 @@ const AdminWithdrawals = () => {
               { value: 'completed', label: 'Completed' },
               { value: 'rejected', label: 'Rejected' }
             ]}
+            className="w-full"
           />
           
           <AdminSelect
@@ -365,6 +374,7 @@ const AdminWithdrawals = () => {
               { value: 'ETH', label: 'Ethereum' },
               { value: 'USDT', label: 'Tether' }
             ]}
+            className="w-full"
           />
           
           <AdminSelect
@@ -376,6 +386,7 @@ const AdminWithdrawals = () => {
               { value: '30days', label: 'Last 30 Days' },
               { value: '90days', label: 'Last 90 Days' }
             ]}
+            className="w-full"
           />
           
           <AdminSelect
@@ -387,6 +398,7 @@ const AdminWithdrawals = () => {
               { value: '1000-10000', label: '$1,000 - $10,000' },
               { value: '10000', label: '$10,000+' }
             ]}
+            className="w-full"
           />
         </div>
       </AdminCard>

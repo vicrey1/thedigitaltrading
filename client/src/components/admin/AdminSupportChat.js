@@ -4,7 +4,7 @@ import { toast } from 'react-toastify';
 import './AdminSupportChat.css';
 
 const AdminSupportChat = () => {
-  const { admin } = useAdminAuth();
+  useAdminAuth();
   const [tickets, setTickets] = useState([]);
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -19,6 +19,8 @@ const AdminSupportChat = () => {
     category: 'all',
     assignedAgent: 'all'
   });
+  const [isMobile, setIsMobile] = useState(false);
+  const [showSidebar, setShowSidebar] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -52,29 +54,14 @@ const AdminSupportChat = () => {
     { value: 'bug', label: 'Bug Report' }
   ];
 
-  useEffect(() => {
-    fetchAnalytics();
-    fetchAgents();
-    fetchTickets();
-  }, [fetchTickets]);
+  // initial data fetch and mobile detection are executed after fetch helpers are defined
+
+  // fetchMessages and fetchTickets are called from the initial effect below
+  // fetchMessages will be defined below; effect moved after its declaration to avoid use-before-define warnings
 
   useEffect(() => {
-    fetchTickets();
-  }, [filters, searchTerm, fetchTickets]);
-
-  useEffect(() => {
-    if (selectedTicket) {
-      fetchMessages(selectedTicket._id);
-    }
-  }, [selectedTicket]);
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
+  }, [messages]);
 
   const fetchAnalytics = useCallback(async () => {
     try {
@@ -139,6 +126,7 @@ const AdminSupportChat = () => {
       toast.error('Failed to load tickets');
     }
   }, [filters, searchTerm]);
+  
 
   const fetchMessages = useCallback(async (ticketId) => {
     try {
@@ -157,6 +145,30 @@ const AdminSupportChat = () => {
       toast.error('Failed to load messages');
     }
   }, []);
+
+  // Call fetchMessages when a ticket is selected
+  useEffect(() => {
+    if (selectedTicket) {
+      fetchMessages(selectedTicket._id || selectedTicket);
+    }
+  }, [selectedTicket, fetchMessages]);
+
+  // Run initial fetches after helpers are defined
+  useEffect(() => {
+    fetchAnalytics();
+    fetchAgents();
+    fetchTickets();
+
+    // mobile detection
+    const checkMobile = () => {
+      const mobile = typeof window !== 'undefined' && window.innerWidth < 768;
+      setIsMobile(mobile);
+      setShowSidebar(!mobile);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, [fetchAnalytics, fetchAgents, fetchTickets]);
 
   const assignTicket = async (ticketId, agentId) => {
     try {
@@ -304,7 +316,12 @@ const AdminSupportChat = () => {
     <div className="admin-support-chat">
       {/* Header with Analytics */}
       <div className="admin-support-header">
-        <h2>Support Management</h2>
+        <div className="flex items-center justify-between">
+          <h2>Support Management</h2>
+          {isMobile && (
+            <button onClick={() => setShowSidebar(prev => !prev)} className="px-3 py-2 rounded bg-gray-100">{showSidebar ? 'Hide' : 'Show'} tickets</button>
+          )}
+        </div>
         <div className="analytics-cards">
           <div className="analytics-card">
             <div className="card-value">{analytics.totalTickets || 0}</div>
@@ -378,7 +395,13 @@ const AdminSupportChat = () => {
 
       <div className="admin-support-content">
         {/* Tickets List */}
-        <div className="admin-tickets-sidebar">
+        {showSidebar && (
+          <div className={`admin-tickets-sidebar ${isMobile ? 'mobile-overlay' : ''}`} style={isMobile ? { position: 'fixed', top: 0, left: 0, zIndex: 60, height: '100vh', overflow: 'auto' } : {}}>
+            {isMobile && (
+              <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '0.5rem 1rem', borderBottom: '1px solid #e9ecef', background: '#fff' }}>
+                <button onClick={() => setShowSidebar(false)} aria-label="Close tickets" className="p-2 rounded bg-gray-100">Close</button>
+              </div>
+            )}
           <div className="tickets-count">
             {tickets.length} ticket{tickets.length !== 1 ? 's' : ''}
           </div>
@@ -428,7 +451,8 @@ const AdminSupportChat = () => {
               ))
             )}
           </div>
-        </div>
+          </div>
+        )}
 
         {/* Chat Area */}
         <div className="admin-chat-area">

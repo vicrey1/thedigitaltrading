@@ -4,7 +4,7 @@ import { useTheme } from '../contexts/ThemeContext';
 
 export default function EventDetailPage() {
   const { slug } = useParams();
-  const { isDarkMode, colors } = useTheme();
+  const { isDarkMode } = useTheme(); // Only using isDarkMode
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);

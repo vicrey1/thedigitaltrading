@@ -11,8 +11,12 @@ const cors = require('cors');
 const http = require('http');
 const socketio = require('socket.io');
 const { startRoiCron } = require('./utils/roiCalculator');
+const corsOptions = require('./middleware/corsConfig');
 
 const app = express();
+
+// Apply CORS middleware with our custom configuration
+app.use(cors(corsOptions));
 
 // Use the PORT from environment (deployment hosts provide this).
 // Fall back to 5001 for local development only when no env PORT is present.
@@ -27,7 +31,13 @@ app.use('/socket.io', (req, res, next) => {
 });
 const server = http.createServer(app);
 
-const io = socketio(server, { cors: { origin: '*', credentials: true } });
+const io = socketio(server, { 
+  cors: { 
+    origin: allowedOrigins,
+    credentials: true,
+    methods: ['GET', 'POST']
+  } 
+});
 
 io.use((socket, next) => {
   console.log('Socket connection attempt with headers:', socket.handshake.headers);

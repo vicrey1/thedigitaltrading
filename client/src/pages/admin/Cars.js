@@ -1,8 +1,8 @@
 // src/pages/admin/Cars.js
 import React, { useState, useEffect } from 'react';
-import { FiPlus, FiFilter, FiDownload, FiEdit, FiTrash2, FiEye } from 'react-icons/fi';
+import { FiPlus, FiEdit, FiTrash2 } from 'react-icons/fi';
 import { useTheme } from '../../contexts/ThemeContext';
-import { getAdminCars, createCar, updateCar, deleteCar, getCarStats } from '../../services/carAPI';
+import { getAdminCars, createCar, updateCar, deleteCar } from '../../services/carAPI';
 
 const AdminCars = () => {
   const { isDarkMode } = useTheme();
@@ -42,6 +42,8 @@ const AdminCars = () => {
 
   useEffect(() => {
     fetchCars();
+  // Only fetch cars once on mount
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchCars = async () => {
@@ -226,18 +228,18 @@ const AdminCars = () => {
   return (
     <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'}`}>
       <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
           <h1 className="text-3xl font-bold">Car Management</h1>
           <button
             onClick={handleCreate}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2"
+            className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2"
           >
             <FiPlus /> Add New Car
           </button>
         </div>
 
-        {/* Search and Filter */}
-        <div className="mb-6 flex gap-4">
+  {/* Search and Filter */}
+  <div className="mb-6 flex flex-col md:flex-row gap-4">
           <input
             type="text"
             placeholder="Search cars..."
@@ -250,7 +252,7 @@ const AdminCars = () => {
           <select
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
-            className={`px-4 py-2 rounded-lg border ${
+            className={`px-4 py-2 rounded-lg border w-full md:w-auto ${
               isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-300'
             }`}
           >
@@ -496,7 +498,7 @@ const AdminCars = () => {
                             {imageSrc ? (
                               <img
                                 src={imageSrc}
-                                alt={`Car image ${index + 1}`}
+                                alt={`${index + 1}`}
                                 className="w-full h-24 object-cover rounded border"
                                 onError={(e) => {
                                   console.error('Image failed to load:', e.target.src);
@@ -562,15 +564,12 @@ const AdminCars = () => {
           </div>
         )}
 
-        {/* Cars List */}
-        <div className={`rounded-lg border ${
-          isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-300'
-        }`}>
-          <div className="overflow-x-auto">
+        {/* Cars List: table on md+, stacked cards on small screens */}
+        <div className={`rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-300'}`}>
+          {/* Table for medium+ screens */}
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full">
-              <thead className={`border-b ${
-                isDarkMode ? 'border-gray-700' : 'border-gray-200'
-              }`}>
+              <thead className={`border-b ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
                 <tr>
                   <th className="text-left p-4">Car</th>
                   <th className="text-left p-4">Year</th>
@@ -583,9 +582,7 @@ const AdminCars = () => {
               </thead>
               <tbody>
                 {filteredCars.map((car) => (
-                  <tr key={car._id} className={`border-b ${
-                    isDarkMode ? 'border-gray-700' : 'border-gray-200'
-                  }`}>
+                  <tr key={car._id} className={`border-b ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
                     <td className="p-4">
                       <div>
                         <div className="font-semibold">{car.make} {car.model}</div>
@@ -611,24 +608,54 @@ const AdminCars = () => {
                     </td>
                     <td className="p-4">
                       <div className="flex gap-2">
-                        <button
-                          onClick={() => handleEdit(car)}
-                          className="text-blue-600 hover:text-blue-800 p-1"
-                        >
-                          <FiEdit />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(car._id)}
-                          className="text-red-600 hover:text-red-800 p-1"
-                        >
-                          <FiTrash2 />
-                        </button>
+                        <button onClick={() => handleEdit(car)} className="text-blue-600 hover:text-blue-800 p-1"><FiEdit /></button>
+                        <button onClick={() => handleDelete(car._id)} className="text-red-600 hover:text-red-800 p-1"><FiTrash2 /></button>
                       </div>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
+          </div>
+
+          {/* Stacked card view for small screens */}
+          <div className="md:hidden space-y-3 p-3">
+            {filteredCars.map((car) => (
+              <div key={car._id} className={`p-3 rounded-lg border ${isDarkMode ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-100'}`}>
+                <div className="flex items-start gap-3">
+                  <div className="w-24 h-16 bg-gray-200 rounded overflow-hidden flex-shrink-0">
+                    {car.images && car.images[0] ? (
+                      <img src={car.images[0].url || car.images[0]} alt={`${car.make} ${car.model}`} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-xs text-gray-500">No Image</div>
+                    )}
+                  </div>
+
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="font-semibold truncate">{car.make} {car.model}</div>
+                        <div className="text-sm text-gray-500 truncate">{car.bodyType} • {car.fuelType}</div>
+                      </div>
+                      <div className="text-sm font-medium ml-2">${car.price?.toLocaleString()}</div>
+                    </div>
+
+                    <div className="mt-2 flex items-center justify-between text-sm text-gray-500">
+                      <div>{car.year} • {car.mileage?.toLocaleString()} mi</div>
+                      <div>
+                        {car.featured && <span className="text-yellow-500 mr-2">⭐</span>}
+                        <span className={`px-2 py-1 rounded-full text-xs ${car.status === 'available' ? 'bg-green-100 text-green-800' : car.status === 'sold' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'}`}>{car.status}</span>
+                      </div>
+                    </div>
+
+                    <div className="mt-3 flex gap-2">
+                      <button onClick={() => handleEdit(car)} className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded">Edit</button>
+                      <button onClick={() => handleDelete(car._id)} className="flex-1 bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded">Delete</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 

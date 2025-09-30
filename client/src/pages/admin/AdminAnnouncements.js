@@ -30,6 +30,8 @@ const AdminAnnouncements = () => {
 
   useEffect(() => {
     fetchAnnouncements();
+  // Only fetch once on mount
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleSubmit = async (e) => {
@@ -120,10 +122,10 @@ const AdminAnnouncements = () => {
   };
 
   return (
-    <div className="p-2 sm:p-4 md:p-6 max-w-full sm:max-w-3xl mx-auto overflow-x-auto">
+    <div className="p-2 sm:p-4 md:p-6 max-w-full sm:max-w-3xl mx-auto">
       <h2 className="text-3xl font-bold text-gold mb-6 text-center">Admin Announcements</h2>
       {/* Post form */}
-      <div className="glassmorphic p-2 sm:p-6 md:p-8 rounded-xl mb-6 sm:mb-10 overflow-x-auto">
+      <div className="glassmorphic p-2 sm:p-6 md:p-8 rounded-xl mb-6 sm:mb-10">
         <h3 className="text-2xl font-bold mb-6 text-center">Post Announcement</h3>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -141,7 +143,7 @@ const AdminAnnouncements = () => {
               ref={quillRef}
             />
             <label className="block mt-2">Insert Image:</label>
-            <input type="file" accept="image/*" onChange={handleExternalImageUpload} className="mt-1" onClick={e => e.stopPropagation()} />
+            <input type="file" accept="image/*" onChange={handleExternalImageUpload} className="mt-1 w-full" onClick={e => e.stopPropagation()} />
           </div>
           <button type="submit" className="w-full py-3 rounded-lg font-bold bg-gold text-black hover:bg-yellow-600 transition" disabled={loading}>
             {loading ? 'Posting...' : 'Post Announcement'}
@@ -154,18 +156,22 @@ const AdminAnnouncements = () => {
       <div className="space-y-4 sm:space-y-6">
         {announcements.filter(a => a._id).map((a) => (
           <div key={a._id} className="glassmorphic p-2 sm:p-4 md:p-6 rounded-xl relative overflow-x-auto">
-            <div className="flex items-center mb-2">
-              <FiInfo className="text-gold mr-2" />
-              <span className="font-bold text-lg text-gold">{a.title}</span>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center mb-2 gap-2">
+              <div className="flex items-center">
+                <FiInfo className="text-gold mr-2" />
+                <span className="font-bold text-lg text-gold">{a.title}</span>
+              </div>
               {a._id && (
-                <button
-                  className="ml-auto text-red-400 hover:text-red-600"
-                  title="Delete announcement"
-                  onClick={() => handleDelete(a._id)}
-                  disabled={deletingId === a._id}
-                >
-                  <FiTrash2 />
-                </button>
+                <div className="ml-auto w-full sm:w-auto">
+                  <button
+                    className="w-full sm:w-auto text-left text-red-400 hover:text-red-600"
+                    title="Delete announcement"
+                    onClick={() => handleDelete(a._id)}
+                    disabled={deletingId === a._id}
+                  >
+                    <FiTrash2 />
+                  </button>
+                </div>
               )}
             </div>
             <div className="text-white mb-2 announcement-message" dangerouslySetInnerHTML={{ __html: a.message }} />

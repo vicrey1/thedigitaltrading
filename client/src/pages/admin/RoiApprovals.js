@@ -32,36 +32,59 @@ const RoiApprovals = () => {
   };
 
   return (
-    <div className="p-2 sm:p-4 md:p-6 max-w-full sm:max-w-4xl mx-auto overflow-x-auto">
+    <div className="p-2 sm:p-4 md:p-6 max-w-full sm:max-w-4xl mx-auto">
       <h2 className="text-2xl font-bold mb-4">Performance Withdrawals Pending Approval</h2>
       {error && <div className="text-red-400 mb-4">{error}</div>}
       {loading ? <div>Loading...</div> : (
-        <div className="overflow-x-auto rounded-lg border border-gray-700">
-          <table className="min-w-full text-sm">
-            <thead>
-              <tr className="border-b border-gray-700 bg-gray-900 text-left">
-                <th className="py-3 px-4 font-semibold">User</th>
-                <th className="py-3 px-4 font-semibold">Amount</th>
-                <th className="py-3 px-4 font-semibold">Date</th>
-                <th className="py-3 px-4 font-semibold">Status</th>
-                <th className="py-3 px-4 font-semibold">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {withdrawals.map(w => (
-                <tr key={w._id} className="border-b border-gray-800 hover:bg-gray-800 transition">
-                  <td className="py-3 px-4 break-all">{w.userId?.email || w.userId}</td>
-                  <td className="py-3 px-4">{w.amount}</td>
-                  <td className="py-3 px-4">{new Date(w.createdAt).toLocaleString()}</td>
-                  <td className="py-3 px-4 capitalize">{w.status}</td>
-                  <td className="py-3 px-4 flex gap-2">
-                    <button className="bg-green-600 px-3 py-1 rounded text-white font-semibold hover:bg-green-700 transition" onClick={() => handleApprove(w._id)}>Approve</button>
-                    <button className="bg-red-600 px-3 py-1 rounded text-white font-semibold hover:bg-red-700 transition" onClick={() => handleReject(w._id)}>Reject</button>
-                  </td>
+        <div>
+          {/* Desktop/tablet */}
+          <div className="hidden md:block overflow-x-auto rounded-lg border border-gray-700">
+            <table className="min-w-full text-sm">
+              <thead>
+                <tr className="border-b border-gray-700 bg-gray-900 text-left">
+                  <th className="py-3 px-4 font-semibold">User</th>
+                  <th className="py-3 px-4 font-semibold">Amount</th>
+                  <th className="py-3 px-4 font-semibold">Date</th>
+                  <th className="py-3 px-4 font-semibold">Status</th>
+                  <th className="py-3 px-4 font-semibold">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {withdrawals.map(w => (
+                  <tr key={w._id} className="border-b border-gray-800 hover:bg-gray-800 transition">
+                    <td className="py-3 px-4 break-all">{w.userId?.email || w.userId}</td>
+                    <td className="py-3 px-4">{w.amount}</td>
+                    <td className="py-3 px-4">{new Date(w.createdAt).toLocaleString()}</td>
+                    <td className="py-3 px-4 capitalize">{w.status}</td>
+                    <td className="py-3 px-4 flex gap-2">
+                      <button className="w-full sm:w-auto bg-green-600 px-3 py-2 rounded text-white font-semibold hover:bg-green-700 transition" onClick={() => handleApprove(w._id)}>Approve</button>
+                      <button className="w-full sm:w-auto bg-red-600 px-3 py-2 rounded text-white font-semibold hover:bg-red-700 transition" onClick={() => handleReject(w._id)}>Reject</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Mobile stacked cards */}
+          <div className="md:hidden space-y-3">
+            {withdrawals.map(w => (
+              <div key={w._id} className="bg-gray-900 rounded-lg p-4">
+                <div className="flex justify-between items-start">
+                  <div className="min-w-0">
+                    <div className="font-medium text-white break-all">{w.userId?.email || w.userId}</div>
+                    <div className="text-gray-200">{w.amount}</div>
+                    <div className="text-gray-300 text-sm">{new Date(w.createdAt).toLocaleString()}</div>
+                    <div className="mt-2"><span className="px-2 py-1 rounded-full text-xs bg-gray-700 text-gray-200">{w.status}</span></div>
+                  </div>
+                    <div className="ml-3 flex-shrink-0 flex flex-col gap-2">
+                    <button className="w-full bg-green-600 px-3 py-2 rounded text-white font-semibold hover:bg-green-700 transition" onClick={() => handleApprove(w._id)}>Approve</button>
+                    <button className="w-full bg-red-600 px-3 py-2 rounded text-white font-semibold hover:bg-red-700 transition" onClick={() => handleReject(w._id)}>Reject</button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>

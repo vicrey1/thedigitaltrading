@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { FiCopy, FiUsers, FiGift, FiBarChart2 } from 'react-icons/fi';
 import { getReferralStats } from '../services/referralAPI';
-import { useUser } from '../contexts/UserContext';
+// User context removed as it's not currently used
+// import { useUser } from '../contexts/UserContext';
 import { toast } from 'react-toastify';
 
 export default function InviteFriends() {
-  const { user } = useUser();
+  // const { user } = useUser();
   const [referralStats, setReferralStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const referralCode = referralStats?.referralCode || '';

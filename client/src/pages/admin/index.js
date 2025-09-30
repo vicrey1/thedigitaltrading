@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { 
-  FiUsers, FiDollarSign, FiTrendingUp, FiTrendingDown, 
-  FiCreditCard, FiDownload, FiEye, FiActivity, FiTruck,
+  FiUsers, FiDollarSign, FiTrendingUp, 
+  FiDownload, FiEye, FiActivity, FiTruck,
   FiBarChart2, FiPieChart, FiArrowUpRight, FiArrowDownRight,
-  FiRefreshCw, FiCalendar, FiClock, FiBell, FiSettings,
-  FiAlertCircle, FiCheckCircle, FiTarget, FiGlobe
+  FiRefreshCw, FiCalendar, FiAlertCircle
 } from 'react-icons/fi';
 import { 
   LineChart, Line, AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,

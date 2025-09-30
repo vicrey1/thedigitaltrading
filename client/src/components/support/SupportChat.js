@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useUser } from '../../contexts/UserContext';
+// Remove unused import
+// import { useUser } from '../../contexts/UserContext';
 import { toast } from 'react-toastify';
 import './SupportChat.css';
 
 const SupportChat = () => {
-  const { user } = useUser();
+  // User context removed as it's not currently used
+  // const userContext = useUser();
   const [tickets, setTickets] = useState([]);
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -43,6 +45,8 @@ const SupportChat = () => {
 
   useEffect(() => {
     fetchTickets();
+  // Only fetch tickets once on mount
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
