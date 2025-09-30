@@ -52,25 +52,8 @@ io.on('connection', (socket) => {
   });
 });
 
-// CORS Middleware - Updated for production domains
-const allowedOrigins = [
-  'https://thedigitaltrading.com',
-  'https://www.thedigitaltrading.com',
-  'https://api.thedigitaltrading.com',
-  'http://localhost:3000',
-  ...(process.env.CORS_ORIGIN || '').split(',').filter(origin => origin.trim()),
-  process.env.FRONTEND_URL
-].filter(Boolean).map(origin => origin.trim()); // Remove duplicates and empty values
-
+// CORS configuration is imported from ./middleware/corsConfig
 console.log('[CORS] Allowed origins:', allowedOrigins);
-
-app.use(cors({
-  origin: allowedOrigins,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  credentials: true,
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
-  exposedHeaders: ['Authorization']
-}));
 
 // Handle preflight requests for all routes
 app.options('*', cors({
