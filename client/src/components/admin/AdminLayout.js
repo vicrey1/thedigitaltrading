@@ -84,32 +84,33 @@ const AdminLayout = () => {
         } 
         border-r shadow-2xl flex flex-col
       `}>
-        {/* Header */}
-        <div className={`
-          flex items-center justify-between h-16 px-4 border-b
-          ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}
-        `}>
-          <div className={`flex items-center transition-all duration-300 ${!sidebarOpen ? 'opacity-0 w-0' : 'opacity-100'}`}>
-            <div className="w-8 h-8 bg-gradient-to-r from-orange-400 to-orange-600 rounded-lg flex items-center justify-center mr-3">
-              <FiShield className="text-white text-lg" />
+        {/* Header (hide on mobile) */}
+        {!isMobile && (
+          <div className={`
+            flex items-center justify-between h-16 px-4 border-b
+            ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}
+          `}>
+            <div className={`flex items-center transition-all duration-300 ${!sidebarOpen ? 'opacity-0 w-0' : 'opacity-100'}`}>
+              <div className="w-8 h-8 bg-gradient-to-r from-orange-400 to-orange-600 rounded-lg flex items-center justify-center mr-3">
+                <FiShield className="text-white text-lg" />
+              </div>
+              <div>
+                <h1 className="text-lg font-bold bg-gradient-to-r from-orange-400 to-orange-600 bg-clip-text text-transparent">
+                  THE DIGITAL TRADING
+                </h1>
+                <p className="text-xs text-gray-500">Admin Panel</p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-lg font-bold bg-gradient-to-r from-orange-400 to-orange-600 bg-clip-text text-transparent">
-                THE DIGITAL TRADING
-              </h1>
-              <p className="text-xs text-gray-500">Admin Panel</p>
-            </div>
+            <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className={`p-2 rounded-lg transition-all duration-300 ${
+                isDarkMode ? 'hover:bg-gray-700 active:bg-gray-600' : 'hover:bg-gray-100 active:bg-gray-200'
+              } transform active:scale-95`}
+            >
+              {sidebarOpen ? <FiChevronLeft size={20} /> : <FiChevronRight size={20} />}
+            </button>
           </div>
-          
-          <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className={`p-2 rounded-lg transition-all duration-300 ${
-              isDarkMode ? 'hover:bg-gray-700 active:bg-gray-600' : 'hover:bg-gray-100 active:bg-gray-200'
-            } transform active:scale-95`}
-          >
-            {sidebarOpen ? <FiChevronLeft size={20} /> : <FiChevronRight size={20} />}
-          </button>
-        </div>
+        )}
 
         {/* Navigation */}
         <nav className="flex-1 py-4 px-2 overflow-y-auto">
@@ -158,19 +159,21 @@ const AdminLayout = () => {
         <div className={`
           p-4 border-t ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}
         `}>
-          {/* Theme Toggle */}
-          <button
-            onClick={toggleTheme}
-            className={`
-              w-full flex items-center px-3 py-2 mb-3 rounded-lg transition-colors
-              ${isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}
-            `}
-          >
-            {isDarkMode ? <FiSun className="mr-3" /> : <FiMoon className="mr-3" />}
-            <span className={`transition-all duration-300 ${!sidebarOpen ? 'opacity-0 w-0' : 'opacity-100'}`}>
-              {isDarkMode ? 'Light Mode' : 'Dark Mode'}
-            </span>
-          </button>
+          {/* Theme Toggle (hide on mobile) */}
+          {!isMobile && (
+            <button
+              onClick={toggleTheme}
+              className={`
+                w-full flex items-center px-3 py-2 mb-3 rounded-lg transition-colors
+                ${isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}
+              `}
+            >
+              {isDarkMode ? <FiSun className="mr-3" /> : <FiMoon className="mr-3" />}
+              <span className={`transition-all duration-300 ${!sidebarOpen ? 'opacity-0 w-0' : 'opacity-100'}`}>
+                {isDarkMode ? 'Light Mode' : 'Dark Mode'}
+              </span>
+            </button>
+          )}
 
           {/* Admin Profile */}
           <div className={`
@@ -211,7 +214,7 @@ const AdminLayout = () => {
       {/* Mobile Menu Button */}
       {isMobile && (
         <button
-          onClick={() => setSidebarOpen(true)}
+          onClick={() => setSidebarOpen((open) => !open)}
           className={`
             fixed top-4 left-4 z-[55] p-3 rounded-lg shadow-lg transition-all duration-300
             ${isDarkMode ? 'bg-gray-800 text-white hover:bg-gray-700' : 'bg-white text-gray-900 hover:bg-gray-100'}
