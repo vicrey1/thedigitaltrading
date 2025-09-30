@@ -14,6 +14,7 @@ import '../custom-scrollbar.css';
 
 const Sidebar = ({ collapsed = false, setCollapsed = () => {}, hasNewAnnouncement = false }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
   const [hoveredItem, setHoveredItem] = useState(null);
   const { logout, user } = useUser();
   const { isDarkMode, toggleTheme } = useTheme();
@@ -72,11 +73,14 @@ const Sidebar = ({ collapsed = false, setCollapsed = () => {}, hasNewAnnouncemen
   // Handle responsive behavior
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth < 768) {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      if (mobile) {
         setMobileOpen(false);
       }
     };
 
+    handleResize();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
@@ -120,23 +124,6 @@ const Sidebar = ({ collapsed = false, setCollapsed = () => {}, hasNewAnnouncemen
         />
       )}
 
-      {/* Mobile hamburger button */}
-      <button
-        className={`
-          fixed top-4 left-4 z-[60] p-3 rounded-xl shadow-lg md:hidden 
-          transition-all duration-300 hover:scale-110 active:scale-95
-          bg-gray-800/90 backdrop-blur-sm
-          ${isDarkMode 
-            ? 'text-white hover:bg-gray-700' 
-            : 'text-white hover:bg-gray-700'
-          }
-        `}
-        onClick={() => setMobileOpen(!mobileOpen)}
-        aria-label={mobileOpen ? "Close sidebar" : "Open sidebar"}
-      >
-        {mobileOpen ? <FiX size={20} /> : <FiMenu size={20} />}
-      </button>
-
       {/* Sidebar */}
       <div className={sidebarClasses}>
         {/* Header */}
@@ -162,11 +149,17 @@ const Sidebar = ({ collapsed = false, setCollapsed = () => {}, hasNewAnnouncemen
               </div>
             )}
             
-            {/* Desktop collapse button */}
+            {/* Collapse / Toggle button (visible on desktop + mobile) */}
             <button
-              onClick={handleCollapse}
+              onClick={() => {
+                if (isMobile) {
+                  setMobileOpen(prev => !prev);
+                } else {
+                  handleCollapse();
+                }
+              }}
               className={`
-                hidden md:flex items-center justify-center w-8 h-8 rounded-lg
+                flex items-center justify-center w-8 h-8 rounded-lg
                 transition-all duration-300 hover:scale-110 active:scale-95
                 ${isDarkMode 
                   ? 'hover:bg-gray-700/50 text-gray-400 hover:text-white' 
@@ -174,9 +167,9 @@ const Sidebar = ({ collapsed = false, setCollapsed = () => {}, hasNewAnnouncemen
                 }
                 ${collapsed ? 'mx-auto' : ''}
               `}
-              aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+              aria-label={(isMobile && mobileOpen) ? "Close menu" : (isMobile ? "Open menu" : (collapsed ? "Expand sidebar" : "Collapse sidebar"))}
             >
-              {collapsed ? <FiChevronRight size={16} /> : <FiChevronLeft size={16} />}
+              {isMobile ? (mobileOpen ? <FiX size={16} /> : <FiMenu size={16} />) : (collapsed ? <FiChevronRight size={16} /> : <FiChevronLeft size={16} />)}
             </button>
           </div>
         </div>
