@@ -95,26 +95,26 @@ const AdminMirrorUser = ({ userId, onBack }) => {
   return (
     <div className="p-2 sm:p-4 md:p-6 overflow-auto w-full">
       <button className="mb-4 bg-gray-700 px-4 py-2 rounded w-full md:w-auto" onClick={onBack}>Back to User List</button>
-      <div className="flex flex-wrap sm:flex-nowrap gap-2 sm:space-x-4 mb-4 sm:mb-6 overflow-x-auto w-full">
-        <button className={tab==='dashboard'?"bg-orange-500 px-4 py-2 rounded min-w-[120px]":"px-4 py-2 min-w-[120px]"} onClick={()=>setTab('dashboard')}>Dashboard</button>
-        <button className={tab==='portfolio'?"bg-orange-500 px-4 py-2 rounded min-w-[120px]":"px-4 py-2 min-w-[120px]"} onClick={()=>setTab('portfolio')}>Portfolio</button>
-        <button className={tab==='settings'?"bg-orange-500 px-4 py-2 rounded min-w-[120px]":"px-4 py-2 min-w-[120px]"} onClick={()=>setTab('settings')}>Settings</button>
-        <button className={tab==='kyc'?"bg-orange-500 px-4 py-2 rounded min-w-[120px]":"px-4 py-2 min-w-[120px]"} onClick={()=>setTab('kyc')}>KYC</button>
-        <button className={tab==='details'?"bg-orange-500 px-4 py-2 rounded min-w-[120px]":"px-4 py-2 min-w-[120px]"} onClick={()=>setTab('details')}>Details</button>
-      </div>
+      <div className="flex flex-col sm:flex-row gap-2 sm:space-x-4 mb-4 sm:mb-6 overflow-x-auto w-full">
+            <button className={`${tab==='dashboard'?'bg-orange-500':''} px-4 py-2 rounded min-w-[120px]`} onClick={()=>setTab('dashboard')}>Dashboard</button>
+            <button className={`${tab==='portfolio'?'bg-orange-500':''} px-4 py-2 rounded min-w-[120px]`} onClick={()=>setTab('portfolio')}>Portfolio</button>
+            <button className={`${tab==='settings'?'bg-orange-500':''} px-4 py-2 rounded min-w-[120px]`} onClick={()=>setTab('settings')}>Settings</button>
+            <button className={`${tab==='kyc'?'bg-orange-500':''} px-4 py-2 rounded min-w-[120px]`} onClick={()=>setTab('kyc')}>KYC</button>
+            <button className={`${tab==='details'?'bg-orange-500':''} px-4 py-2 rounded min-w-[120px]`} onClick={()=>setTab('details')}>Details</button>
+          </div>
       {tab==='dashboard' && <Dashboard adminView portfolioData={portfolioData} />}
       {tab==='portfolio' && (
         <>
-          <div className="mb-4 flex gap-4">
+          <div className="mb-4 flex flex-col sm:flex-row gap-4">
             <button
-              className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded font-bold"
+              className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded font-bold w-full sm:w-auto"
               onClick={handleCompleteActiveInvestment}
               disabled={!portfolioData || !portfolioData.investments?.some(inv => inv.status === 'active')}
             >
               Complete Active Investment
             </button>
             <button
-              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded font-bold"
+              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded font-bold w-full sm:w-auto"
               onClick={handleContinueCompletedInvestment}
               disabled={!portfolioData || !portfolioData.investments?.some(inv => inv.status === 'completed')}
             >

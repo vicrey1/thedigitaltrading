@@ -56,15 +56,8 @@ const AdminSupportChat = () => {
 
   // initial data fetch and mobile detection are executed after fetch helpers are defined
 
-  useEffect(() => {
-    fetchTickets();
-  }, [filters, searchTerm, fetchTickets]);
-
-  useEffect(() => {
-    if (selectedTicket) {
-      fetchMessages(selectedTicket._1d || selectedTicket._id || selectedTicket);
-    }
-  }, [selectedTicket, fetchMessages]);
+  // fetchMessages and fetchTickets are called from the initial effect below
+  // fetchMessages will be defined below; effect moved after its declaration to avoid use-before-define warnings
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -152,6 +145,13 @@ const AdminSupportChat = () => {
       toast.error('Failed to load messages');
     }
   }, []);
+
+  // Call fetchMessages when a ticket is selected
+  useEffect(() => {
+    if (selectedTicket) {
+      fetchMessages(selectedTicket._id || selectedTicket);
+    }
+  }, [selectedTicket, fetchMessages]);
 
   // Run initial fetches after helpers are defined
   useEffect(() => {
