@@ -8,8 +8,6 @@ const allowedOrigins = [
   'https://thedigitaltrading.onrender.com'  // Render deployment URL
 ];
 
-module.exports = { corsOptions, allowedOrigins };
-
 const corsOptions = {
   origin: (origin, callback) => {
     // Allow requests with no origin (like mobile apps or curl requests)
@@ -33,5 +31,7 @@ const corsOptions = {
   exposedHeaders: ['Content-Range', 'X-Content-Range'],
   maxAge: 600 // Cache preflight requests for 10 minutes
 };
+
+module.exports = { corsOptions, allowedOrigins };
 
 module.exports = corsOptions;
