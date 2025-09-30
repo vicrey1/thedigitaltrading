@@ -16,18 +16,21 @@ const AdminLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   const location = useLocation();
-
   useEffect(() => {
+    // Determine initial mobile state on mount and auto-close the sidebar
+    // only on initial mobile load. Do not change sidebarOpen on subsequent
+    // resizes to avoid overriding user interactions (some mobile browsers
+    // fire resize on address-bar show/hide or tap which would immediately
+    // re-close the menu).
     const checkMobile = () => {
       const isMobileView = window.innerWidth < 768;
       setIsMobile(isMobileView);
-      // Only auto-close sidebar on initial mobile load
-      if (isMobileView && !isMobile) {
-        setSidebarOpen(false);
-      }
     };
-    
-    checkMobile();
+
+    const initialIsMobile = window.innerWidth < 768;
+    setIsMobile(initialIsMobile);
+    if (initialIsMobile) setSidebarOpen(false);
+
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
