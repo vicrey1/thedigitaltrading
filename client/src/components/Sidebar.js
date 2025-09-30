@@ -101,12 +101,13 @@ const Sidebar = ({ collapsed = false, setCollapsed = () => {}, hasNewAnnouncemen
       ? 'bg-gradient-to-b from-gray-900 via-gray-900 to-gray-800 text-gray-100 border-gray-700/50' 
       : 'bg-gradient-to-b from-white via-gray-50 to-gray-100 text-gray-900 border-gray-200/80'
     }
-    transition-all duration-500 ease-in-out border-r backdrop-blur-sm
+    transition-transform duration-500 ease-in-out transform-gpu border-r backdrop-blur-sm
     ${collapsed ? 'w-20' : 'w-72'}
     h-screen flex flex-col
     fixed top-0 left-0 z-50
-    ${mobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
-    shadow-2xl
+    ${mobileOpen ? 'translate-x-0 opacity-100 pointer-events-auto' : '-translate-x-full opacity-0 pointer-events-none'}
+    md:translate-x-0 md:opacity-100 md:pointer-events-auto
+    shadow-2xl overflow-hidden
   `;
 
   return (

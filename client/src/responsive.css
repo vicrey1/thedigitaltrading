@@ -200,3 +200,15 @@
     grid-template-columns: repeat(2, 1fr) !important;
   }
 }
+
+/* Prevent off-canvas sidebar from creating horizontal scroll on small screens */
+@media (max-width: 767px) {
+  html, body, #root {
+    overflow-x: hidden !important;
+  }
+
+  /* Ensure main content doesn't shift due to fixed sidebar */
+  .content, .main, .app {
+    overflow-x: hidden !important;
+  }
+}
