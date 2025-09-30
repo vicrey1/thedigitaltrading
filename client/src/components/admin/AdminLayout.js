@@ -75,8 +75,8 @@ const AdminLayout = () => {
       {/* Sidebar */}
       <aside className={`
         fixed md:static top-0 left-0 h-full z-50 transition-all duration-300 ease-in-out
-        ${sidebarOpen ? 'w-72' : 'w-16'} 
-        ${sidebarOpen && isMobile ? 'translate-x-0' : isMobile ? '-translate-x-full' : 'translate-x-0'}
+        ${isMobile ? 'w-72' : sidebarOpen ? 'w-72' : 'w-16'} 
+        ${isMobile && !sidebarOpen ? '-translate-x-full' : 'translate-x-0'}
         ${isDarkMode 
           ? 'bg-gradient-to-b from-gray-800 to-gray-900 border-gray-700' 
           : 'bg-gradient-to-b from-white to-gray-50 border-gray-200'
@@ -212,12 +212,11 @@ const AdminLayout = () => {
         <button
           onClick={toggleSidebar}
           className={`
-            fixed top-4 left-4 z-30 p-3 rounded-lg shadow-lg transition-colors
+            fixed top-4 left-4 z-50 p-3 rounded-lg shadow-lg transition-colors
             ${isDarkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'}
-            ${sidebarOpen ? 'hidden' : 'block'}
           `}
         >
-          <FiMenu size={20} />
+          {sidebarOpen ? <FiX size={20} /> : <FiMenu size={20} />}
         </button>
       )}
 
