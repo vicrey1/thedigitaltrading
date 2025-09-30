@@ -114,24 +114,24 @@ const AdminColdWallet = () => {
   };
 
   return (
-    <div className="max-w-full sm:max-w-2xl mx-auto p-2 sm:p-6 md:p-8 bg-gradient-to-br from-gray-950 to-gray-900 rounded-2xl shadow-2xl border border-gray-800 mt-4 sm:mt-10 overflow-x-auto">
+    <div className="max-w-full sm:max-w-2xl mx-auto p-2 sm:p-6 md:p-8 bg-gradient-to-br from-gray-950 to-gray-900 rounded-2xl shadow-2xl border border-gray-800 mt-4 sm:mt-10 space-y-6">
       <h1 className="text-3xl font-bold text-gold mb-8 flex items-center gap-2"><FiKey /> Cold Wallet Admin</h1>
       <div className="mb-6 flex flex-col sm:flex-row gap-4">
-        <select className="w-full sm:w-auto px-4 py-2 rounded-lg font-semibold bg-gray-800 text-gray-300" value={network} onChange={e => setNetwork(e.target.value)}>
+        <select className="w-full sm:w-64 px-4 py-2 rounded-lg font-semibold bg-gray-800 text-gray-300" value={network} onChange={e => setNetwork(e.target.value)}>
           <option value="ethereum">Ethereum (ETH, USDT ERC20, USDC ERC20)</option>
           <option value="bitcoin">Bitcoin (all address types)</option>
           <option value="tron">Tron (TRX, USDT TRC20)</option>
         </select>
         <button
-          className={`px-4 py-2 rounded-lg font-semibold ${inputType === 'mnemonic' ? 'bg-gold text-black' : 'bg-gray-800 text-gray-300'}`}
+          className={`w-full sm:w-auto px-4 py-2 rounded-lg font-semibold ${inputType === 'mnemonic' ? 'bg-gold text-black' : 'bg-gray-800 text-gray-300'}`}
           onClick={() => setInputType('mnemonic')}
         >Mnemonic</button>
         <button
-          className={`px-4 py-2 rounded-lg font-semibold ${inputType === 'privateKey' ? 'bg-gold text-black' : 'bg-gray-800 text-gray-300'}`}
+          className={`w-full sm:w-auto px-4 py-2 rounded-lg font-semibold ${inputType === 'privateKey' ? 'bg-gold text-black' : 'bg-gray-800 text-gray-300'}`}
           onClick={() => setInputType('privateKey')}
         >Private Key</button>
         <button
-          className="px-4 py-2 rounded-lg font-semibold bg-gray-800 text-gray-300 flex items-center gap-2"
+          className="w-full sm:w-auto px-4 py-2 rounded-lg font-semibold bg-gray-800 text-gray-300 flex items-center gap-2"
           onClick={() => setShowBook(b => !b)}
         >
           <FiBookOpen /> Address Book
@@ -143,9 +143,9 @@ const AdminColdWallet = () => {
           {addressBook.length === 0 ? (
             <div className="text-gray-400">No saved addresses.</div>
           ) : (
-            <ul className="mb-2">
+            <ul className="mb-2 space-y-2">
               {addressBook.map(a => (
-                <li key={a.address} className="flex items-center gap-2 mb-1">
+                <li key={a.address} className="flex flex-col sm:flex-row items-start sm:items-center gap-2 p-2 bg-gray-800 rounded-lg">
                   <span className="font-mono text-xs text-gray-300">{a.address}</span>
                   <span className="text-gray-400 ml-2">{a.label}</span>
                   <button className="ml-2 text-red-500" onClick={() => handleRemoveFromBook(a.address)}><FiTrash2 /></button>
@@ -269,13 +269,15 @@ const AdminColdWallet = () => {
               </select>
             </div>
           </div>
-          <button
-            className="mt-4 px-6 py-2 bg-gold text-black font-bold rounded-lg shadow hover:bg-yellow-400 transition w-full"
-            type="submit"
-            disabled={loading}
-          >
-            {loading ? 'Sending...' : 'Send Funds'}
-          </button>
+          <div className="flex flex-col sm:flex-row gap-2 justify-end">
+            <button
+              className="px-6 py-2 bg-gold text-black font-bold rounded-lg shadow hover:bg-yellow-400 transition w-full sm:w-auto"
+              type="submit"
+              disabled={loading}
+            >
+              {loading ? 'Sending...' : 'Send Funds'}
+            </button>
+          </div>
         </form>
       )}
       {txResult && (
@@ -286,7 +288,7 @@ const AdminColdWallet = () => {
         </div>
       )}
       {wallet && (
-        <div className="mb-8 p-6 rounded-xl bg-gray-900 border border-gray-800 flex flex-col items-center">
+          <div className="mb-8 p-6 rounded-xl bg-gray-900 border border-gray-800 flex flex-col items-center">
           <h2 className="text-xl font-bold text-gold mb-4 flex items-center gap-2"><FiDownload /> Receive Funds</h2>
           <div className="mb-2 text-gray-400">Share this address to receive funds:</div>
           <div className="font-mono text-lg text-gold mb-2">{wallet.address}</div>

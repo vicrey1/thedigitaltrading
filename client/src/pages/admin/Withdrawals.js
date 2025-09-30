@@ -265,7 +265,7 @@ const AdminWithdrawals = () => {
           </p>
         </div>
         
-        <div className="flex flex-col sm:flex-row items-start sm:items-center sm:space-x-3 mt-4 sm:mt-0 w-full">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center sm:space-x-3 mt-4 sm:mt-0 w-full gap-2 sm:gap-0">
           <div className="w-full sm:w-auto mb-2 sm:mb-0">
             <AdminButton variant="secondary" icon={FiRefreshCw} onClick={fetchWithdrawals} className="w-full sm:w-auto">
               Refresh
@@ -280,7 +280,7 @@ const AdminWithdrawals = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         <AdminCard>
           <div className="flex items-center justify-between">
             <div>
@@ -342,7 +342,7 @@ const AdminWithdrawals = () => {
 
       {/* Filters */}
       <AdminCard>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 p-2 sm:p-4">
           <AdminInput
             placeholder="Search by user, email, or address..."
             value={searchTerm}

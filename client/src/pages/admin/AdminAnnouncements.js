@@ -120,10 +120,10 @@ const AdminAnnouncements = () => {
   };
 
   return (
-    <div className="p-2 sm:p-4 md:p-6 max-w-full sm:max-w-3xl mx-auto overflow-x-auto">
+    <div className="p-2 sm:p-4 md:p-6 max-w-full sm:max-w-3xl mx-auto">
       <h2 className="text-3xl font-bold text-gold mb-6 text-center">Admin Announcements</h2>
       {/* Post form */}
-      <div className="glassmorphic p-2 sm:p-6 md:p-8 rounded-xl mb-6 sm:mb-10 overflow-x-auto">
+      <div className="glassmorphic p-2 sm:p-6 md:p-8 rounded-xl mb-6 sm:mb-10">
         <h3 className="text-2xl font-bold mb-6 text-center">Post Announcement</h3>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
