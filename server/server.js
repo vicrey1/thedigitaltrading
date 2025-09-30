@@ -13,7 +13,10 @@ const socketio = require('socket.io');
 const { startRoiCron } = require('./utils/roiCalculator');
 
 const app = express();
-const PORT = process.env.PORT || 5001;
+
+// Force PORT to 5001 for development
+const PORT = 5001;
+process.env.PORT = PORT;
 
 // Trust proxy headers (needed for WebSocket support on Render and similar hosts)
 app.set('trust proxy', 1);
