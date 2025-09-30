@@ -38,10 +38,11 @@
     "yup": "^1.6.1"
   },
   "scripts": {
-    "start": "react-scripts start",
+  "start": "react-scripts start",
     "build": "react-scripts build",
     "postbuild": "node -e \"require('fs').copyFileSync('static.json','build/static.json') && require('fs').copyFileSync('public/manifest.json','build/manifest.json')\"",
-    "test": "react-scripts test",
+  "test": "react-scripts test",
+  "test:playwright-mobile": "node playwright-mobile-test.js",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
@@ -64,6 +65,7 @@
   },
   "devDependencies": {
     "autoprefixer": "^10.4.17",
+    "playwright": "^1.43.0",
     "postcss": "^8.4.35",
     "tailwindcss": "^3.4.1"
   },
