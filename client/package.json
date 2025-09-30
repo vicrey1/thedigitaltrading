@@ -38,10 +38,8 @@
     "yup": "^1.6.1"
   },
   "scripts": {
-    "start": "vite --port 3000",
-    "dev": "vite --port 3000",
-    "build": "vite build",
-    "preview": "vite preview",
+    "start": "set PORT=3000 && react-scripts start",
+    "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
