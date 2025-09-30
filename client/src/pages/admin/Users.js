@@ -388,11 +388,11 @@ const AdminUsers = () => {
               </div>
             </div>
 
-            <div className="flex justify-end space-x-3">
-              <AdminButton variant="secondary" onClick={() => setShowUserModal(false)}>
+            <div className="flex flex-col sm:flex-row justify-end sm:space-x-3 gap-2">
+              <AdminButton variant="secondary" onClick={() => setShowUserModal(false)} className="w-full sm:w-auto">
                 Close
               </AdminButton>
-              <AdminButton variant="primary" onClick={() => handleEditUser(selectedUser)}>
+              <AdminButton variant="primary" onClick={() => handleEditUser(selectedUser)} className="w-full sm:w-auto">
                 Edit User
               </AdminButton>
             </div>

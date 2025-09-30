@@ -12,7 +12,7 @@ const AdminMirror = () => {
       ) : (
         <div>
           <div className="mb-4">
-            <button className="px-3 py-2 bg-gray-800 text-white rounded-lg" onClick={() => setSelectedUserId(null)}>Back</button>
+            <button className="w-full sm:w-auto px-3 py-2 bg-gray-800 text-white rounded-lg" onClick={() => setSelectedUserId(null)} aria-label="Back to user list">Back</button>
           </div>
           <AdminMirrorUser userId={selectedUserId} onBack={() => setSelectedUserId(null)} />
         </div>
