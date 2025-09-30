@@ -92,7 +92,7 @@ const UserInvestmentsAdmin = () => {
         </table>
       </div>
       {editing && (
-        <form onSubmit={handleEditSubmit} className="mb-6 space-y-2 bg-gray-900 p-2 sm:p-4 rounded-lg border border-gray-700 overflow-x-auto">
+        <form onSubmit={handleEditSubmit} className="mb-6 space-y-2 bg-gray-900 p-2 sm:p-4 rounded-lg border border-gray-700">
           <h2 className="text-lg font-bold text-gold mb-2">Edit Investment</h2>
           <input className="w-full p-2 border rounded bg-gray-800 text-white border-gray-700 focus:border-gold outline-none" type="number" value={editForm.amount} onChange={e => setEditForm({ ...editForm, amount: e.target.value })} />
           <input className="w-full p-2 border rounded bg-gray-800 text-white border-gray-700 focus:border-gold outline-none" type="number" value={editForm.currentValue} onChange={e => setEditForm({ ...editForm, currentValue: e.target.value })} />

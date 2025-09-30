@@ -42,7 +42,7 @@ const AdminDeposits = () => {
   };
 
   return (
-    <div className="p-2 sm:p-4 md:p-6 min-h-screen max-w-full sm:max-w-4xl mx-auto bg-gray-900 overflow-x-auto">
+    <div className="p-2 sm:p-4 md:p-6 min-h-screen max-w-full sm:max-w-4xl mx-auto bg-gray-900">
       <h1 className="text-2xl font-bold mb-4 text-white">Admin: Deposits</h1>
       {loading ? (
         <div className="text-white">Loading...</div>

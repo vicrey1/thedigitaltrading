@@ -77,11 +77,11 @@ const Settings = () => {
           <input className="p-2 rounded bg-gray-800 text-white border border-gray-700 focus:border-gold outline-none" disabled={!edit} value={edit ? form.phone : profile.phone} onChange={e => setForm({ ...form, phone: e.target.value })} placeholder="Phone" />
           <input className="p-2 rounded bg-gray-800 text-white border border-gray-700 focus:border-gold outline-none" disabled={!edit} value={edit ? form.country : profile.country} onChange={e => setForm({ ...form, country: e.target.value })} placeholder="Country" />
         </div>
-        <div className="flex gap-2 mt-2">
+        <div className="flex flex-col sm:flex-row gap-2 mt-2">
           {edit ? (
             <>
-              <button className="bg-gold text-black px-4 py-2 rounded font-semibold hover:bg-yellow-400 transition" onClick={handleSaveProfile}>Save</button>
-              <button className="px-4 py-2 rounded bg-gray-700 text-white hover:bg-gray-600 transition" onClick={() => setEdit(false)}>Cancel</button>
+              <button className="w-full sm:w-auto bg-gold text-black px-4 py-2 rounded font-semibold hover:bg-yellow-400 transition" onClick={handleSaveProfile}>Save</button>
+              <button className="w-full sm:w-auto px-4 py-2 rounded bg-gray-700 text-white hover:bg-gray-600 transition" onClick={() => setEdit(false)}>Cancel</button>
             </>
           ) : (
             <button className="bg-gold text-black px-4 py-2 rounded font-semibold hover:bg-yellow-400 transition" onClick={() => setEdit(true)}>Edit</button>
@@ -97,7 +97,7 @@ const Settings = () => {
           <input type="password" className="p-2 rounded bg-gray-800 text-white border border-gray-700 focus:border-gold outline-none" value={passwords.new} onChange={e => setPasswords({ ...passwords, new: e.target.value })} placeholder="New Password" />
           <input type="password" className="p-2 rounded bg-gray-800 text-white border border-gray-700 focus:border-gold outline-none" value={passwords.confirm} onChange={e => setPasswords({ ...passwords, confirm: e.target.value })} placeholder="Confirm New Password" />
         </div>
-        <button className="bg-gold text-black px-4 py-2 rounded-lg hover:bg-yellow-400" onClick={handleChangePassword}>Change Password</button>
+        <button className="w-full sm:w-auto bg-gold text-black px-4 py-2 rounded-lg hover:bg-yellow-400" onClick={handleChangePassword}>Change Password</button>
         {passwordMsg && <div className="mt-2 text-green-400">{passwordMsg}</div>}
       </div>
       {/* Notification Preferences */}
@@ -114,7 +114,7 @@ const Settings = () => {
             <input type="checkbox" checked={notifPrefs.push} onChange={e => setNotifPrefs(p => ({ ...p, push: e.target.checked }))} /> Push
           </label>
         </div>
-        <button className="bg-gold text-black px-4 py-2 rounded-lg hover:bg-yellow-400" onClick={handleSaveNotifPrefs}>Save Preferences</button>
+        <button className="w-full sm:w-auto bg-gold text-black px-4 py-2 rounded-lg hover:bg-yellow-400" onClick={handleSaveNotifPrefs}>Save Preferences</button>
         {notifMsg && <div className="mt-2 text-green-400">{notifMsg}</div>}
       </div>
     </div>
