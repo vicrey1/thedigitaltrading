@@ -11,7 +11,6 @@ const DashboardLayout = ({ sidebarCollapsed, setSidebarCollapsed }) => {
         className={`
           flex-1 overflow-y-auto flex flex-col scrollbar-thin scrollbar-thumb-orange scrollbar-track-gray-900/60
           transition-all duration-300 ease-in-out
-          ${sidebarCollapsed ? 'ml-16' : 'ml-72'}
           md:${sidebarCollapsed ? 'ml-16' : 'ml-72'}
           max-md:ml-0
         `}

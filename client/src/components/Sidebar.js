@@ -104,9 +104,9 @@ const Sidebar = ({ collapsed = false, setCollapsed = () => {}, hasNewAnnouncemen
     transition-all duration-500 ease-in-out border-r backdrop-blur-sm
     ${collapsed ? 'w-20' : 'w-72'}
     h-screen flex flex-col
-    fixed md:static top-0 left-0 z-50
-    ${mobileOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0
-    shadow-2xl md:shadow-xl
+    fixed top-0 left-0 z-50
+    ${mobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+    shadow-2xl
   `;
 
   return (
@@ -122,11 +122,12 @@ const Sidebar = ({ collapsed = false, setCollapsed = () => {}, hasNewAnnouncemen
       {/* Mobile hamburger button */}
       <button
         className={`
-          fixed top-4 left-4 z-50 p-3 rounded-xl shadow-lg md:hidden 
+          fixed top-4 left-4 z-[60] p-3 rounded-xl shadow-lg md:hidden 
           transition-all duration-300 hover:scale-110 active:scale-95
+          bg-gray-800/90 backdrop-blur-sm
           ${isDarkMode 
-            ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white hover:from-orange-600 hover:to-orange-700' 
-            : 'bg-gradient-to-r from-orange-600 to-orange-700 text-white hover:from-orange-700 hover:to-orange-800'
+            ? 'text-white hover:bg-gray-700' 
+            : 'text-white hover:bg-gray-700'
           }
         `}
         onClick={() => setMobileOpen(!mobileOpen)}
