@@ -13,7 +13,7 @@ import { useTheme } from '../../contexts/ThemeContext';
 const AdminLayout = () => {
   const { admin, logout } = useAdminAuth();
   const { isDarkMode, toggleTheme } = useTheme();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const location = useLocation();
 
@@ -23,9 +23,10 @@ const AdminLayout = () => {
 
   useEffect(() => {
     const checkMobile = () => {
-      const isMobileView = window.innerWidth < 768;
-      setIsMobile(isMobileView);
-      setSidebarOpen(!isMobileView);
+      setIsMobile(window.innerWidth < 768);
+      if (window.innerWidth < 768) {
+        setSidebarOpen(false);
+      }
     };
     
     checkMobile();
@@ -81,7 +82,7 @@ const AdminLayout = () => {
       {/* Sidebar */}
       <aside className={`
         fixed md:static top-0 left-0 h-full z-50 transition-all duration-300 ease-in-out
-        ${sidebarOpen ? 'w-72' : 'w-16'} 
+        ${isMobile ? 'w-72' : sidebarOpen ? 'w-72' : 'w-16'} 
         ${isMobile && !sidebarOpen ? '-translate-x-full' : 'translate-x-0'}
         ${isDarkMode 
           ? 'bg-gradient-to-b from-gray-800 to-gray-900 border-gray-700' 
@@ -237,7 +238,7 @@ const AdminLayout = () => {
           ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}
           shadow-sm
         `}>
-          <div className="flex items-center pl-12 md:pl-0">
+          <div className="flex items-center pl-4 md:pl-12">
             <h2 className="text-lg md:text-xl font-semibold truncate">
               {navigationItems.find(item => isActiveRoute(item.path, item.exact))?.label || 'Dashboard'}
             </h2>

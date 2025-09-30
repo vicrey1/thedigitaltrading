@@ -154,18 +154,22 @@ const AdminAnnouncements = () => {
       <div className="space-y-4 sm:space-y-6">
         {announcements.filter(a => a._id).map((a) => (
           <div key={a._id} className="glassmorphic p-2 sm:p-4 md:p-6 rounded-xl relative overflow-x-auto">
-            <div className="flex items-center mb-2">
-              <FiInfo className="text-gold mr-2" />
-              <span className="font-bold text-lg text-gold">{a.title}</span>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center mb-2 gap-2">
+              <div className="flex items-center">
+                <FiInfo className="text-gold mr-2" />
+                <span className="font-bold text-lg text-gold">{a.title}</span>
+              </div>
               {a._id && (
-                <button
-                  className="ml-auto text-red-400 hover:text-red-600"
-                  title="Delete announcement"
-                  onClick={() => handleDelete(a._id)}
-                  disabled={deletingId === a._id}
-                >
-                  <FiTrash2 />
-                </button>
+                <div className="ml-auto w-full sm:w-auto">
+                  <button
+                    className="w-full sm:w-auto text-left text-red-400 hover:text-red-600"
+                    title="Delete announcement"
+                    onClick={() => handleDelete(a._id)}
+                    disabled={deletingId === a._id}
+                  >
+                    <FiTrash2 />
+                  </button>
+                </div>
               )}
             </div>
             <div className="text-white mb-2 announcement-message" dangerouslySetInnerHTML={{ __html: a.message }} />

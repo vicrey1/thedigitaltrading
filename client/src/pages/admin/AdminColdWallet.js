@@ -116,8 +116,8 @@ const AdminColdWallet = () => {
   return (
     <div className="max-w-full sm:max-w-2xl mx-auto p-2 sm:p-6 md:p-8 bg-gradient-to-br from-gray-950 to-gray-900 rounded-2xl shadow-2xl border border-gray-800 mt-4 sm:mt-10 overflow-x-auto">
       <h1 className="text-3xl font-bold text-gold mb-8 flex items-center gap-2"><FiKey /> Cold Wallet Admin</h1>
-      <div className="mb-6 flex gap-4 flex-wrap">
-        <select className="px-4 py-2 rounded-lg font-semibold bg-gray-800 text-gray-300" value={network} onChange={e => setNetwork(e.target.value)}>
+      <div className="mb-6 flex flex-col sm:flex-row gap-4">
+        <select className="w-full sm:w-auto px-4 py-2 rounded-lg font-semibold bg-gray-800 text-gray-300" value={network} onChange={e => setNetwork(e.target.value)}>
           <option value="ethereum">Ethereum (ETH, USDT ERC20, USDC ERC20)</option>
           <option value="bitcoin">Bitcoin (all address types)</option>
           <option value="tron">Tron (TRX, USDT TRC20)</option>
@@ -160,7 +160,7 @@ const AdminColdWallet = () => {
         {inputType === 'mnemonic' ? (
           <div>
             <label className="block text-gray-300 mb-2">Mnemonic Phrase</label>
-            <div className="relative flex items-center">
+            <div className="relative">
               <input
                 type={showSecret ? 'text' : 'password'}
                 className="w-full p-3 rounded-lg bg-gray-800 text-white border border-gray-700 focus:border-gold outline-none"
@@ -168,7 +168,7 @@ const AdminColdWallet = () => {
                 onChange={e => setMnemonic(e.target.value)}
                 placeholder="Enter 12/24-word mnemonic phrase"
               />
-              <button type="button" className="absolute right-3" onClick={() => setShowSecret(s => !s)}>
+              <button type="button" className="absolute right-3 top-3" onClick={() => setShowSecret(s => !s)}>
                 {showSecret ? <FiEyeOff /> : <FiEye />}
               </button>
             </div>
@@ -176,7 +176,7 @@ const AdminColdWallet = () => {
         ) : (
           <div>
             <label className="block text-gray-300 mb-2">Private Key</label>
-            <div className="relative flex items-center">
+            <div className="relative">
               <input
                 type={showSecret ? 'text' : 'password'}
                 className="w-full p-3 rounded-lg bg-gray-800 text-white border border-gray-700 focus:border-gold outline-none"
@@ -184,14 +184,14 @@ const AdminColdWallet = () => {
                 onChange={e => setPrivateKey(e.target.value)}
                 placeholder="Enter private key"
               />
-              <button type="button" className="absolute right-3" onClick={() => setShowSecret(s => !s)}>
+              <button type="button" className="absolute right-3 top-3" onClick={() => setShowSecret(s => !s)}>
                 {showSecret ? <FiEyeOff /> : <FiEye />}
               </button>
             </div>
           </div>
         )}
         <button
-          className="mt-4 px-6 py-2 bg-gold text-black font-bold rounded-lg shadow hover:bg-yellow-400 transition w-full"
+          className="mt-4 px-6 py-2 bg-gold text-black font-bold rounded-lg shadow hover:bg-yellow-400 transition w-full sm:w-auto"
           onClick={handleImport}
           disabled={loading || (!mnemonic && !privateKey)}
         >

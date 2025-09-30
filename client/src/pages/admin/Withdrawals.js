@@ -265,13 +265,17 @@ const AdminWithdrawals = () => {
           </p>
         </div>
         
-        <div className="flex items-center space-x-3 mt-4 md:mt-0">
-          <AdminButton variant="secondary" icon={FiRefreshCw} onClick={fetchWithdrawals}>
-            Refresh
-          </AdminButton>
-          <AdminButton variant="primary" icon={FiDownload}>
-            Export
-          </AdminButton>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center sm:space-x-3 mt-4 sm:mt-0 w-full">
+          <div className="w-full sm:w-auto mb-2 sm:mb-0">
+            <AdminButton variant="secondary" icon={FiRefreshCw} onClick={fetchWithdrawals} className="w-full sm:w-auto">
+              Refresh
+            </AdminButton>
+          </div>
+          <div className="w-full sm:w-auto">
+            <AdminButton variant="primary" icon={FiDownload} className="w-full sm:w-auto">
+              Export
+            </AdminButton>
+          </div>
         </div>
       </div>
 
@@ -338,7 +342,7 @@ const AdminWithdrawals = () => {
 
       {/* Filters */}
       <AdminCard>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
           <AdminInput
             placeholder="Search by user, email, or address..."
             value={searchTerm}
@@ -354,6 +358,7 @@ const AdminWithdrawals = () => {
               { value: 'completed', label: 'Completed' },
               { value: 'rejected', label: 'Rejected' }
             ]}
+            className="w-full"
           />
           
           <AdminSelect
@@ -365,6 +370,7 @@ const AdminWithdrawals = () => {
               { value: 'ETH', label: 'Ethereum' },
               { value: 'USDT', label: 'Tether' }
             ]}
+            className="w-full"
           />
           
           <AdminSelect
@@ -376,6 +382,7 @@ const AdminWithdrawals = () => {
               { value: '30days', label: 'Last 30 Days' },
               { value: '90days', label: 'Last 90 Days' }
             ]}
+            className="w-full"
           />
           
           <AdminSelect
@@ -387,6 +394,7 @@ const AdminWithdrawals = () => {
               { value: '1000-10000', label: '$1,000 - $10,000' },
               { value: '10000', label: '$10,000+' }
             ]}
+            className="w-full"
           />
         </div>
       </AdminCard>

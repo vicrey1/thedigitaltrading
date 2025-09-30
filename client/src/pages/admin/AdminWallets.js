@@ -41,7 +41,7 @@ const AdminWallets = () => {
   return (
     <div className="max-w-full sm:max-w-xl mx-auto p-2 sm:p-4 overflow-x-auto">
       <h1 className="text-2xl font-bold mb-6">Admin: User Wallets</h1>
-      <form onSubmit={searchUsers} className="mb-6 flex gap-2">
+  <form onSubmit={searchUsers} className="mb-6 flex flex-col sm:flex-row gap-2">
         <input
           type="text"
           value={query}
@@ -58,9 +58,9 @@ const AdminWallets = () => {
           <h2 className="text-lg font-bold mb-2">Select a User</h2>
           <ul className="divide-y divide-gray-800">
             {users.map(u => (
-              <li key={u._id} className="py-2 flex justify-between items-center">
-                <span>{u.email} ({u.username})</span>
-                <button onClick={() => fetchWallets(u._id)} className="text-xs bg-gold text-black px-3 py-1 rounded hover:bg-yellow-600">View Wallets</button>
+              <li key={u._id} className="py-2 flex flex-col sm:flex-row justify-between items-start sm:items-center">
+                <span className="break-words">{u.email} ({u.username})</span>
+                <button onClick={() => fetchWallets(u._id)} className="mt-2 sm:mt-0 text-xs bg-gold text-black px-3 py-1 rounded hover:bg-yellow-600">View Wallets</button>
               </li>
             ))}
           </ul>

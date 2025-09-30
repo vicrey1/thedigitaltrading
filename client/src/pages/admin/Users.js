@@ -208,7 +208,7 @@ const AdminUsers = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold">User Management</h1>
           <p className={`mt-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
@@ -280,8 +280,8 @@ const AdminUsers = () => {
 
       {/* Search and Filters */}
       <AdminCard>
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div className="flex-1 max-w-md">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="w-full sm:max-w-md">
             <AdminInput
               placeholder="Search users by name, email, or username..."
               value={searchTerm}
@@ -289,22 +289,26 @@ const AdminUsers = () => {
             />
           </div>
           
-          <div className="flex items-center space-x-3">
-            <AdminSelect
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-              options={[
-                { value: 'all', label: 'All Status' },
-                { value: 'active', label: 'Active' },
-                { value: 'suspended', label: 'Suspended' },
-                { value: 'pending', label: 'Pending' }
-              ]}
-              className="w-40"
-            />
-            
-            <AdminButton variant="primary" icon={FiUserPlus}>
-              Add User
-            </AdminButton>
+          <div className="w-full sm:w-auto flex flex-col sm:flex-row sm:items-center sm:space-x-3 gap-2">
+            <div className="w-full sm:w-40">
+              <AdminSelect
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value)}
+                options={[
+                  { value: 'all', label: 'All Status' },
+                  { value: 'active', label: 'Active' },
+                  { value: 'suspended', label: 'Suspended' },
+                  { value: 'pending', label: 'Pending' }
+                ]}
+                className="w-full"
+              />
+            </div>
+
+            <div className="w-full sm:w-auto">
+              <AdminButton variant="primary" icon={FiUserPlus} className="w-full sm:w-auto">
+                Add User
+              </AdminButton>
+            </div>
           </div>
         </div>
       </AdminCard>

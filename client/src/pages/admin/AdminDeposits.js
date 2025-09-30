@@ -49,40 +49,67 @@ const AdminDeposits = () => {
       ) : error ? (
         <div className="text-red-400 font-semibold">{error}</div>
       ) : (
-        <div className="overflow-x-auto rounded-lg border border-gray-700">
-          <table className="min-w-full text-sm">
-            <thead className="bg-gray-700">
-              <tr>
-                <th className="py-3 px-4 border-b border-gray-600 font-semibold text-gray-100">User</th>
-                <th className="py-3 px-4 border-b border-gray-600 font-semibold text-gray-100">Amount</th>
-                <th className="py-3 px-4 border-b border-gray-600 font-semibold text-gray-100">Currency</th>
-                <th className="py-3 px-4 border-b border-gray-600 font-semibold text-gray-100">Status</th>
-                <th className="py-3 px-4 border-b border-gray-600 font-semibold text-gray-100">Method</th>
-                <th className="py-3 px-4 border-b border-gray-600 font-semibold text-gray-100">Created</th>
-                <th className="py-3 px-4 border-b border-gray-600 font-semibold text-gray-100">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {deposits.map((dep, idx) => (
-                <tr key={dep._id} className={`text-center ${idx % 2 === 0 ? 'bg-gray-900' : 'bg-gray-800'} hover:bg-gray-700 transition`}>
-                  <td className="py-3 px-4 border-b border-gray-700 font-bold break-all max-w-xs text-left text-white">{dep.user?.email || dep.user?.username || dep.user?.name}</td>
-                  <td className="py-3 px-4 border-b border-gray-700 text-gray-200">{dep.amount}</td>
-                  <td className="py-3 px-4 border-b border-gray-700 text-gray-200">{dep.currency}</td>
-                  <td className="py-3 px-4 border-b border-gray-700 capitalize text-gray-200">{dep.status}</td>
-                  <td className="py-3 px-4 border-b border-gray-700 text-gray-200">{dep.method}</td>
-                  <td className="py-3 px-4 border-b border-gray-700 text-gray-200">{new Date(dep.createdAt).toLocaleString()}</td>
-                  <td className="py-3 px-4 border-b border-gray-700">
+        <div>
+          {/* Desktop/tablet view */}
+          <div className="hidden md:block overflow-x-auto rounded-lg border border-gray-700">
+            <table className="min-w-full text-sm">
+              <thead className="bg-gray-700">
+                <tr>
+                  <th className="py-3 px-4 border-b border-gray-600 font-semibold text-gray-100">User</th>
+                  <th className="py-3 px-4 border-b border-gray-600 font-semibold text-gray-100">Amount</th>
+                  <th className="py-3 px-4 border-b border-gray-600 font-semibold text-gray-100">Currency</th>
+                  <th className="py-3 px-4 border-b border-gray-600 font-semibold text-gray-100">Status</th>
+                  <th className="py-3 px-4 border-b border-gray-600 font-semibold text-gray-100">Method</th>
+                  <th className="py-3 px-4 border-b border-gray-600 font-semibold text-gray-100">Created</th>
+                  <th className="py-3 px-4 border-b border-gray-600 font-semibold text-gray-100">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {deposits.map((dep, idx) => (
+                  <tr key={dep._id} className={`text-center ${idx % 2 === 0 ? 'bg-gray-900' : 'bg-gray-800'} hover:bg-gray-700 transition`}>
+                    <td className="py-3 px-4 border-b border-gray-700 font-bold break-all max-w-xs text-left text-white">{dep.user?.email || dep.user?.username || dep.user?.name}</td>
+                    <td className="py-3 px-4 border-b border-gray-700 text-gray-200">{dep.amount}</td>
+                    <td className="py-3 px-4 border-b border-gray-700 text-gray-200">{dep.currency}</td>
+                    <td className="py-3 px-4 border-b border-gray-700 capitalize text-gray-200">{dep.status}</td>
+                    <td className="py-3 px-4 border-b border-gray-700 text-gray-200">{dep.method}</td>
+                    <td className="py-3 px-4 border-b border-gray-700 text-gray-200">{new Date(dep.createdAt).toLocaleString()}</td>
+                    <td className="py-3 px-4 border-b border-gray-700">
+                      {dep.status === 'pending' && (
+                        <div className="flex gap-2 justify-center">
+                          <button className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 transition font-semibold" onClick={() => handleAction(dep._id, 'confirmed')}>Approve</button>
+                          <button className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition font-semibold" onClick={() => handleAction(dep._id, 'rejected')}>Reject</button>
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Mobile stacked cards */}
+          <div className="md:hidden space-y-3">
+            {deposits.map(dep => (
+              <div key={dep._id} className="bg-gray-900 rounded-lg p-4">
+                <div className="flex justify-between items-start">
+                  <div className="min-w-0">
+                    <div className="font-bold text-white break-all">{dep.user?.email || dep.user?.username || dep.user?.name}</div>
+                    <div className="text-gray-200">{dep.amount} {dep.currency}</div>
+                    <div className="text-gray-300 mt-1">{dep.method} • {new Date(dep.createdAt).toLocaleString()}</div>
+                    <div className="mt-2"><span className="px-2 py-1 rounded-full text-xs bg-gray-700 text-gray-200">{dep.status}</span></div>
+                  </div>
+                  <div className="ml-3 flex-shrink-0">
                     {dep.status === 'pending' && (
-                      <div className="flex gap-2 justify-center">
+                      <div className="flex flex-col gap-2">
                         <button className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 transition font-semibold" onClick={() => handleAction(dep._id, 'confirmed')}>Approve</button>
                         <button className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition font-semibold" onClick={() => handleAction(dep._id, 'rejected')}>Reject</button>
                       </div>
                     )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
       {actionStatus && <div className="mt-4 text-blue-600">{actionStatus}</div>}

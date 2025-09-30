@@ -70,8 +70,8 @@ const AdminFunds = () => {
           </button>
         </div>
 
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-          <div className="relative w-full md:w-64">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          <div className="w-full sm:w-64 relative">
             <input
               type="text"
               placeholder="Search funds..."
@@ -82,18 +82,18 @@ const AdminFunds = () => {
             <FiFilter className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
           </div>
 
-          <div className="flex items-center space-x-2">
+          <div className="w-full sm:w-auto flex flex-col sm:flex-row items-start sm:items-center sm:space-x-2 gap-2">
             <select
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
-              className="bg-gray-700 rounded-lg px-4 py-2 focus:outline-none"
+              className="w-full sm:w-auto bg-gray-700 rounded-lg px-4 py-2 focus:outline-none"
             >
               <option value="all">All Statuses</option>
               <option value="active">Active</option>
               <option value="paused">Paused</option>
               <option value="archived">Archived</option>
             </select>
-            <button className="flex items-center px-4 py-2 bg-gray-700 rounded-lg hover:bg-gray-600">
+            <button className="w-full sm:w-auto flex items-center justify-center px-4 py-2 bg-gray-700 rounded-lg hover:bg-gray-600">
               <FiDownload className="mr-2" /> Export
             </button>
           </div>
@@ -108,7 +108,7 @@ const AdminFunds = () => {
           <FundEditor 
             fund={selectedFund}
             onSave={(updates) => { handleUpdateFund(selectedFund._id, updates); setIsEditing(false); }}
-            onClose={() => setIsEditing(false)}
+            onCancel={() => setIsEditing(false)}
           />
         )}
       </div>

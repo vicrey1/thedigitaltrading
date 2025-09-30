@@ -46,9 +46,9 @@ const UserInvestmentsAdmin = () => {
   return (
       <div className="max-w-full sm:max-w-4xl w-full mx-auto p-2 sm:p-6 overflow-x-auto">
       <h1 className="text-2xl font-bold mb-4">User Investments Admin</h1>
-      <div className="mb-4 flex gap-2">
-        <input className="p-2 border rounded bg-gray-800 text-white border-gray-700 focus:border-gold outline-none" placeholder="User ID" value={userId} onChange={e => setUserId(e.target.value)} />
-        <button className="bg-gold text-black px-4 py-2 rounded font-semibold hover:bg-yellow-400 transition" onClick={fetchInvestments}>Fetch Investments</button>
+      <div className="mb-4 flex flex-col sm:flex-row gap-2">
+        <input className="p-2 border rounded bg-gray-800 text-white border-gray-700 focus:border-gold outline-none flex-1" placeholder="User ID" value={userId} onChange={e => setUserId(e.target.value)} />
+        <button className="bg-gold text-black px-4 py-2 rounded font-semibold hover:bg-yellow-400 transition w-full sm:w-auto" onClick={fetchInvestments}>Fetch Investments</button>
       </div>
       <div className="overflow-x-auto rounded-lg border border-gray-700 mb-6">
         <table className="w-full text-sm overflow-auto">
@@ -70,15 +70,21 @@ const UserInvestmentsAdmin = () => {
                 <td className="py-3 px-4">{inv.amount}</td>
                 <td className="py-3 px-4">{inv.currentValue}</td>
                 <td className="py-3 px-4 capitalize">{inv.status}</td>
-                <td className="py-3 px-4 flex flex-wrap gap-2 items-center">
-                  <button className="text-blue-600 font-semibold hover:underline" onClick={() => handleEdit(inv)}>Edit</button>
-                  <button className="text-green-600 font-semibold hover:underline" onClick={() => handleComplete(inv._id)}>Complete</button>
-                  <input className="p-1 border rounded w-20 bg-gray-800 text-white border-gray-700 focus:border-gold outline-none" type="number" placeholder="Gain/Loss $" value={gainLossAmount} onChange={e => setGainLossAmount(e.target.value)} />
-                  <select className="p-1 border rounded bg-gray-800 text-white border-gray-700 focus:border-gold outline-none" value={gainLossType} onChange={e => setGainLossType(e.target.value)}>
-                    <option value="gain">Gain</option>
-                    <option value="loss">Loss</option>
-                  </select>
-                  <button className="text-red-600 font-semibold hover:underline" onClick={() => handleSetGainLoss(inv._id)}>Set</button>
+                <td className="py-3 px-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
+                    <div className="flex gap-2 mb-2 sm:mb-0">
+                      <button className="text-blue-600 font-semibold hover:underline" onClick={() => handleEdit(inv)}>Edit</button>
+                      <button className="text-green-600 font-semibold hover:underline" onClick={() => handleComplete(inv._id)}>Complete</button>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <input className="p-1 border rounded w-28 sm:w-20 bg-gray-800 text-white border-gray-700 focus:border-gold outline-none" type="number" placeholder="Gain/Loss $" value={gainLossAmount} onChange={e => setGainLossAmount(e.target.value)} />
+                      <select className="p-1 border rounded bg-gray-800 text-white border-gray-700 focus:border-gold outline-none" value={gainLossType} onChange={e => setGainLossType(e.target.value)}>
+                        <option value="gain">Gain</option>
+                        <option value="loss">Loss</option>
+                      </select>
+                      <button className="text-red-600 font-semibold hover:underline" onClick={() => handleSetGainLoss(inv._id)}>Set</button>
+                    </div>
+                  </div>
                 </td>
               </tr>
             ))}
@@ -95,9 +101,9 @@ const UserInvestmentsAdmin = () => {
             <option value="completed">Completed</option>
             <option value="cancelled">Cancelled</option>
           </select>
-          <div className="flex gap-2 mt-2">
-            <button className="bg-gold text-black px-4 py-2 rounded font-semibold hover:bg-yellow-400 transition" type="submit">Save</button>
-            <button className="px-4 py-2 rounded bg-gray-700 text-white hover:bg-gray-600 transition" onClick={() => setEditing(null)}>Cancel</button>
+          <div className="flex flex-col sm:flex-row gap-2 mt-2">
+            <button className="bg-gold text-black px-4 py-2 rounded font-semibold hover:bg-yellow-400 transition w-full sm:w-auto" type="submit">Save</button>
+            <button className="px-4 py-2 rounded bg-gray-700 text-white hover:bg-gray-600 transition w-full sm:w-auto" onClick={() => setEditing(null)}>Cancel</button>
           </div>
         </form>
       )}

@@ -9,8 +9,8 @@ export const AdminCard = ({ children, className = '', hover = true }) => {
   
   return (
     <div className={`
-      p-6 rounded-xl shadow-lg transition-all duration-300
-      ${hover ? 'hover:shadow-xl hover:scale-105' : ''}
+      p-4 sm:p-6 rounded-xl shadow transition-all duration-300
+      ${hover ? 'sm:hover:shadow-xl sm:hover:scale-105' : ''} /* disable heavy hover on small screens */
       ${isDarkMode 
         ? 'bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700' 
         : 'bg-gradient-to-br from-white to-gray-50 border border-gray-200'
@@ -186,9 +186,10 @@ export const AdminTable = ({
     );
   }
   
+  // Responsive: on small screens render each row as a stacked card
   return (
     <AdminCard className={className} hover={false}>
-      <div className="overflow-x-auto">
+      <div className="hidden sm:block overflow-x-auto">
         <table className="w-full">
           <thead>
             <tr className={`border-b ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
@@ -220,12 +221,12 @@ export const AdminTable = ({
                 }
               `}>
                 {columns.map((column) => (
-                  <td key={column.key} className="py-4 px-4">
+                  <td key={column.key} className="py-4 px-4 align-top">
                     {column.render ? column.render(row[column.key], row) : row[column.key]}
                   </td>
                 ))}
                 {actions.length > 0 && (
-                  <td className="py-4 px-4">
+                  <td className="py-4 px-4 align-top">
                     <div className="flex space-x-2">
                       {actions.map((action, actionIndex) => (
                         <button
@@ -258,6 +259,45 @@ export const AdminTable = ({
           </div>
         )}
       </div>
+
+      {/* Stacked card view for small screens */}
+      <div className="sm:hidden space-y-3">
+        {data.map((row, idx) => (
+          <div key={idx} className={`p-3 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'}`}>
+            <div className="flex items-start justify-between space-x-3">
+              <div className="flex-1 min-w-0">
+                {columns.map((col) => (
+                  <div key={col.key} className="mb-2">
+                    <div className={`text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>{col.title}</div>
+                    <div className={`mt-1 ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>
+                      {col.render ? col.render(row[col.key], row) : row[col.key]}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {actions.length > 0 && (
+                <div className="flex-shrink-0 flex flex-col space-y-2">
+                  {actions.map((action, actionIndex) => (
+                    <button
+                      key={actionIndex}
+                      onClick={() => action.onClick(row)}
+                      className={`p-2 rounded-lg ${isDarkMode ? 'bg-gray-700 text-gray-200' : 'bg-gray-50 text-gray-700'}`}
+                      title={action.title}
+                    >
+                      <action.icon size={16} />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        ))}
+        {data.length === 0 && (
+          <div className={`text-center py-8 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+            No data available
+          </div>
+        )}
+      </div>
     </AdminCard>
   );
 };
@@ -274,7 +314,7 @@ export const AdminSearchBar = ({
   showAdd = true,
   className = '' 
 }) => {
-  const { isDarkMode } = useTheme();
+  // intentionally lightweight search bar; theme handled by parent
   
   return (
     <div className={`flex flex-col md:flex-row md:items-center md:justify-between gap-4 ${className}`}>
@@ -363,14 +403,14 @@ export const AdminModal = ({
   
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+      <div className="flex items-center justify-center min-h-screen px-4 pt-6 pb-12 text-center sm:block sm:p-0">
         <div 
           className="fixed inset-0 transition-opacity bg-black bg-opacity-50"
           onClick={onClose}
         ></div>
         
         <div className={`
-          inline-block w-full ${sizes[size]} p-6 my-8 overflow-hidden text-left align-middle transition-all transform
+          inline-block w-full ${sizes[size]} p-4 sm:p-6 my-6 sm:my-8 max-h-[90vh] overflow-auto text-left align-middle transition-all transform
           ${isDarkMode ? 'bg-gray-800' : 'bg-white'}
           shadow-xl rounded-2xl ${className}
         `}>
