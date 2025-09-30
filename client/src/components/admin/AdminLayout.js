@@ -68,21 +68,21 @@ const AdminLayout = () => {
       {/* Mobile Overlay */}
       {sidebarOpen && isMobile && (
         <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden" 
+          className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[60] md:hidden" 
           onClick={() => setSidebarOpen(false)} 
         />
       )}
 
       {/* Sidebar */}
       <aside className={`
-        fixed md:static top-0 left-0 h-full z-50 transition-all duration-300 ease-in-out
-        ${sidebarOpen ? 'w-72' : 'w-16'} 
+        fixed md:static top-0 left-0 h-full z-[70] transition-all duration-300 ease-in-out
+        ${sidebarOpen ? 'w-72' : isMobile ? 'w-0' : 'w-16'} 
         ${isMobile && !sidebarOpen ? '-translate-x-full' : 'translate-x-0'}
         ${isDarkMode 
           ? 'bg-gradient-to-b from-gray-800 to-gray-900 border-gray-700' 
           : 'bg-gradient-to-b from-white to-gray-50 border-gray-200'
         } 
-        border-r shadow-xl flex flex-col
+        border-r shadow-2xl flex flex-col
       `}>
         {/* Header */}
         <div className={`
@@ -103,9 +103,9 @@ const AdminLayout = () => {
           
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className={`p-2 rounded-lg transition-colors ${
-              isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'
-            }`}
+            className={`p-2 rounded-lg transition-all duration-300 ${
+              isDarkMode ? 'hover:bg-gray-700 active:bg-gray-600' : 'hover:bg-gray-100 active:bg-gray-200'
+            } transform active:scale-95`}
           >
             {sidebarOpen ? <FiChevronLeft size={20} /> : <FiChevronRight size={20} />}
           </button>
@@ -213,9 +213,9 @@ const AdminLayout = () => {
         <button
           onClick={() => setSidebarOpen(true)}
           className={`
-            fixed top-4 left-4 z-30 p-3 rounded-lg shadow-lg transition-colors
-            ${isDarkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'}
-            ${sidebarOpen ? 'hidden' : 'block'}
+            fixed top-4 left-4 z-[55] p-3 rounded-lg shadow-lg transition-all duration-300
+            ${isDarkMode ? 'bg-gray-800 text-white hover:bg-gray-700' : 'bg-white text-gray-900 hover:bg-gray-100'}
+            ${sidebarOpen ? 'opacity-0 pointer-events-none' : 'opacity-100 pointer-events-auto'}
           `}
         >
           <FiMenu size={20} />
