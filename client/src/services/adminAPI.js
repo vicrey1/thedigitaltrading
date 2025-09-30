@@ -1,4 +1,4 @@
-// src/services/adminAPI.js
+// admin API client for admin pages
 import axios from 'axios';
 
 export const API = axios.create({

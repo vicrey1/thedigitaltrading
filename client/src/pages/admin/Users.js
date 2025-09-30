@@ -17,6 +17,7 @@ const AdminUsers = () => {
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [showUserModal, setShowUserModal] = useState(false);
@@ -46,6 +47,7 @@ const AdminUsers = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
+      setError(null);
       const data = await getUsers();
       setUsers(data.users || []);
       
@@ -59,7 +61,8 @@ const AdminUsers = () => {
       setUserStats(stats);
     } catch (error) {
       console.error("Failed to fetch users:", error);
-      // Handle error silently or show user-friendly message
+      // Surface error to the UI so admins can debug
+      setError(typeof error === 'string' ? error : (error?.message || 'Failed to fetch users'));
       setUsers([]);
       setUserStats({ total: 0, active: 0, verified: 0, totalInvestments: 0 });
     } finally {
@@ -316,6 +319,23 @@ const AdminUsers = () => {
           </div>
         </div>
       </AdminCard>
+
+      {/* API Error (if any) */}
+      {error && (
+        <AdminCard>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="font-semibold text-red-600">Failed to load users</p>
+              <p className={`mt-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>{error}</p>
+            </div>
+            <div className="ml-4">
+              <AdminButton variant="primary" onClick={fetchUsers}>
+                Retry
+              </AdminButton>
+            </div>
+          </div>
+        </AdminCard>
+      )}
 
       {/* Users Table */}
       <AdminTable
