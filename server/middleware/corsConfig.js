@@ -33,5 +33,3 @@ const corsOptions = {
 };
 
 module.exports = { corsOptions, allowedOrigins };
-
-module.exports = corsOptions;
