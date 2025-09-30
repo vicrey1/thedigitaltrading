@@ -218,6 +218,8 @@ const AdminLayout = () => {
       {isMobile && (
         <button
           onClick={toggleSidebar}
+          aria-label={sidebarOpen ? 'Close menu' : 'Open menu'}
+          aria-expanded={sidebarOpen}
           className={`
             fixed top-4 left-4 z-50 p-3 rounded-lg shadow-lg transition-colors
             ${isDarkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'}

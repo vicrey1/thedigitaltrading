@@ -46,11 +46,11 @@ const AdminWallets = () => {
           type="text"
           value={query}
           onChange={e => setQuery(e.target.value)}
-          className="flex-1 bg-dark border border-gray-700 rounded-lg py-2 px-4 focus:border-gold focus:outline-none"
+          className="flex-1 bg-dark border border-gray-700 rounded-lg py-2 px-4 focus:border-gold focus:outline-none w-full"
           placeholder="Search by email, username, or user ID"
           required
         />
-        <button type="submit" className="py-2 px-4 rounded-lg font-bold bg-gold text-black hover:bg-yellow-600 transition">Search</button>
+        <button type="submit" className="w-full sm:w-auto py-2 px-4 rounded-lg font-bold bg-gold text-black hover:bg-yellow-600 transition">Search</button>
       </form>
       {error && <div className="text-red-400 mb-4">{error}</div>}
       {users.length > 0 && (
@@ -60,7 +60,7 @@ const AdminWallets = () => {
             {users.map(u => (
               <li key={u._id} className="py-2 flex flex-col sm:flex-row justify-between items-start sm:items-center">
                 <span className="break-words">{u.email} ({u.username})</span>
-                <button onClick={() => fetchWallets(u._id)} className="mt-2 sm:mt-0 text-xs bg-gold text-black px-3 py-1 rounded hover:bg-yellow-600">View Wallets</button>
+                <button onClick={() => fetchWallets(u._id)} className="mt-2 sm:mt-0 w-full sm:w-auto text-xs bg-gold text-black px-3 py-1 rounded hover:bg-yellow-600">View Wallets</button>
               </li>
             ))}
           </ul>

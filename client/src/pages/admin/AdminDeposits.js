@@ -75,9 +75,9 @@ const AdminDeposits = () => {
                     <td className="py-3 px-4 border-b border-gray-700 text-gray-200">{new Date(dep.createdAt).toLocaleString()}</td>
                     <td className="py-3 px-4 border-b border-gray-700">
                       {dep.status === 'pending' && (
-                        <div className="flex gap-2 justify-center">
-                          <button className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 transition font-semibold" onClick={() => handleAction(dep._id, 'confirmed')}>Approve</button>
-                          <button className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition font-semibold" onClick={() => handleAction(dep._id, 'rejected')}>Reject</button>
+                        <div className="flex flex-col sm:flex-row gap-2 items-center justify-center">
+                          <button className="w-full sm:w-auto bg-green-500 text-white px-3 py-2 rounded hover:bg-green-600 transition font-semibold" onClick={() => handleAction(dep._id, 'confirmed')}>Approve</button>
+                          <button className="w-full sm:w-auto bg-red-500 text-white px-3 py-2 rounded hover:bg-red-600 transition font-semibold" onClick={() => handleAction(dep._id, 'rejected')}>Reject</button>
                         </div>
                       )}
                     </td>
@@ -101,8 +101,8 @@ const AdminDeposits = () => {
                   <div className="ml-3 flex-shrink-0">
                     {dep.status === 'pending' && (
                       <div className="flex flex-col gap-2">
-                        <button className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 transition font-semibold" onClick={() => handleAction(dep._id, 'confirmed')}>Approve</button>
-                        <button className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition font-semibold" onClick={() => handleAction(dep._id, 'rejected')}>Reject</button>
+                        <button className="w-full bg-green-500 text-white px-3 py-2 rounded hover:bg-green-600 transition font-semibold" onClick={() => handleAction(dep._id, 'confirmed')}>Approve</button>
+                        <button className="w-full bg-red-500 text-white px-3 py-2 rounded hover:bg-red-600 transition font-semibold" onClick={() => handleAction(dep._id, 'rejected')}>Reject</button>
                       </div>
                     )}
                   </div>

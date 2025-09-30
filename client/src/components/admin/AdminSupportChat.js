@@ -396,7 +396,12 @@ const AdminSupportChat = () => {
       <div className="admin-support-content">
         {/* Tickets List */}
         {showSidebar && (
-          <div className="admin-tickets-sidebar">
+          <div className={`admin-tickets-sidebar ${isMobile ? 'mobile-overlay' : ''}`} style={isMobile ? { position: 'fixed', top: 0, left: 0, zIndex: 60, height: '100vh', overflow: 'auto' } : {}}>
+            {isMobile && (
+              <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '0.5rem 1rem', borderBottom: '1px solid #e9ecef', background: '#fff' }}>
+                <button onClick={() => setShowSidebar(false)} aria-label="Close tickets" className="p-2 rounded bg-gray-100">Close</button>
+              </div>
+            )}
           <div className="tickets-count">
             {tickets.length} ticket{tickets.length !== 1 ? 's' : ''}
           </div>

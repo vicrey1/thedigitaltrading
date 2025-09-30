@@ -141,7 +141,7 @@ const AdminAnnouncements = () => {
               ref={quillRef}
             />
             <label className="block mt-2">Insert Image:</label>
-            <input type="file" accept="image/*" onChange={handleExternalImageUpload} className="mt-1" onClick={e => e.stopPropagation()} />
+            <input type="file" accept="image/*" onChange={handleExternalImageUpload} className="mt-1 w-full" onClick={e => e.stopPropagation()} />
           </div>
           <button type="submit" className="w-full py-3 rounded-lg font-bold bg-gold text-black hover:bg-yellow-600 transition" disabled={loading}>
             {loading ? 'Posting...' : 'Post Announcement'}
