@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 const API = axios.create({
-  baseURL: process.env.REACT_APP_API_BASE_URL + '/api/admin/auth',
+  baseURL: process.env.REACT_APP_API_BASE_URL + '/api/admin',
 });
 
 // Add auth token to requests
@@ -19,6 +19,17 @@ export const adminLogin = async (email, password) => {
     console.log('Attempting admin login with email:', email);
     const response = await API.post('/auth/login', { email, password });
     console.log('Admin login response:', response.data);
+    
+    // Validate response contains token
+    if (!response.data || !response.data.token) {
+      console.error('No token in login response');
+      throw new Error('Invalid login response');
+    }
+
+    // Store token immediately
+    localStorage.setItem('adminToken', response.data.token);
+    console.log('Admin token stored:', !!localStorage.getItem('adminToken'));
+
     return response.data;
   } catch (error) {
     console.error('Admin login error:', error.response?.data || error.message);
