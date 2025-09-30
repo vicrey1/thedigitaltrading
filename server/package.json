@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node -r dotenv/config server.js",
-    "dev": "nodemon -r dotenv/config server.js",
+    "dev": "NODE_ENV=development nodemon -r dotenv/config server.js --env-file=.env.development",
     "test": "jest",
     "seed": "node scripts/seed-plans.js",
     "list-plans": "node scripts/list-plans.js"
