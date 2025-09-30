@@ -14,21 +14,27 @@ const AdminLayout = () => {
   const { admin, logout } = useAdminAuth();
   const { isDarkMode, toggleTheme } = useTheme();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false); // desktop collapsed state
   const [isMobile, setIsMobile] = useState(false);
   const location = useLocation();
 
   const toggleSidebar = () => {
-    setSidebarOpen(prev => !prev);
+    // On mobile: open/close off-canvas. On desktop: collapse/expand.
+    if (isMobile) {
+      setSidebarOpen(prev => !prev);
+    } else {
+      setCollapsed(prev => !prev);
+    }
   };
 
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-      if (window.innerWidth < 768) {
-        setSidebarOpen(false);
-      }
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      // reset off-canvas state when switching sizes
+      setSidebarOpen(false);
     };
-    
+
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
@@ -40,6 +46,9 @@ const AdminLayout = () => {
       setSidebarOpen(false);
     }
   }, [location.pathname, isMobile]);
+
+  // Whether the sidebar UI is expanded (shows labels) — mobile uses off-canvas, desktop uses collapsed state
+  const showSidebar = isMobile ? sidebarOpen : !collapsed;
 
   const navigationItems = [
     { path: '/admin', icon: FiHome, label: 'Dashboard', exact: true },
@@ -82,8 +91,8 @@ const AdminLayout = () => {
       {/* Sidebar */}
       <aside className={`
         fixed md:static top-0 left-0 h-full z-50 transition-all duration-300 ease-in-out
-        ${isMobile ? 'w-72' : sidebarOpen ? 'w-72' : 'w-16'} 
-        ${isMobile && !sidebarOpen ? '-translate-x-full' : 'translate-x-0'}
+  ${isMobile ? 'w-72' : showSidebar ? 'w-72' : 'w-16'}
+  ${isMobile && !sidebarOpen ? '-translate-x-full' : 'translate-x-0'}
         ${isDarkMode 
           ? 'bg-gradient-to-b from-gray-800 to-gray-900 border-gray-700' 
           : 'bg-gradient-to-b from-white to-gray-50 border-gray-200'
@@ -95,7 +104,7 @@ const AdminLayout = () => {
           flex items-center justify-between h-16 px-4 border-b
           ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}
         `}>
-          <div className={`flex items-center transition-all duration-300 ${!sidebarOpen ? 'opacity-0 w-0' : 'opacity-100'}`}>
+          <div className={`flex items-center transition-all duration-300 ${!showSidebar ? 'opacity-0 w-0' : 'opacity-100'}`}>
             <div className="w-8 h-8 bg-gradient-to-r from-orange-400 to-orange-600 rounded-lg flex items-center justify-center mr-3">
               <FiShield className="text-white text-lg" />
             </div>
@@ -109,11 +118,10 @@ const AdminLayout = () => {
           
           <button
             onClick={toggleSidebar}
-            className={`p-2 rounded-lg transition-colors ${
-              isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'
-            }`}
+            className={`p-2 rounded-lg transition-colors ${isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}`}
+            aria-label={isMobile ? (sidebarOpen ? 'Close menu' : 'Open menu') : (collapsed ? 'Expand sidebar' : 'Collapse sidebar')}
           >
-            {sidebarOpen ? <FiChevronLeft size={20} /> : <FiChevronRight size={20} />}
+            {isMobile ? (sidebarOpen ? <FiX size={20} /> : <FiMenu size={20} />) : (collapsed ? <FiChevronRight size={20} /> : <FiChevronLeft size={20} />)}
           </button>
         </div>
 
@@ -140,18 +148,11 @@ const AdminLayout = () => {
                     }
                   `}
                 >
-                  <Icon className={`
-                    ${sidebarOpen ? 'mr-3' : 'mx-auto'} 
-                    text-lg transition-all duration-300
-                    ${isActive ? 'text-white' : ''}
-                  `} />
-                  <span className={`
-                    font-medium transition-all duration-300 
-                    ${!sidebarOpen ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100'}
-                  `}>
+                  <Icon className={`${showSidebar ? 'mr-3' : 'mx-auto'} text-lg transition-all duration-300 ${isActive ? 'text-white' : ''}`} />
+                  <span className={`font-medium transition-all duration-300 ${!showSidebar ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100'}`}>
                     {item.label}
                   </span>
-                  {isActive && sidebarOpen && (
+                  {isActive && showSidebar && (
                     <div className="ml-auto w-2 h-2 bg-white rounded-full"></div>
                   )}
                 </Link>
@@ -173,20 +174,15 @@ const AdminLayout = () => {
             `}
           >
             {isDarkMode ? <FiSun className="mr-3" /> : <FiMoon className="mr-3" />}
-            <span className={`transition-all duration-300 ${!sidebarOpen ? 'opacity-0 w-0' : 'opacity-100'}`}>
-              {isDarkMode ? 'Light Mode' : 'Dark Mode'}
-            </span>
+            <span className={`transition-all duration-300 ${!showSidebar ? 'opacity-0 w-0' : 'opacity-100'}`}>{isDarkMode ? 'Light Mode' : 'Dark Mode'}</span>
           </button>
 
           {/* Admin Profile */}
-          <div className={`
-            flex items-center transition-all duration-300 
-            ${!sidebarOpen ? 'justify-center' : ''}
-          `}>
+          <div className={`flex items-center transition-all duration-300 ${!showSidebar ? 'justify-center' : ''}`}>
             <div className="w-10 h-10 bg-gradient-to-r from-orange-400 to-orange-600 rounded-full flex items-center justify-center text-white font-bold">
               {admin?.name?.charAt(0) || 'A'}
             </div>
-            {sidebarOpen && (
+            {showSidebar && (
               <div className="ml-3 flex-1">
                 <div className="font-semibold text-sm">{admin?.name || 'Administrator'}</div>
                 <div className="text-xs text-gray-500">Super Admin</div>
@@ -199,35 +195,22 @@ const AdminLayout = () => {
             onClick={logout}
             className={`
               w-full mt-3 flex items-center px-3 py-2 rounded-lg transition-all duration-300
-              ${!sidebarOpen ? 'justify-center' : 'justify-start'}
+              ${!showSidebar ? 'justify-center' : 'justify-start'}
               ${isDarkMode 
                 ? 'bg-red-600 hover:bg-red-700 text-white' 
                 : 'bg-red-500 hover:bg-red-600 text-white'
               }
             `}
           >
-            <FiLogOut className={`${!sidebarOpen ? 'mx-auto' : 'mr-3'}`} />
-            <span className={`transition-all duration-300 ${!sidebarOpen ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100 w-auto'}`}>
+            <FiLogOut className={`${!showSidebar ? 'mx-auto' : 'mr-3'}`} />
+            <span className={`transition-all duration-300 ${!showSidebar ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100 w-auto'}`}>
               Logout
             </span>
           </button>
         </div>
       </aside>
 
-      {/* Mobile Menu Button */}
-      {isMobile && (
-        <button
-          onClick={toggleSidebar}
-          aria-label={sidebarOpen ? 'Close menu' : 'Open menu'}
-          aria-expanded={sidebarOpen}
-          className={`
-            fixed top-4 left-4 z-50 p-3 rounded-lg shadow-lg transition-colors
-            ${isDarkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'}
-          `}
-        >
-          {sidebarOpen ? <FiX size={20} /> : <FiMenu size={20} />}
-        </button>
-      )}
+      {/* Toggle button moved into sidebar header; no separate mobile button needed */}
 
       {/* Main Content */}
       <main className={`
