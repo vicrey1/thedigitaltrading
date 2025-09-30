@@ -15,7 +15,11 @@ const PlansAdmin = () => {
     setLoading(false);
   };
 
-  useEffect(() => { fetchPlans(); }, []);
+  useEffect(() => {
+    fetchPlans();
+    // We only want to fetch plans once on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleEdit = (plan) => {
     setEditing(plan._id);
@@ -42,7 +46,7 @@ const PlansAdmin = () => {
   return (
     <div className="max-w-full sm:max-w-2xl mx-auto p-2 sm:p-4 md:p-6 overflow-x-auto">
       <h1 className="text-2xl font-bold mb-4">Investment Plans Admin</h1>
-      <form onSubmit={handleSubmit} className="mb-6 space-y-2 bg-gray-900 p-4 rounded-lg border border-gray-700">
+      <form onSubmit={handleSubmit} className="mb-6 space-y-4 bg-gray-900 p-4 rounded-lg border border-gray-700">
         <input className="w-full p-2 border rounded bg-gray-800 text-white border-gray-700 focus:border-gold outline-none" placeholder="Name" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} required />
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
           <input className="w-full p-2 border rounded bg-gray-800 text-white border-gray-700 focus:border-gold outline-none" type="number" placeholder="% Return" value={form.percentReturn} onChange={e => setForm({ ...form, percentReturn: e.target.value })} required />
@@ -84,8 +88,8 @@ const PlansAdmin = () => {
                     <td className="py-3 px-4">{plan.maxInvestment}</td>
                     <td className="py-3 px-4">{plan.isActive ? 'Yes' : 'No'}</td>
                     <td className="py-3 px-4 flex gap-2">
-                      <button className="text-blue-600 font-semibold hover:underline" onClick={() => handleEdit(plan)}>Edit</button>
-                      <button className="text-red-600 font-semibold hover:underline" onClick={() => handleDelete(plan._id)}>Delete</button>
+                      <button className="w-full sm:w-auto px-3 py-1 rounded bg-blue-600 text-white hover:bg-blue-700" onClick={() => handleEdit(plan)}>Edit</button>
+                      <button className="w-full sm:w-auto px-3 py-1 rounded bg-red-600 text-white hover:bg-red-700" onClick={() => handleDelete(plan._id)}>Delete</button>
                     </td>
                   </tr>
                 ))}
@@ -108,8 +112,8 @@ const PlansAdmin = () => {
                   </div>
                 </div>
                 <div className="mt-3 flex gap-2">
-                  <button className="flex-1 bg-gold text-black px-3 py-2 rounded" onClick={() => handleEdit(plan)}>Edit</button>
-                  <button className="flex-1 bg-red-600 text-white px-3 py-2 rounded" onClick={() => handleDelete(plan._id)}>Delete</button>
+                  <button className="w-full sm:w-auto bg-gold text-black px-3 py-2 rounded" onClick={() => handleEdit(plan)}>Edit</button>
+                  <button className="w-full sm:w-auto bg-red-600 text-white px-3 py-2 rounded" onClick={() => handleDelete(plan._id)}>Delete</button>
                 </div>
               </div>
             ))}

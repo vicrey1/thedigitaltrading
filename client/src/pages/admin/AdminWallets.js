@@ -58,9 +58,9 @@ const AdminWallets = () => {
           <h2 className="text-lg font-bold mb-2">Select a User</h2>
           <ul className="divide-y divide-gray-800">
             {users.map(u => (
-              <li key={u._id} className="py-2 flex flex-col sm:flex-row justify-between items-start sm:items-center">
-                <span className="break-words">{u.email} ({u.username})</span>
-                <button onClick={() => fetchWallets(u._id)} className="mt-2 sm:mt-0 w-full sm:w-auto text-xs bg-gold text-black px-3 py-1 rounded hover:bg-yellow-600">View Wallets</button>
+              <li key={u._id} className="py-2 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                <span className="break-words w-full sm:w-auto">{u.email} ({u.username})</span>
+                <button onClick={() => fetchWallets(u._id)} className="mt-2 sm:mt-0 w-full sm:w-auto bg-gold text-black px-3 py-2 rounded hover:bg-yellow-600 text-sm font-semibold">View Wallets</button>
               </li>
             ))}
           </ul>
@@ -71,7 +71,7 @@ const AdminWallets = () => {
           <h2 className="text-xl font-bold mb-4">Wallets</h2>
           <div className="grid grid-cols-1 gap-4">
             {Object.entries(wallets).map(([chain, w]) => (
-              <div key={chain} className="bg-gray-900 rounded-lg p-4">
+              <div key={chain} className="bg-gray-900 rounded-lg p-4 space-y-2">
                 <div className="font-bold mb-1 uppercase">{chain}</div>
                 <div className="mb-1 break-all text-gold">Address: {w.address}</div>
                 <div className="mb-1 break-all text-yellow-400">Mnemonic: {w.mnemonic}</div>
