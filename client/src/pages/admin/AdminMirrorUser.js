@@ -33,6 +33,12 @@ const AdminMirrorUser = ({ userId, onBack }) => {
         setKyc(kycRes.data);
       } catch (err) {
         console.error('Error fetching user data:', err);
+        // Log detailed response for debugging auth-triggered redirects
+        if (err.response) {
+          console.error('FetchAll response status:', err.response.status);
+          console.error('FetchAll response data:', err.response.data);
+          console.error('FetchAll request headers:', err.config?.headers);
+        }
         setError(err.response?.data?.message || 'Failed to fetch user data');
         setPortfolioData(null);
         setProfile(null);
