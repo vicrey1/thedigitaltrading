@@ -97,12 +97,15 @@ router.delete('/market-events/:id', authAdmin, async (req, res) => {
   }
 });
 
-// Get all users
-router.get('/users', auth, authAdmin, async (req, res) => {
+// Get all users with proper data structure
+router.get('/users', authAdmin, async (req, res) => {
   try {
-    const users = await User.find();
-    res.json(users);
+    console.log('[ADMIN] Fetching all users...');
+    const users = await User.find().select('-password');
+    console.log(`[ADMIN] Found ${users.length} users`);
+    res.json({ users, total: users.length });
   } catch (err) {
+    console.error('[ADMIN] Error fetching users:', err);
     res.status(500).json({ message: err.message });
   }
 });

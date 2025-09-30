@@ -35,7 +35,17 @@ export const getUsers = async () => {
     console.log('Calling getUsers API...');
     const response = await API.get('/users');
     console.log('getUsers API response:', response.data);
-    return response.data;
+    
+    // Ensure we have the expected data structure
+    if (!response.data || !Array.isArray(response.data.users)) {
+      console.error('Invalid users data structure:', response.data);
+      throw new Error('Invalid response format');
+    }
+    
+    return {
+      users: response.data.users,
+      total: response.data.total || response.data.users.length
+    };
   } catch (error) {
     console.error('getUsers API error:', error);
     throw error.response?.data?.message || 'Failed to fetch users';
