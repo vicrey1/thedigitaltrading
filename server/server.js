@@ -14,9 +14,9 @@ const { startRoiCron } = require('./utils/roiCalculator');
 
 const app = express();
 
-// Force PORT to 5001 for development
-const PORT = 5001;
-process.env.PORT = PORT;
+// Use the PORT from environment (deployment hosts provide this).
+// Fall back to 5001 for local development only when no env PORT is present.
+const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 5001;
 
 // Trust proxy headers (needed for WebSocket support on Render and similar hosts)
 app.set('trust proxy', 1);
