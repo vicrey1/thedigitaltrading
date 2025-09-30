@@ -38,9 +38,10 @@
     "yup": "^1.6.1"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "postbuild": "node -e \"require('fs').copyFileSync('static.json','build/static.json') && require('fs').copyFileSync('public/manifest.json','build/manifest.json')\"",
+    "start": "vite --port 3000",
+    "dev": "vite --port 3000",
+    "build": "vite build",
+    "preview": "vite preview",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
