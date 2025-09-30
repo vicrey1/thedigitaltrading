@@ -214,7 +214,11 @@ const AdminLayout = () => {
       {/* Mobile Toggle Button */}
       {isMobile && (
         <button
-          onClick={() => setSidebarOpen((open) => !open)}
+          aria-label="mobile-toggle"
+          onClick={() => {
+            console.log('mobile toggle clicked - current open:', sidebarOpen);
+            setSidebarOpen((open) => !open);
+          }}
           className={`
             fixed top-4 left-4 z-[55] p-3 rounded-lg shadow-lg transition-all duration-300
             ${isDarkMode ? 'bg-gray-800 text-white hover:bg-gray-700' : 'bg-white text-gray-900 hover:bg-gray-100'}
