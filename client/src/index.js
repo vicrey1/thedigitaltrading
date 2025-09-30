@@ -1,5 +1,4 @@
 import './buffer-polyfill';
-import './utils/axios';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';

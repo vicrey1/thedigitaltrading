@@ -54,6 +54,7 @@ const AdminUsers = () => {
       };
       setUserStats(stats);
     } catch (error) {
+      console.error("Failed to fetch users:", error);
       // Handle error silently or show user-friendly message
       setUsers([]);
       setUserStats({ total: 0, active: 0, verified: 0, totalInvestments: 0 });

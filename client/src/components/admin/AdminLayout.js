@@ -19,8 +19,10 @@ const AdminLayout = () => {
 
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-      if (window.innerWidth < 768) {
+      const isMobileView = window.innerWidth < 768;
+      setIsMobile(isMobileView);
+      // Only auto-close sidebar on initial mobile load
+      if (isMobileView && !isMobile) {
         setSidebarOpen(false);
       }
     };
@@ -72,7 +74,7 @@ const AdminLayout = () => {
       <aside className={`
         fixed md:static top-0 left-0 h-full z-50 transition-all duration-300 ease-in-out
         ${sidebarOpen ? 'w-72' : 'w-16'} 
-        ${sidebarOpen && isMobile ? 'translate-x-0' : isMobile ? '-translate-x-full' : 'translate-x-0'}
+        ${isMobile && !sidebarOpen ? '-translate-x-full' : 'translate-x-0'}
         ${isDarkMode 
           ? 'bg-gradient-to-b from-gray-800 to-gray-900 border-gray-700' 
           : 'bg-gradient-to-b from-white to-gray-50 border-gray-200'
