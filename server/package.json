@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node -r dotenv/config server.js",
-    "dev": "NODE_ENV=development nodemon -r dotenv/config server.js --env-file=.env.development",
+    "dev": "cross-env NODE_ENV=development nodemon -r dotenv/config --env-file=.env.development server.js",
     "test": "jest",
     "seed": "node scripts/seed-plans.js",
     "list-plans": "node scripts/list-plans.js"
@@ -46,6 +46,7 @@
     "useragent": "^2.3.0"
   },
   "devDependencies": {
+    "cross-env": "^10.1.0",
     "jest": "^29.7.0",
     "nodemon": "^3.0.1",
     "supertest": "^6.3.3"
