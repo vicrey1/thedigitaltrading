@@ -11,7 +11,7 @@ const cors = require('cors');
 const http = require('http');
 const socketio = require('socket.io');
 const { startRoiCron } = require('./utils/roiCalculator');
-const corsOptions = require('./middleware/corsConfig');
+const { corsOptions, allowedOrigins } = require('./middleware/corsConfig');
 
 const app = express();
 

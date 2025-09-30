@@ -4,8 +4,11 @@ const allowedOrigins = [
   'https://thedigitaltrading.com',
   'https://www.thedigitaltrading.com',
   'http://localhost:3000',  // For local development
-  'http://localhost:5173'   // For Vite dev server
+  'http://localhost:5173',   // For Vite dev server
+  'https://thedigitaltrading.onrender.com'  // Render deployment URL
 ];
+
+module.exports = { corsOptions, allowedOrigins };
 
 const corsOptions = {
   origin: (origin, callback) => {
