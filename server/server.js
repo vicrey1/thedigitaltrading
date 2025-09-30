@@ -248,7 +248,7 @@ app.get('/', (req, res) => {
   res.send('API is running');
 });
 
-console.log(`[DEBUG] Final port check before listen: ${process.env.PORT}`);
-server.listen(process.env.PORT, () => {
-  console.log('Server running on port', process.env.PORT);
+console.log(`[DEBUG] Final port check before listen: ${PORT}`);
+server.listen(PORT, () => {
+  console.log('Server running on port', PORT);
 });
