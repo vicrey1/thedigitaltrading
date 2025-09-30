@@ -31,6 +31,8 @@ const AdminColdWallet = () => {
 
   useEffect(() => {
     setAddressBook(getAddressBook());
+  // Only fetch address book once on mount
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleImport = async () => {

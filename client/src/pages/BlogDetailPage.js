@@ -4,7 +4,7 @@ import { useTheme } from '../contexts/ThemeContext';
 
 export default function BlogDetailPage() {
   const { slug } = useParams();
-  const { isDarkMode, colors } = useTheme();
+  const { isDarkMode } = useTheme(); // Only using isDarkMode
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);

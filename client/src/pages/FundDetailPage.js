@@ -31,7 +31,7 @@ const fundData = {
 
 export default function FundDetailPage() {
   const { slug } = useParams();
-  const { isDarkMode, colors } = useTheme();
+      const { isDarkMode } = useTheme();
   const fund = fundData[slug];
   
   if (!fund) return (

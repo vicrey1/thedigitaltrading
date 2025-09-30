@@ -46,7 +46,7 @@ const AdminUserList = ({ onSelectUser }) => {
                     <td className="py-3 px-4 break-all">{user.email}</td>
                     <td className="py-3 px-4">{user.name}</td>
                     <td className="py-3 px-4">
-                      <button className="bg-gold px-3 py-1 rounded text-black font-semibold hover:bg-yellow-400 transition" onClick={() => onSelectUser(user._id)}>Mirror</button>
+                      <button className="w-full sm:w-auto bg-gold px-3 py-1 rounded text-black font-semibold hover:bg-yellow-400 transition" onClick={() => onSelectUser(user._id)}>Mirror</button>
                     </td>
                   </tr>
                 ))}
@@ -63,8 +63,8 @@ const AdminUserList = ({ onSelectUser }) => {
                     <div className="font-medium text-sm truncate">{user.email}</div>
                     <div className="text-sm text-gray-400">{user.name}</div>
                   </div>
-                  <div className="flex-shrink-0 ml-2">
-                    <button className="bg-gold px-3 py-1 rounded text-black font-semibold hover:bg-yellow-400 transition" onClick={() => onSelectUser(user._id)}>Mirror</button>
+                    <div className="flex-shrink-0 ml-2">
+                    <button className="w-full sm:w-auto bg-gold px-3 py-1 rounded text-black font-semibold hover:bg-yellow-400 transition" onClick={() => onSelectUser(user._id)}>Mirror</button>
                   </div>
                 </div>
               </div>

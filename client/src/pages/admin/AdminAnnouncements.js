@@ -30,6 +30,8 @@ const AdminAnnouncements = () => {
 
   useEffect(() => {
     fetchAnnouncements();
+  // Only fetch once on mount
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleSubmit = async (e) => {

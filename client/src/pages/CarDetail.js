@@ -14,10 +14,6 @@ const CarDetail = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [relatedCars, setRelatedCars] = useState([]);
 
-  useEffect(() => {
-    fetchCarDetail();
-  }, [id, fetchCarDetail]);
-
   const fetchCarDetail = useCallback(async () => {
     setLoading(true);
     try {
@@ -38,6 +34,10 @@ const CarDetail = () => {
       setLoading(false);
     }
   }, [id]);
+
+  useEffect(() => {
+    fetchCarDetail();
+  }, [id, fetchCarDetail]);
 
   const nextImage = () => {
     if (car.images && car.images.length > 1) {

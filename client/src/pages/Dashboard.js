@@ -3,7 +3,10 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
-import { FiDownload, FiGlobe, FiCopy, FiTrendingUp, FiDollarSign, FiRefreshCw, FiMessageCircle } from 'react-icons/fi';
+import { 
+  FiDollarSign, FiTrendingUp, FiRefreshCw, 
+  FiCopy, FiGlobe, FiDownload 
+} from 'react-icons/fi';
 import { LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { getReferralStats } from '../services/referralAPI';
 import KYCStatus from '../components/KYCStatus';

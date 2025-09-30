@@ -12,7 +12,7 @@ const values = [
 ];
 
 function AboutPage() {
-    const { isDarkMode, colors } = useTheme();
+        const { isDarkMode } = useTheme();
     
     return e(PageShell, {
         title: 'About Us',

@@ -26,14 +26,6 @@ const CarShop = () => {
   const [sortBy, setSortBy] = useState('newest');
   const [showFilters, setShowFilters] = useState(false);
 
-  useEffect(() => {
-    fetchCars();
-  }, [fetchCars]);
-
-  useEffect(() => {
-    applyFilters();
-  }, [applyFilters]);
-
   const fetchCars = useCallback(async () => {
     setLoading(true);
     try {
@@ -93,6 +85,18 @@ const CarShop = () => {
 
     setFilteredCars(filtered);
   }, [cars, searchTerm, filters, sortBy]);
+
+  useEffect(() => {
+    fetchCars();
+  // Only fetch cars once on mount
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    applyFilters();
+  // Dependencies are tracked in the useCallback
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [applyFilters]);
 
   const resetFilters = () => {
     setFilters({

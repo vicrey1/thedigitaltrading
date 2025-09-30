@@ -1,8 +1,8 @@
 // src/pages/admin/Cars.js
 import React, { useState, useEffect } from 'react';
-import { FiPlus, FiFilter, FiDownload, FiEdit, FiTrash2, FiEye } from 'react-icons/fi';
+import { FiPlus, FiEdit, FiTrash2 } from 'react-icons/fi';
 import { useTheme } from '../../contexts/ThemeContext';
-import { getAdminCars, createCar, updateCar, deleteCar, getCarStats } from '../../services/carAPI';
+import { getAdminCars, createCar, updateCar, deleteCar } from '../../services/carAPI';
 
 const AdminCars = () => {
   const { isDarkMode } = useTheme();
@@ -42,6 +42,8 @@ const AdminCars = () => {
 
   useEffect(() => {
     fetchCars();
+  // Only fetch cars once on mount
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchCars = async () => {
@@ -496,7 +498,7 @@ const AdminCars = () => {
                             {imageSrc ? (
                               <img
                                 src={imageSrc}
-                                alt={`Car image ${index + 1}`}
+                                alt={`${index + 1}`}
                                 className="w-full h-24 object-cover rounded border"
                                 onError={(e) => {
                                   console.error('Image failed to load:', e.target.src);

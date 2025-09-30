@@ -1,7 +1,7 @@
 // src/pages/admin/Withdrawals.js
 import React, { useState, useEffect } from 'react';
 import { 
-  FiDollarSign, FiClock, FiCheck, FiX, FiEye, FiFilter,
+  FiDollarSign, FiClock, FiCheck, FiX, FiEye,
   FiDownload, FiRefreshCw, FiAlertCircle, FiTrendingDown,
   FiCalendar, FiUser, FiCreditCard
 } from 'react-icons/fi';
@@ -43,10 +43,14 @@ const AdminWithdrawals = () => {
 
   useEffect(() => {
     fetchWithdrawals();
+  // Only fetch once on mount
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     filterWithdrawals();
+  // We want this effect to run when these dependencies change
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [withdrawals, searchTerm, filters]);
 
   const fetchWithdrawals = async () => {

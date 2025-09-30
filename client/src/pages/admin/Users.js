@@ -7,7 +7,7 @@ import {
 import { useTheme } from '../../contexts/ThemeContext';
 import { 
   AdminCard, AdminButton, AdminInput, AdminSelect, AdminTable, 
-  AdminSearchBar, StatusBadge, AdminModal, LoadingSpinner 
+  StatusBadge, AdminModal, LoadingSpinner 
 } from '../../components/admin/AdminComponents';
 import { getUsers, updateUser } from '../../services/adminAPI';
 
@@ -33,10 +33,14 @@ const AdminUsers = () => {
 
   useEffect(() => {
     fetchUsers();
+  // Only fetch users once on mount
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     filterUsers();
+  // Include all dependencies that filterUsers depends on
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [users, searchTerm, filterStatus]);
 
   const fetchUsers = async () => {

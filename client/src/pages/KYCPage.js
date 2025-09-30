@@ -8,7 +8,7 @@ import { FiCamera, FiUpload, FiCheckCircle, FiAlertCircle } from 'react-icons/fi
 import { useTheme } from '../contexts/ThemeContext';
 
 const KYCPage = () => {
-  const { isDarkMode, colors } = useTheme();
+  const { isDarkMode } = useTheme(); // Only using isDarkMode
   const [step, setStep] = useState(1); // 1: Info, 2: ID, 3: Selfie, 4: Review
   const [country, setCountry] = useState('');
   const [documentType, setDocumentType] = useState('');

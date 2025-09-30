@@ -96,11 +96,11 @@ const AdminMirrorUser = ({ userId, onBack }) => {
     <div className="p-2 sm:p-4 md:p-6 overflow-auto w-full">
       <button className="mb-4 bg-gray-700 px-4 py-2 rounded w-full md:w-auto" onClick={onBack}>Back to User List</button>
       <div className="flex flex-col sm:flex-row gap-2 sm:space-x-4 mb-4 sm:mb-6 overflow-x-auto w-full">
-            <button className={`${tab==='dashboard'?'bg-orange-500':''} px-4 py-2 rounded min-w-[120px]`} onClick={()=>setTab('dashboard')}>Dashboard</button>
-            <button className={`${tab==='portfolio'?'bg-orange-500':''} px-4 py-2 rounded min-w-[120px]`} onClick={()=>setTab('portfolio')}>Portfolio</button>
-            <button className={`${tab==='settings'?'bg-orange-500':''} px-4 py-2 rounded min-w-[120px]`} onClick={()=>setTab('settings')}>Settings</button>
-            <button className={`${tab==='kyc'?'bg-orange-500':''} px-4 py-2 rounded min-w-[120px]`} onClick={()=>setTab('kyc')}>KYC</button>
-            <button className={`${tab==='details'?'bg-orange-500':''} px-4 py-2 rounded min-w-[120px]`} onClick={()=>setTab('details')}>Details</button>
+            <button className={`${tab==='dashboard'?'bg-orange-500':''} px-4 py-2 rounded w-full sm:w-auto min-w-[120px]`} onClick={()=>setTab('dashboard')}>Dashboard</button>
+            <button className={`${tab==='portfolio'?'bg-orange-500':''} px-4 py-2 rounded w-full sm:w-auto min-w-[120px]`} onClick={()=>setTab('portfolio')}>Portfolio</button>
+            <button className={`${tab==='settings'?'bg-orange-500':''} px-4 py-2 rounded w-full sm:w-auto min-w-[120px]`} onClick={()=>setTab('settings')}>Settings</button>
+            <button className={`${tab==='kyc'?'bg-orange-500':''} px-4 py-2 rounded w-full sm:w-auto min-w-[120px]`} onClick={()=>setTab('kyc')}>KYC</button>
+            <button className={`${tab==='details'?'bg-orange-500':''} px-4 py-2 rounded w-full sm:w-auto min-w-[120px]`} onClick={()=>setTab('details')}>Details</button>
           </div>
       {tab==='dashboard' && <Dashboard adminView portfolioData={portfolioData} />}
       {tab==='portfolio' && (
@@ -180,7 +180,7 @@ const AdminMirrorUser = ({ userId, onBack }) => {
           <div className="mb-4">
             <h3 className="text-lg font-bold mb-2">Sensitive Keys</h3>
             <button
-              className="bg-gold text-black px-4 py-2 rounded-lg font-bold hover:bg-yellow-500 transition mb-2"
+              className="w-full sm:w-auto bg-gold text-black px-4 py-2 rounded-lg font-bold hover:bg-yellow-500 transition mb-2"
               onClick={handleRevealKeys}
               disabled={loadingKeys}
             >
