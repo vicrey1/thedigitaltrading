@@ -8,17 +8,36 @@ export const API = axios.create({
 // Add auth token to requests
 API.interceptors.request.use((config) => {
   const token = localStorage.getItem('adminToken');
+  console.log('API Request:', config.url);
+  console.log('Admin token exists:', !!token);
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
+  } else {
+    console.warn('No admin token found');
   }
   return config;
 });
 
+// Add response interceptor for debugging
+API.interceptors.response.use(
+  response => {
+    console.log('API Response:', response.config.url, response.status);
+    return response;
+  },
+  error => {
+    console.error('API Error:', error.config?.url, error.response?.status, error.response?.data);
+    return Promise.reject(error);
+  }
+);
+
 export const getUsers = async () => {
   try {
+    console.log('Calling getUsers API...');
     const response = await API.get('/users');
+    console.log('getUsers API response:', response.data);
     return response.data;
   } catch (error) {
+    console.error('getUsers API error:', error);
     throw error.response?.data?.message || 'Failed to fetch users';
   }
 };

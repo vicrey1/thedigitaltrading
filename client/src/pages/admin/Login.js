@@ -18,11 +18,17 @@ const AdminLogin = () => {
     setLoading(true);
     
     try {
+      console.log('Login form submitted');
       const result = await login(email, password);
+      console.log('Login result:', result);
       if (!result.success) {
+        console.error('Login failed:', result.error);
         setError(result.error || 'Login failed');
+      } else {
+        console.log('Login successful, token stored:', !!localStorage.getItem('adminToken'));
       }
     } catch (err) {
+      console.error('Login error:', err);
       setError('An unexpected error occurred');
     } finally {
       setLoading(false);

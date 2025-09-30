@@ -60,6 +60,9 @@ router.use(adminContinueInvestment);
 // Register admin fees routes
 router.use('/fees', auth, require('./admin/fees'));
 
+// Register admin auth routes
+router.use('/auth', require('./admin/auth'));
+
 // Register admin deposits routes
 router.use('/deposits', require('./admin/deposits'));
 

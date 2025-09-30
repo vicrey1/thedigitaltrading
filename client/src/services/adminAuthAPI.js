@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 const API = axios.create({
-  baseURL: process.env.REACT_APP_API_BASE_URL + '/api/admin',
+  baseURL: process.env.REACT_APP_API_BASE_URL + '/api/admin/auth',
 });
 
 // Add auth token to requests
@@ -16,9 +16,12 @@ API.interceptors.request.use((config) => {
 
 export const adminLogin = async (email, password) => {
   try {
+    console.log('Attempting admin login with email:', email);
     const response = await API.post('/auth/login', { email, password });
+    console.log('Admin login response:', response.data);
     return response.data;
   } catch (error) {
+    console.error('Admin login error:', error.response?.data || error.message);
     throw error.response?.data?.message || 'Login failed';
   }
 };
