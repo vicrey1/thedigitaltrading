@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const JWT_SECRET = process.env.JWT_SECRET;
+const logger = require('../utils/logger');
 
 function parseRawAuth(rawAuth) {
   if (!rawAuth) return { token: null, source: null };
@@ -13,15 +14,25 @@ function parseRawAuth(rawAuth) {
 function verifyToken(rawAuthOrToken) {
   // Accept either a raw Authorization header ("Bearer xxx") or a raw token string
   const { token, source } = parseRawAuth(rawAuthOrToken);
+  
   if (!token) {
+    logger.error('[AUTH] No token provided');
     const e = new Error('No token provided');
     e.code = 'NO_TOKEN';
     throw e;
   }
-  const decoded = jwt.verify(token, JWT_SECRET);
-  const id = decoded && decoded.user && decoded.user.id ? decoded.user.id : decoded.id || decoded._id;
-  const role = decoded && decoded.user && decoded.user.role ? decoded.user.role : decoded.role;
-  return { id, role, decoded, rawToken: token, source };
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    const id = decoded && decoded.user && decoded.user.id ? decoded.user.id : decoded.id || decoded._id;
+    const role = decoded && decoded.user && decoded.user.role ? decoded.user.role : decoded.role;
+    
+    logger.debug('[AUTH] Token verified successfully', { id, role, source });
+    return { id, role, decoded, rawToken: token, source };
+  } catch (err) {
+    logger.error('[AUTH] Token verification failed:', err.message);
+    throw err;
+  }
 }
 
 function isAdminToken(rawAuthOrToken) {
