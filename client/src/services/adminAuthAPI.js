@@ -16,21 +16,9 @@ API.interceptors.request.use((config) => {
 
 export const adminLogin = async (email, password) => {
   try {
-    console.log('Attempting admin login with email:', email);
     const response = await API.post('/auth/login', { email, password });
-    console.log('Admin login response:', response.data);
-    
-    // Validate response contains token
-    if (!response.data || !response.data.token) {
-      console.error('No token in login response');
-      throw new Error('Invalid login response');
-    }
-
-    // Store token immediately
-    localStorage.setItem('adminToken', response.data.token);
-    console.log('Admin token stored:', !!localStorage.getItem('adminToken'));
-
     return response.data;
+  
   } catch (error) {
     console.error('Admin login error:', error.response?.data || error.message);
     throw error.response?.data?.message || 'Login failed';

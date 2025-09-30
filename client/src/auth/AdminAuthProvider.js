@@ -42,20 +42,22 @@ export const AdminAuthProvider = ({ children }) => {
       console.log('AdminAuthProvider: Starting login...');
       const response = await adminLogin(email, password);
       
-      // Verify token was stored
-      const storedToken = localStorage.getItem('adminToken');
-      if (!storedToken) {
-        console.error('AdminAuthProvider: Token not stored after login');
-        throw new Error('Failed to store authentication token');
+      if (!response || !response.token || !response.admin) {
+        throw new Error('Invalid login response');
       }
       
-      console.log('AdminAuthProvider: Token stored successfully');
+      localStorage.setItem('adminToken', response.token);
       setAdmin(response.admin);
       navigate('/admin');
       return { success: true };
     } catch (error) {
       console.error('AdminAuthProvider: Login error:', error);
-      return { success: false, error: error.message };
+      localStorage.removeItem('adminToken');
+      setAdmin(null);
+      return { 
+        success: false, 
+        error: error.response?.data?.message || error.message || 'Login failed'
+      };
     }
   };
 
