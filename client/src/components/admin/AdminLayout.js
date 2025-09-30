@@ -34,6 +34,13 @@ const AdminLayout = () => {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  // Close mobile sidebar on route change
+  useEffect(() => {
+    if (isMobile) {
+      setSidebarOpen(false);
+    }
+  }, [location.pathname, isMobile]);
+
   const navigationItems = [
     { path: '/admin', icon: FiHome, label: 'Dashboard', exact: true },
     { path: '/admin/users', icon: FiUsers, label: 'User Management' },
@@ -67,7 +74,7 @@ const AdminLayout = () => {
       {/* Mobile Overlay */}
       {sidebarOpen && isMobile && (
         <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden" 
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden backdrop-blur-sm" 
           onClick={() => setSidebarOpen(false)} 
         />
       )}
@@ -227,12 +234,12 @@ const AdminLayout = () => {
       `}>
         {/* Top Bar */}
         <header className={`
-          h-16 flex items-center justify-between px-6 border-b
+          h-16 flex items-center justify-between px-4 md:px-6 border-b
           ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}
           shadow-sm
         `}>
-          <div className="flex items-center">
-            <h2 className="text-xl font-semibold">
+          <div className="flex items-center pl-12 md:pl-0">
+            <h2 className="text-lg md:text-xl font-semibold truncate">
               {navigationItems.find(item => isActiveRoute(item.path, item.exact))?.label || 'Dashboard'}
             </h2>
           </div>
@@ -261,9 +268,11 @@ const AdminLayout = () => {
         </header>
 
         {/* Content Area */}
-        <div className="flex-1 overflow-auto p-6">
+        <div className="flex-1 overflow-auto p-3 md:p-6">
           <div className="max-w-7xl mx-auto">
-            <Outlet />
+            <div className="space-y-4">
+              <Outlet />
+            </div>
           </div>
         </div>
       </main>
