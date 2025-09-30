@@ -211,17 +211,17 @@ const AdminLayout = () => {
         </div>
       </aside>
 
-      {/* Mobile Menu Button */}
+      {/* Mobile Toggle Button */}
       {isMobile && (
         <button
           onClick={() => setSidebarOpen((open) => !open)}
           className={`
             fixed top-4 left-4 z-[55] p-3 rounded-lg shadow-lg transition-all duration-300
             ${isDarkMode ? 'bg-gray-800 text-white hover:bg-gray-700' : 'bg-white text-gray-900 hover:bg-gray-100'}
-            ${sidebarOpen ? 'opacity-0 pointer-events-none' : 'opacity-100 pointer-events-auto'}
+            transform active:scale-95
           `}
         >
-          <FiMenu size={20} />
+          {sidebarOpen ? <FiChevronLeft size={20} /> : <FiChevronRight size={20} />}
         </button>
       )}
 
