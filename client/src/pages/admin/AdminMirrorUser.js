@@ -3,20 +3,15 @@ import Portfolio from '../../pages/Portfolio';
 import Dashboard from '../../pages/Dashboard';
 import Settings from '../../pages/Settings';
 import KYCPage from '../../pages/KYCPage';
-
 import { API } from '../../services/adminAPI';
+import { useNavigate } from 'react-router-dom';
 
-        <div className="mb-4 p-4 bg-red-900/50 border border-red-500 text-red-300 rounded flex items-center justify-between">
-
-const AdminMirrorUser = ({ userId, onBack }) => {          <div>{error}</div>
-
-  const [portfolioData, setPortfolioData] = useState(null);          <button
-
-  const [profile, setProfile] = useState(null);            onClick={() => { setError(''); fetchAll(); }}
-
-  const [kyc, setKyc] = useState(null);            className="ml-4 px-4 py-2 bg-red-800 hover:bg-red-700 text-white rounded"
-
-  const [loading, setLoading] = useState(false);          >
+const AdminMirrorUser = ({ userId, onBack }) => {
+  const [portfolioData, setPortfolioData] = useState(null);
+  const [profile, setProfile] = useState(null);
+  const [kyc, setKyc] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const [error, setError] = useState('');            Try Again
 

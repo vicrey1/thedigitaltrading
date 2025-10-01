@@ -111,11 +111,6 @@ const getStatusVariant = (status) => {
     }
   ];
 
-import { AdminCard, AdminButton, AdminInput, AdminSelect, AdminTable, 
-  StatusBadge, AdminModal, LoadingSpinner 
-} from '../../components/admin/AdminComponents';
-import { getUsers, updateUser } from '../../services/adminAPI';
-
 const AdminUsers = () => {
   const { isDarkMode } = useTheme();
   const [users, setUsers] = useState([]);

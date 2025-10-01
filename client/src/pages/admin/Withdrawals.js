@@ -531,13 +531,19 @@ const AdminWithdrawals = () => {
           />
         </div>
       </AdminCard>
-      
+
       {/* Filter Summary */}
-          {Object.values(filters).some(value => value !== 'all') && (
-            <div className={`mt-4 text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-              <span className="font-medium">Applied Filters:</span>{' '}
-              {filters.status !== 'all' && (
-                <span className="inline-flex items-center px-2 py-1 mr-2 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">
+      <div className="mt-4">
+        {Object.values(filters).some(value => value !== 'all') && (
+          <div className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+            <span className="font-medium">Applied Filters:</span>{' '}
+            {filters.status !== 'all' && (
+              <span className="inline-flex items-center px-2 py-1 mr-2 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">
+                {filters.status}
+              </span>
+            )}
+          </div>
+        )}
                   Status: {filters.status}
                 </span>
               )}
