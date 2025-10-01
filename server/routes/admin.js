@@ -66,6 +66,9 @@ router.use('/auth', require('./admin/auth'));
 // Register admin deposits routes
 router.use('/deposits', require('./admin/deposits'));
 
+// Register admin stats routes
+router.use('/', require('./admin/stats'));
+
 // Create market event
 router.post('/market-events', authAdmin, async (req, res) => {
   try {

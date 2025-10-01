@@ -23,6 +23,12 @@ const getStatusVariant = (status) => {
 const AdminUsers = () => {
   const { isDarkMode } = useTheme();
   const [users, setUsers] = useState([]);
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    activeUsers: 0,
+    verifiedUsers: 0,
+    totalInvestments: 0
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [filters, setFilters] = useState({
@@ -36,6 +42,15 @@ const AdminUsers = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [itemsPerPage] = useState(10);
   const [searchQuery, setSearchQuery] = useState('');
+
+  const fetchStats = async () => {
+    try {
+      const response = await API.get('/stats');
+      setStats(response.data);
+    } catch (err) {
+      console.error('Failed to fetch stats:', err);
+    }
+  };
 
   const fetchUsers = async () => {
     try {
@@ -61,7 +76,14 @@ const AdminUsers = () => {
 
   useEffect(() => {
     fetchUsers();
+    fetchStats();
   }, [currentPage, sortField, sortDirection, filters, searchQuery]);
+
+  // Refresh stats periodically
+  useEffect(() => {
+    const interval = setInterval(fetchStats, 30000); // Refresh every 30 seconds
+    return () => clearInterval(interval);
+  }, []);
 
   const handleSort = (field) => {
     if (field === sortField) {
@@ -96,13 +118,67 @@ const AdminUsers = () => {
 
   return (
     <div className="space-y-4">
+      {/* Stats Overview */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+        <AdminCard>
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-blue-500/10 rounded-lg">
+              <FiUsers className="text-2xl text-blue-500" />
+            </div>
+            <div>
+              <p className="text-sm text-gray-400">Total Users</p>
+              <h3 className="text-2xl font-bold">{stats.totalUsers}</h3>
+            </div>
+          </div>
+        </AdminCard>
+
+        <AdminCard>
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-green-500/10 rounded-lg">
+              <FiUserPlus className="text-2xl text-green-500" />
+            </div>
+            <div>
+              <p className="text-sm text-gray-400">Active Users</p>
+              <h3 className="text-2xl font-bold">{stats.activeUsers}</h3>
+            </div>
+          </div>
+        </AdminCard>
+
+        <AdminCard>
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-yellow-500/10 rounded-lg">
+              <FiShield className="text-2xl text-yellow-500" />
+            </div>
+            <div>
+              <p className="text-sm text-gray-400">Verified Users</p>
+              <h3 className="text-2xl font-bold">{stats.verifiedUsers}</h3>
+            </div>
+          </div>
+        </AdminCard>
+
+        <AdminCard>
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-purple-500/10 rounded-lg">
+              <FiTrendingUp className="text-2xl text-purple-500" />
+            </div>
+            <div>
+              <p className="text-sm text-gray-400">Total Investments</p>
+              <h3 className="text-2xl font-bold">${(stats.totalInvestments / 1000).toFixed(1)}K</h3>
+            </div>
+          </div>
+        </AdminCard>
+      </div>
+
       <AdminCard>
         <div className="flex flex-col md:flex-row gap-4 justify-between items-center mb-4">
           <h1 className="text-2xl font-bold">Users Management</h1>
           <AdminButton
             variant="primary"
             icon={<FiRefreshCw />}
-            onClick={fetchUsers}
+            onClick={() => {
+              fetchUsers();
+              fetchStats();
+            }}
           >
             Refresh
           </AdminButton>
