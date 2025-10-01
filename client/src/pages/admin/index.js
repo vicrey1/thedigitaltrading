@@ -4,7 +4,8 @@ import {
   FiUsers, FiDollarSign, FiTrendingUp, 
   FiDownload, FiEye, FiActivity, FiTruck,
   FiBarChart2, FiPieChart, FiArrowUpRight, FiArrowDownRight,
-  FiRefreshCw, FiCalendar, FiAlertCircle
+  FiRefreshCw, FiCalendar, FiAlertCircle, FiInbox, FiArrowRight,
+  FiHardDrive, FiMail
 } from 'react-icons/fi';
 import { 
   LineChart, Line, AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
@@ -42,10 +43,38 @@ const AdminIndex = () => {
     pendingWithdrawals: 0,
     totalRevenue: 0,
     monthlyGrowth: 0,
-    activeUsers: 0
+    activeUsers: 0,
+    successfulDeposits: 0,
+    successfulWithdrawals: 0,
+    averageInvestment: 0,
+    totalInvestments: 0
   });
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [activities, setActivities] = useState([]);
+  const [timeframe, setTimeframe] = useState('7d');
+  const [chartData, setChartData] = useState({
+    investments: [],
+    transactions: [],
+    userGrowth: [],
+    revenue: []
+  });
+  const [systemHealth, setSystemHealth] = useState({
+    status: 'healthy',
+    lastBackup: null,
+    serverLoad: 0,
+    databaseSize: 0
+  });
+  const [loading, setLoading] = useState({
+    stats: true,
+    activities: true,
+    charts: true,
+    health: true
+  });
+  const [error, setError] = useState({
+    stats: null,
+    activities: null,
+    charts: null,
+    health: null
+  });
 
   // Chart data - will be populated from API
   const [revenueData, setRevenueData] = useState([]);
@@ -313,22 +342,50 @@ const AdminIndex = () => {
       )}
 
       {/* Stats Cards */}
+            {/* Stats Overview */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard
+        <AdminCard
           title="Total Users"
-          value={stats.totalUsers}
-          change={8.2}
-          trend="up"
-          icon={FiUsers}
-          color="bg-gradient-to-r from-blue-500 to-blue-600"
+          value={stats.totalUsers.toLocaleString()}
+          icon={<FiUsers className="text-blue-500" />}
+          trend={stats.monthlyGrowth}
+          loading={loading.stats}
+          subtitle={`${stats.activeUsers} active users`}
         />
-        <StatCard
-          title="Active Investments"
-          value={stats.activeInvestments}
-          change={12.5}
-          trend="up"
-          icon={FiTrendingUp}
-          color="bg-gradient-to-r from-green-500 to-green-600"
+        <AdminCard
+          title="Total Investments"
+          value={`$${stats.totalInvestments.toLocaleString()}`}
+          icon={<FiTrendingUp className="text-green-500" />}
+          trend={stats.investmentGrowth}
+          loading={loading.stats}
+          subtitle={`Avg: $${stats.averageInvestment.toLocaleString()}`}
+        />
+        <AdminCard
+          title="Transactions"
+          value={`$${(stats.totalDeposits + stats.totalWithdrawals).toLocaleString()}`}
+          icon={<FiDollarSign className="text-purple-500" />}
+          loading={loading.stats}
+          subtitle={
+            <>
+              <span className="text-green-500">↑${stats.successfulDeposits.toLocaleString()}</span>
+              {' / '}
+              <span className="text-red-500">↓${stats.successfulWithdrawals.toLocaleString()}</span>
+            </>
+          }
+        />
+        <AdminCard
+          title="System Status"
+          value={systemHealth.status}
+          icon={<FiActivity className={`${
+            systemHealth.status === 'healthy' ? 'text-green-500' : 
+            systemHealth.status === 'warning' ? 'text-yellow-500' : 'text-red-500'
+          }`} />}
+          loading={loading.health}
+          subtitle={`Last backup: ${
+            systemHealth.lastBackup 
+              ? new Date(systemHealth.lastBackup).toLocaleDateString() 
+              : 'Never'
+          }`}
         />
         <StatCard
           title="Total Revenue"
@@ -346,6 +403,20 @@ const AdminIndex = () => {
           icon={FiDownload}
           color="bg-gradient-to-r from-orange-500 to-orange-600"
         />
+      </div>
+
+      {/* Timeframe Selector */}
+      <div className="flex justify-end mt-8 mb-4">
+        <select
+          value={timeframe}
+          onChange={(e) => setTimeframe(e.target.value)}
+          className="px-4 py-2 border rounded-lg text-sm"
+        >
+          <option value="24h">Last 24 Hours</option>
+          <option value="7d">Last 7 Days</option>
+          <option value="30d">Last 30 Days</option>
+          <option value="90d">Last 90 Days</option>
+        </select>
       </div>
 
       {/* Charts Section */}
@@ -634,19 +705,68 @@ const AdminIndex = () => {
       `}>
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-lg font-semibold">Recent Activities</h3>
-          <FiActivity className={isDarkMode ? 'text-gray-400' : 'text-gray-600'} />
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={refreshData}
+              className={`p-2 rounded-lg transition-colors ${
+                isDarkMode 
+                  ? 'hover:bg-gray-700 text-gray-400 hover:text-gray-300' 
+                  : 'hover:bg-gray-100 text-gray-600 hover:text-gray-700'
+              }`}
+              title="Refresh activities"
+            >
+              <FiRefreshCw className={`w-5 h-5 ${loading.activities ? 'animate-spin' : ''}`} />
+            </button>
+            <FiActivity className={isDarkMode ? 'text-gray-400' : 'text-gray-600'} />
+          </div>
         </div>
-        <div className="space-y-2">
-          {recentActivities.map((activity) => (
-            <ActivityItem key={activity.id} activity={activity} />
-          ))}
+        {loading.activities ? (
+          <div className="flex justify-center py-8">
+            <div className="w-10 h-10 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        ) : recentActivities.length === 0 ? (
+          <div className="text-center py-8">
+            <FiInbox className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+            <p className={isDarkMode ? 'text-gray-400' : 'text-gray-600'}>
+              No recent activities to display
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {recentActivities.map((activity) => (
+              <ActivityItem key={activity.id} activity={activity} />
+            ))}
+            {error.activities && (
+              <div className={`
+                p-4 rounded-lg text-sm
+                ${isDarkMode ? 'bg-red-900/20 text-red-300' : 'bg-red-50 text-red-700'}
+              `}>
+                <div className="flex items-center">
+                  <FiAlertCircle className="mr-2" />
+                  <span>{error.activities}</span>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+        <div className="mt-4 flex justify-between items-center">
+          <Link 
+            to="/admin/activities" 
+            className={`
+              flex items-center font-medium transition-colors
+              ${isDarkMode 
+                ? 'text-orange-400 hover:text-orange-300' 
+                : 'text-orange-500 hover:text-orange-600'
+              }
+            `}
+          >
+            View All Activities
+            <FiArrowRight className="ml-2 w-4 h-4" />
+          </Link>
+          <span className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+            Showing last {recentActivities.length} activities
+          </span>
         </div>
-        <Link 
-          to="/admin/activities" 
-          className="block text-center mt-4 text-orange-500 hover:text-orange-600 font-medium"
-        >
-          View All Activities
-        </Link>
       </div>
 
       {/* System Status */}
@@ -657,21 +777,188 @@ const AdminIndex = () => {
           : 'bg-gradient-to-br from-white to-gray-50 border border-gray-200'
         }
       `}>
-        <h3 className="text-lg font-semibold mb-4">System Status</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="flex items-center">
-            <div className="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
-            <span>API Services: Online</span>
-          </div>
-          <div className="flex items-center">
-            <div className="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
-            <span>Database: Connected</span>
-          </div>
-          <div className="flex items-center">
-            <div className="w-3 h-3 bg-yellow-500 rounded-full mr-3"></div>
-            <span>Email Service: Degraded</span>
-          </div>
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-lg font-semibold">System Status</h3>
+          <button
+            onClick={refreshData}
+            className={`p-2 rounded-lg transition-colors ${
+              isDarkMode 
+                ? 'hover:bg-gray-700 text-gray-400 hover:text-gray-300' 
+                : 'hover:bg-gray-100 text-gray-600 hover:text-gray-700'
+            }`}
+            title="Refresh system status"
+          >
+            <FiRefreshCw className={`w-5 h-5 ${loading.health ? 'animate-spin' : ''}`} />
+          </button>
         </div>
+        
+        {loading.health ? (
+          <div className="flex justify-center py-8">
+            <div className="w-10 h-10 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        ) : error.health ? (
+          <div className={`
+            p-4 rounded-lg text-sm
+            ${isDarkMode ? 'bg-red-900/20 text-red-300' : 'bg-red-50 text-red-700'}
+          `}>
+            <div className="flex items-center">
+              <FiAlertCircle className="mr-2" />
+              <span>{error.health}</span>
+            </div>
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+              <div className={`
+                p-4 rounded-lg
+                ${isDarkMode ? 'bg-gray-700/50' : 'bg-gray-50'}
+              `}>
+                <div className="flex items-center justify-between mb-2">
+                  <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>API Services</span>
+                  <div className={`
+                    px-2 py-1 rounded text-xs font-medium
+                    ${systemHealth.api === 'healthy' 
+                      ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' 
+                      : systemHealth.api === 'degraded'
+                      ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
+                      : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+                    }
+                  `}>
+                    {systemHealth.api === 'healthy' ? 'Online' : 
+                     systemHealth.api === 'degraded' ? 'Degraded' : 'Offline'}
+                  </div>
+                </div>
+                <div className="flex items-center text-sm">
+                  <FiActivity className="mr-2" />
+                  <span>{systemHealth.apiLatency}ms avg. latency</span>
+                </div>
+              </div>
+
+              <div className={`
+                p-4 rounded-lg
+                ${isDarkMode ? 'bg-gray-700/50' : 'bg-gray-50'}
+              `}>
+                <div className="flex items-center justify-between mb-2">
+                  <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>Database</span>
+                  <div className={`
+                    px-2 py-1 rounded text-xs font-medium
+                    ${systemHealth.database === 'healthy'
+                      ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                      : systemHealth.database === 'degraded'
+                      ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
+                      : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+                    }
+                  `}>
+                    {systemHealth.database === 'healthy' ? 'Connected' :
+                     systemHealth.database === 'degraded' ? 'Slow' : 'Disconnected'}
+                  </div>
+                </div>
+                <div className="flex items-center text-sm">
+                  <FiHardDrive className="mr-2" />
+                  <span>{(systemHealth.databaseSize / 1024).toFixed(2)}GB used</span>
+                </div>
+              </div>
+
+              <div className={`
+                p-4 rounded-lg
+                ${isDarkMode ? 'bg-gray-700/50' : 'bg-gray-50'}
+              `}>
+                <div className="flex items-center justify-between mb-2">
+                  <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>Email Service</span>
+                  <div className={`
+                    px-2 py-1 rounded text-xs font-medium
+                    ${systemHealth.email === 'healthy'
+                      ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                      : systemHealth.email === 'degraded'
+                      ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
+                      : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+                    }
+                  `}>
+                    {systemHealth.email === 'healthy' ? 'Operational' :
+                     systemHealth.email === 'degraded' ? 'Degraded' : 'Down'}
+                  </div>
+                </div>
+                <div className="flex items-center text-sm">
+                  <FiMail className="mr-2" />
+                  <span>{systemHealth.emailQueue} in queue</span>
+                </div>
+              </div>
+            </div>
+
+            <div className={`
+              p-4 rounded-lg border
+              ${isDarkMode 
+                ? 'bg-gray-700/30 border-gray-600' 
+                : 'bg-white border-gray-200'
+              }
+            `}>
+              <h4 className="text-sm font-medium mb-3">System Metrics</h4>
+              <div className="space-y-3">
+                <div>
+                  <div className="flex justify-between text-sm mb-1">
+                    <span>CPU Usage</span>
+                    <span>{systemHealth.cpuUsage}%</span>
+                  </div>
+                  <div className="h-2 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
+                    <div 
+                      className={`h-full rounded-full ${
+                        systemHealth.cpuUsage > 90 ? 'bg-red-500' :
+                        systemHealth.cpuUsage > 70 ? 'bg-yellow-500' :
+                        'bg-green-500'
+                      }`}
+                      style={{ width: `${systemHealth.cpuUsage}%` }}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <div className="flex justify-between text-sm mb-1">
+                    <span>Memory Usage</span>
+                    <span>{systemHealth.memoryUsage}%</span>
+                  </div>
+                  <div className="h-2 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
+                    <div 
+                      className={`h-full rounded-full ${
+                        systemHealth.memoryUsage > 90 ? 'bg-red-500' :
+                        systemHealth.memoryUsage > 70 ? 'bg-yellow-500' :
+                        'bg-green-500'
+                      }`}
+                      style={{ width: `${systemHealth.memoryUsage}%` }}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <div className="flex justify-between text-sm mb-1">
+                    <span>Storage Usage</span>
+                    <span>{systemHealth.storageUsage}%</span>
+                  </div>
+                  <div className="h-2 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
+                    <div 
+                      className={`h-full rounded-full ${
+                        systemHealth.storageUsage > 90 ? 'bg-red-500' :
+                        systemHealth.storageUsage > 70 ? 'bg-yellow-500' :
+                        'bg-green-500'
+                      }`}
+                      style={{ width: `${systemHealth.storageUsage}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-4 text-sm text-gray-500 dark:text-gray-400">
+              <div className="flex items-center justify-between">
+                <span>Last System Check:</span>
+                <span>{new Date(systemHealth.lastCheck).toLocaleString()}</span>
+              </div>
+              <div className="flex items-center justify-between mt-1">
+                <span>Last Backup:</span>
+                <span>{systemHealth.lastBackup ? new Date(systemHealth.lastBackup).toLocaleString() : 'Never'}</span>
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

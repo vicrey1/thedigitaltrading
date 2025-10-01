@@ -97,13 +97,65 @@ router.delete('/market-events/:id', authAdmin, async (req, res) => {
   }
 });
 
-// Get all users with proper data structure
+// Get all users with filtering and pagination
 router.get('/users', authAdmin, async (req, res) => {
   try {
-    console.log('[ADMIN] Fetching all users...');
-    const users = await User.find().select('-password');
-    console.log(`[ADMIN] Found ${users.length} users`);
-    res.json({ users, total: users.length });
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const search = req.query.search?.trim() || '';
+    const filter = req.query.filter || 'all';
+    const skip = (page - 1) * limit;
+
+    console.log('[ADMIN] Fetching users with filters:', { page, limit, search, filter });
+
+    // Build the filter query
+    const query = {};
+    if (search) {
+      query.$or = [
+        { email: new RegExp(search, 'i') },
+        { name: new RegExp(search, 'i') },
+        { _id: search.length === 24 ? search : null } // Match exact ID if valid
+      ];
+    }
+
+    // Apply filter conditions
+    switch (filter) {
+      case 'active':
+        query.lastActive = { $gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) }; // Active in last 7 days
+        break;
+      case 'kyc_pending':
+        query['kyc.status'] = 'pending';
+        break;
+      case 'recent':
+        query.createdAt = { $gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) }; // Created in last 30 days
+        break;
+    }
+
+    // Execute query with pagination
+    const [users, total] = await Promise.all([
+      User.find(query)
+        .select('-password')
+        .sort({ lastActive: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      User.countDocuments(query)
+    ]);
+
+    // Add additional user status information
+    const enrichedUsers = users.map(user => ({
+      ...user,
+      isActive: user.lastActive && new Date(user.lastActive) >= new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+      kycStatus: user.kyc?.status || 'not_submitted'
+    }));
+
+    console.log(`[ADMIN] Found ${total} users (showing ${enrichedUsers.length})`);
+    res.json({
+      users: enrichedUsers,
+      total,
+      currentPage: page,
+      totalPages: Math.ceil(total / limit)
+    });
   } catch (err) {
     console.error('[ADMIN] Error fetching users:', err);
     res.status(500).json({ message: err.message });

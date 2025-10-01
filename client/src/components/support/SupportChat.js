@@ -1,12 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-// Remove unused import
-// import { useUser } from '../../contexts/UserContext';
+import { useSocket } from '../../contexts/SocketContext';
 import { toast } from 'react-toastify';
 import './SupportChat.css';
 
 const SupportChat = () => {
-  // User context removed as it's not currently used
-  // const userContext = useUser();
+  const socket = useSocket();
   const [tickets, setTickets] = useState([]);
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -16,6 +14,42 @@ const SupportChat = () => {
   const [attachments, setAttachments] = useState([]);
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
+
+  // Socket.io event handlers
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleNewMessage = (msg) => {
+      if (selectedTicket && msg.ticketId === selectedTicket._id) {
+        setMessages(prev => [...prev, msg]);
+        // Mark message as seen if it's from admin
+        if (msg.senderType === 'agent') {
+          socket.emit('messageSeen', { ticketId: selectedTicket._id, messageId: msg._id });
+        }
+      }
+    };
+
+    const handleStatusChange = ({ ticketId, status }) => {
+      setTickets(prev => prev.map(ticket => {
+        if (ticket._id === ticketId) {
+          return { ...ticket, status };
+        }
+        return ticket;
+      }));
+      if (selectedTicket?._id === ticketId) {
+        setSelectedTicket(prev => ({ ...prev, status }));
+        toast.info(`Ticket status updated to: ${status.replace('_', ' ')}`);
+      }
+    };
+
+    socket.on('newMessage', handleNewMessage);
+    socket.on('ticketStatusChange', handleStatusChange);
+
+    return () => {
+      socket.off('newMessage', handleNewMessage);
+      socket.off('ticketStatusChange', handleStatusChange);
+    };
+  }, [socket, selectedTicket]);
 
   // New ticket form state
   const [newTicket, setNewTicket] = useState({
@@ -142,6 +176,9 @@ const SupportChat = () => {
     if (!newMessage.trim() && attachments.length === 0) return;
 
     setLoading(true);
+    
+    // Emit typing stopped when sending message
+    socket.emit('userStoppedTyping', { ticketId: selectedTicket._id });
 
     try {
       const formData = new FormData();

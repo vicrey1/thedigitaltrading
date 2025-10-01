@@ -1,41 +1,78 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const AdminUserList = ({ onSelectUser }) => {
+const AdminUserList = ({ onSelectUser, filter = 'all' }) => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [searchDebounce, setSearchDebounce] = useState(null);
+  const usersPerPage = 10;
 
   useEffect(() => {
     const fetchUsers = async () => {
       try {
         setLoading(true);
+        setError('');
         const res = await axios.get('/api/admin/users', {
-          headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` }
+          headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` },
+          params: {
+            page,
+            limit: usersPerPage,
+            search: search.trim(),
+            filter
+          }
         });
-        setUsers(res.data.users || []); // Handle expected data structure
+        setUsers(res.data.users || []);
+        setTotalPages(Math.ceil(res.data.total / usersPerPage));
       } catch (error) {
         console.error('Error fetching users:', error);
+        setError(error.response?.data?.message || 'Failed to fetch users');
         setUsers([]);
       } finally {
         setLoading(false);
       }
     };
-    fetchUsers();
-  }, []);
 
-  const filtered = users.filter(u => u.email.toLowerCase().includes(search.toLowerCase()));
+    // Debounce search
+    if (searchDebounce) clearTimeout(searchDebounce);
+    setSearchDebounce(setTimeout(() => {
+      setPage(1); // Reset to first page on search
+      fetchUsers();
+    }, 300));
+
+    return () => {
+      if (searchDebounce) clearTimeout(searchDebounce);
+    };
+  }, [search, page, filter, lastRefresh]);
 
   return (
     <div className="p-2 sm:p-4 md:p-6 max-w-full sm:max-w-4xl mx-auto overflow-x-auto">
       <h1 className="text-2xl font-bold mb-4">All Users</h1>
-      <input
-        className="mb-4 p-2 rounded bg-gray-800 text-white w-full border border-gray-700 focus:border-gold outline-none"
-        placeholder="Search by email..."
-        value={search}
-        onChange={e => setSearch(e.target.value)}
-      />
-      {loading ? <div>Loading...</div> : (
+      
+      <div className="mb-4 flex flex-col sm:flex-row gap-4">
+        <input
+          className="p-2 rounded bg-gray-800 text-white w-full border border-gray-700 focus:border-gold outline-none"
+          placeholder="Search by email, name, or ID..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+        />
+      </div>
+
+      {error && (
+        <div className="mb-4 p-4 bg-red-900/50 border border-red-500 text-red-300 rounded">
+          {error}
+        </div>
+      )}
+
+      {loading ? (
+        <div className="flex items-center justify-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gold"></div>
+          <span className="ml-2">Loading users...</span>
+        </div>
+      ) : (
         <div>
           {/* Desktop/tablet table */}
           <div className="hidden md:block overflow-x-auto rounded-lg border border-gray-700">
@@ -77,6 +114,31 @@ const AdminUserList = ({ onSelectUser }) => {
               </div>
             ))}
           </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="mt-6 flex items-center justify-between">
+              <div className="text-sm text-gray-400">
+                Page {page} of {totalPages}
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                  className={`px-3 py-1 rounded ${page === 1 ? 'bg-gray-700 text-gray-500' : 'bg-gray-800 hover:bg-gray-700'}`}
+                >
+                  Previous
+                </button>
+                <button
+                  onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                  disabled={page === totalPages}
+                  className={`px-3 py-1 rounded ${page === totalPages ? 'bg-gray-700 text-gray-500' : 'bg-gray-800 hover:bg-gray-700'}`}
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

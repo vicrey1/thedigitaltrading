@@ -4,7 +4,8 @@ import axios from 'axios';
 import { 
   FiUsers, FiUserPlus, FiMail, FiPhone, FiCalendar, 
   FiDollarSign, FiTrendingUp, FiShield, FiEdit, FiTrash2, FiEye,
-  FiSearch, FiFilter, FiList, FiArrowUp, FiArrowDown 
+  FiSearch, FiFilter, FiList, FiArrowUp, FiArrowDown,
+  FiCheck, FiMoreVertical, FiX, FiRefreshCw, FiDownload
 } from 'react-icons/fi';
 import { useTheme } from '../../contexts/ThemeContext';
 import { 
@@ -126,6 +127,19 @@ const AdminUsers = () => {
   const [showUserModal, setShowUserModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
+  const [actionMenuUser, setActionMenuUser] = useState(null);
+
+  // Close action menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (actionMenuUser && !event.target.closest('.action-menu')) {
+        setActionMenuUser(null);
+      }
+    };
+
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [actionMenuUser]);
 
   // Stats
   const [userStats, setUserStats] = useState({
@@ -493,43 +507,130 @@ const AdminUsers = () => {
   // Define the table structure
   const columns = [
     {
-      header: 'Name',
-      key: 'name',
+      header: 'User',
+      key: 'user',
       sortable: true,
-      render: (user) => user.name || 'N/A'
+      sortField: 'name',
+      render: (user) => (
+        <div className="flex items-center">
+          <div className={`
+            w-10 h-10 rounded-full flex items-center justify-center text-white font-bold mr-3 relative
+            ${user.isVerified 
+              ? 'bg-gradient-to-r from-green-400 to-green-600'
+              : user.status === 'suspended'
+              ? 'bg-gradient-to-r from-red-400 to-red-600'
+              : 'bg-gradient-to-r from-blue-400 to-blue-600'
+            }
+          `}>
+            {user.name?.charAt(0) || 'U'}
+            {user.isVerified && (
+              <div className="absolute -bottom-1 -right-1 bg-green-500 rounded-full p-1">
+                <FiCheck size={8} className="text-white" />
+              </div>
+            )}
+          </div>
+          <div>
+            <div className="font-medium flex items-center">
+              {user.name || 'N/A'}
+              {user.vipTier > 0 && (
+                <span className="ml-2 px-1.5 py-0.5 text-xs rounded bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300">
+                  VIP {user.vipTier}
+                </span>
+              )}
+            </div>
+            <div className="text-sm text-gray-500 dark:text-gray-400">
+              {user.email}
+            </div>
+          </div>
+        </div>
+      )
     },
     {
-      header: 'Email',
-      key: 'email',
-      sortable: true,
-      render: (user) => user.email
-    },
-    {
-      header: 'Status',
+      header: 'Status & Verification',
       key: 'status',
       sortable: true,
-      render: (user) => <StatusBadge status={user.status} />
+      render: (user) => (
+        <div className="space-y-2">
+          <StatusBadge 
+            status={user.status} 
+            variant={
+              user.status === 'active' ? 'success' :
+              user.status === 'suspended' ? 'danger' :
+              user.status === 'pending' ? 'warning' : 'default'
+            }
+          />
+          <div className="flex flex-wrap gap-1">
+            {user.isVerified && (
+              <span className="px-2 py-0.5 text-xs rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
+                Verified
+              </span>
+            )}
+            {user.kycVerified && (
+              <span className="px-2 py-0.5 text-xs rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">
+                KYC
+              </span>
+            )}
+            {user.hasMFA && (
+              <span className="px-2 py-0.5 text-xs rounded-full bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300">
+                2FA
+              </span>
+            )}
+          </div>
+        </div>
+      )
     },
     {
-      header: 'Last Login',
-      key: 'lastLogin',
+      header: 'Activity',
+      key: 'activity',
       sortable: true,
-      render: (user) => user.lastLogin 
-        ? new Date(user.lastLogin).toLocaleDateString()
-        : 'Never'
+      sortField: 'lastLogin',
+      render: (user) => (
+        <div className="space-y-1">
+          <div className="text-sm">
+            Last Login: {user.lastLogin 
+              ? new Date(user.lastLogin).toLocaleDateString()
+              : 'Never'
+            }
+          </div>
+          <div className="text-xs text-gray-500 dark:text-gray-400">
+            Joined: {new Date(user.createdAt).toLocaleDateString()}
+          </div>
+          {user.lastLogin && (
+            <div className="text-xs text-gray-500 dark:text-gray-400">
+              {user.loginCount || 0} total logins
+            </div>
+          )}
+        </div>
+      )
+    },
+    {
+      header: 'Investments',
+      key: 'investments',
+      sortable: true,
+      sortField: 'totalInvestment',
+      render: (user) => (
+        <div className="space-y-1">
+          <div className="font-medium">
+            ${(user.totalInvestment || 0).toLocaleString()}
+          </div>
+          {user.activeInvestments > 0 && (
+            <div className="text-xs text-gray-500 dark:text-gray-400">
+              {user.activeInvestments} active investments
+            </div>
+          )}
+          {user.lastInvestmentDate && (
+            <div className="text-xs text-gray-500 dark:text-gray-400">
+              Last: {new Date(user.lastInvestmentDate).toLocaleDateString()}
+            </div>
+          )}
+        </div>
+      )
     },
     {
       header: 'Actions',
       key: 'actions',
       render: (user) => (
-        <div className="flex space-x-2">
-          <AdminButton
-            onClick={() => handleEditUser(user)}
-            icon={<FiEdit />}
-            variant="secondary"
-            size="sm"
-            tooltip="Edit User"
-          />
+        <div className="flex items-center space-x-2">
           <AdminButton
             onClick={() => handleViewUser(user)}
             icon={<FiEye />}
@@ -538,12 +639,61 @@ const AdminUsers = () => {
             tooltip="View Details"
           />
           <AdminButton
-            onClick={() => handleDeleteUser(user)}
-            icon={<FiTrash2 />}
-            variant="danger"
+            onClick={() => handleEditUser(user)}
+            icon={<FiEdit />}
+            variant="secondary"
             size="sm"
-            tooltip="Delete User"
+            tooltip="Edit User"
           />
+          <div className="relative">
+            <AdminButton
+              onClick={() => setActionMenuUser(user)}
+              icon={<FiMoreVertical />}
+              variant="secondary"
+              size="sm"
+              tooltip="More Actions"
+            />
+            {actionMenuUser?._id === user._id && (
+              <div className={`
+                absolute right-0 mt-2 w-48 rounded-md shadow-lg z-10
+                ${isDarkMode ? 'bg-gray-800' : 'bg-white'}
+                border ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}
+              `}>
+                <div className="py-1">
+                  <button
+                    onClick={() => window.location.href = `/admin/mirror/${user._id}`}
+                    className={`
+                      flex items-center w-full px-4 py-2 text-sm
+                      ${isDarkMode 
+                        ? 'text-gray-300 hover:bg-gray-700' 
+                        : 'text-gray-700 hover:bg-gray-100'
+                      }
+                    `}
+                  >
+                    <FiEye className="mr-3" /> Mirror User View
+                  </button>
+                  <button
+                    onClick={() => window.location.href = `/admin/investments/${user._id}`}
+                    className={`
+                      flex items-center w-full px-4 py-2 text-sm
+                      ${isDarkMode 
+                        ? 'text-gray-300 hover:bg-gray-700' 
+                        : 'text-gray-700 hover:bg-gray-100'
+                      }
+                    `}
+                  >
+                    <FiTrendingUp className="mr-3" /> View Investments
+                  </button>
+                  <button
+                    onClick={() => handleDeleteUser(user)}
+                    className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                  >
+                    <FiTrash2 className="mr-3" /> Delete User
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       )
     }
@@ -645,99 +795,271 @@ const AdminUsers = () => {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <AdminCard>
+        <AdminCard className="transform transition-all duration-200 hover:scale-105">
           <div className="flex items-center justify-between">
             <div>
               <p className={`text-sm font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
                 Total Users
               </p>
               <p className="text-2xl font-bold mt-2">{userStats.total}</p>
+              <p className={`text-sm mt-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                <span className="text-green-500">+{userStats.newUsersToday || 0}</span> today
+              </p>
             </div>
             <div className="p-3 rounded-lg bg-gradient-to-r from-blue-500 to-blue-600">
               <FiUsers size={24} className="text-white" />
             </div>
           </div>
+          <div className="mt-4 pt-4 border-t ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}">
+            <div className="flex items-center justify-between text-sm">
+              <span>Growth Rate</span>
+              <span className="text-green-500 flex items-center">
+                <FiArrowUp className="mr-1" size={12} />
+                {((userStats.newUsersLastWeek / userStats.total) * 100).toFixed(1)}%
+              </span>
+            </div>
+          </div>
         </AdminCard>
 
-        <AdminCard>
+        <AdminCard className="transform transition-all duration-200 hover:scale-105">
           <div className="flex items-center justify-between">
             <div>
               <p className={`text-sm font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
                 Active Users
               </p>
               <p className="text-2xl font-bold mt-2">{userStats.active}</p>
+              <p className={`text-sm mt-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                {((userStats.active / userStats.total) * 100).toFixed(1)}% of total
+              </p>
             </div>
             <div className="p-3 rounded-lg bg-gradient-to-r from-green-500 to-green-600">
               <FiTrendingUp size={24} className="text-white" />
             </div>
           </div>
+          <div className="mt-4 pt-4 border-t ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}">
+            <div className="flex items-center justify-between text-sm">
+              <span>Active Last 24h</span>
+              <span className="font-medium">{userStats.activeToday || 0} users</span>
+            </div>
+          </div>
         </AdminCard>
 
-        <AdminCard>
+        <AdminCard className="transform transition-all duration-200 hover:scale-105">
           <div className="flex items-center justify-between">
             <div>
               <p className={`text-sm font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
                 Verified Users
               </p>
               <p className="text-2xl font-bold mt-2">{userStats.verified}</p>
+              <p className={`text-sm mt-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                {((userStats.verified / userStats.total) * 100).toFixed(1)}% verification rate
+              </p>
             </div>
             <div className="p-3 rounded-lg bg-gradient-to-r from-purple-500 to-purple-600">
               <FiShield size={24} className="text-white" />
             </div>
           </div>
+          <div className="mt-4 pt-4 border-t ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}">
+            <div className="flex items-center justify-between text-sm">
+              <span>Pending Verification</span>
+              <span className="text-orange-500 font-medium">{userStats.pendingVerification || 0}</span>
+            </div>
+          </div>
         </AdminCard>
 
-        <AdminCard>
+        <AdminCard className="transform transition-all duration-200 hover:scale-105">
           <div className="flex items-center justify-between">
             <div>
               <p className={`text-sm font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
                 Total Investments
               </p>
               <p className="text-2xl font-bold mt-2">
-                ${(userStats.totalInvestments / 1000).toFixed(0)}K
+                ${(userStats.totalInvestments / 1000).toFixed(1)}K
+              </p>
+              <p className={`text-sm mt-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                Avg. ${(userStats.totalInvestments / userStats.active || 0).toFixed(0)} per user
               </p>
             </div>
             <div className="p-3 rounded-lg bg-gradient-to-r from-orange-500 to-orange-600">
               <FiDollarSign size={24} className="text-white" />
             </div>
           </div>
+          <div className="mt-4 pt-4 border-t ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}">
+            <div className="flex items-center justify-between text-sm">
+              <span>Active Investors</span>
+              <span className="text-orange-500 font-medium">
+                {userStats.activeInvestors || 0} ({((userStats.activeInvestors / userStats.active) * 100).toFixed(1)}%)
+              </span>
+            </div>
+          </div>
         </AdminCard>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <AdminButton
+          variant="secondary"
+          icon={FiUserPlus}
+          onClick={() => {
+            setEditingUser({});
+            setShowEditModal(true);
+          }}
+          className="w-full py-4"
+        >
+          Add New User
+        </AdminButton>
+
+        <AdminButton
+          variant="secondary"
+          icon={FiShield}
+          onClick={() => setFilterStatus('pending')}
+          className="w-full py-4"
+        >
+          Pending Verifications ({userStats.pendingVerification || 0})
+        </AdminButton>
+
+        <AdminButton
+          variant="secondary"
+          icon={FiMail}
+          className="w-full py-4"
+          onClick={() => window.location.href = '/admin/send-email'}
+        >
+          Send Mass Email
+        </AdminButton>
+
+        <AdminButton
+          variant="secondary"
+          icon={FiDownload}
+          className="w-full py-4"
+          onClick={() => {
+            // TODO: Implement export functionality
+            alert('Export functionality coming soon!');
+          }}
+        >
+          Export Users
+        </AdminButton>
       </div>
 
       {/* Search and Filters */}
       <AdminCard>
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div className="w-full sm:max-w-md">
-            <AdminInput
-              placeholder="Search users by name, email, or username..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              icon={<FiSearch />}
-            />
-          </div>
-          
-          <div className="w-full sm:w-auto flex flex-wrap sm:flex-row sm:items-center gap-3">
-            <div className="w-full sm:w-40">
-              <AdminSelect
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
-                icon={<FiFilter />}
-                options={[
-                  { value: 'all', label: 'All Status' },
-                  { value: 'active', label: 'Active' },
-                  { value: 'suspended', label: 'Suspended' },
-                  { value: 'pending', label: 'Pending' }
-                ]}
+        <div className="space-y-4">
+          {/* Search Bar */}
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex-1">
+              <AdminInput
+                placeholder="Search users by name, email, or username..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                icon={<FiSearch />}
                 className="w-full"
               />
             </div>
-
-            <div className="w-full sm:w-auto">
-              <AdminButton variant="primary" icon={FiUserPlus} className="w-full sm:w-auto">
-                Add User
+            <div className="flex items-center gap-2">
+              <AdminButton 
+                variant="secondary"
+                icon={<FiRefreshCw className={loading ? 'animate-spin' : ''} />}
+                onClick={fetchUsers}
+                disabled={loading}
+              >
+                Refresh
               </AdminButton>
+              <AdminSelect
+                value={sortField}
+                onChange={(e) => {
+                  setSortField(e.target.value);
+                  setSortOrder('desc');
+                }}
+                options={[
+                  { value: 'createdAt', label: 'Join Date' },
+                  { value: 'lastLogin', label: 'Last Login' },
+                  { value: 'name', label: 'Name' },
+                  { value: 'totalInvestment', label: 'Investment' }
+                ]}
+                className="w-40"
+              />
+              <AdminButton
+                variant="secondary"
+                icon={sortOrder === 'asc' ? <FiArrowUp /> : <FiArrowDown />}
+                onClick={() => setSortOrder(current => current === 'asc' ? 'desc' : 'asc')}
+              />
             </div>
           </div>
+
+          {/* Filter Pills */}
+          <div className="flex flex-wrap gap-2">
+            <AdminButton 
+              variant={filterStatus === 'all' ? 'primary' : 'secondary'}
+              size="sm"
+              onClick={() => setFilterStatus('all')}
+            >
+              All Users
+            </AdminButton>
+            <AdminButton 
+              variant={filterStatus === 'active' ? 'success' : 'secondary'}
+              size="sm"
+              onClick={() => setFilterStatus('active')}
+            >
+              Active ({userStats.active})
+            </AdminButton>
+            <AdminButton 
+              variant={filterStatus === 'pending' ? 'warning' : 'secondary'}
+              size="sm"
+              onClick={() => setFilterStatus('pending')}
+            >
+              Pending ({userStats.pendingVerification || 0})
+            </AdminButton>
+            <AdminButton 
+              variant={filterStatus === 'suspended' ? 'danger' : 'secondary'}
+              size="sm"
+              onClick={() => setFilterStatus('suspended')}
+            >
+              Suspended ({userStats.suspended || 0})
+            </AdminButton>
+            <AdminButton 
+              variant={filterStatus === 'verified' ? 'primary' : 'secondary'}
+              size="sm"
+              onClick={() => setFilterStatus('verified')}
+            >
+              Verified ({userStats.verified})
+            </AdminButton>
+            <AdminButton 
+              variant={filterStatus === 'investors' ? 'primary' : 'secondary'}
+              size="sm"
+              onClick={() => setFilterStatus('investors')}
+            >
+              Investors ({userStats.activeInvestors || 0})
+            </AdminButton>
+          </div>
+          
+          {/* Active Filters Summary */}
+          {(searchTerm || filterStatus !== 'all') && (
+            <div className="flex items-center gap-2 text-sm">
+              <span className={isDarkMode ? 'text-gray-400' : 'text-gray-600'}>
+                Showing {filteredUsers.length} of {userStats.total} users
+              </span>
+              {filterStatus !== 'all' && (
+                <span className="px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">
+                  Status: {filterStatus}
+                </span>
+              )}
+              {searchTerm && (
+                <span className="px-2 py-1 rounded-full text-xs bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300">
+                  Search: {searchTerm}
+                </span>
+              )}
+              <AdminButton
+                variant="secondary"
+                size="xs"
+                icon={<FiX />}
+                onClick={() => {
+                  setSearchTerm('');
+                  setFilterStatus('all');
+                }}
+              >
+                Clear All
+              </AdminButton>
+            </div>
+          )}
         </div>
       </AdminCard>
 

@@ -56,17 +56,49 @@ const AdminSupportChat = () => {
     { value: 'bug', label: 'Bug Report' }
   ];
 
-  // Listen for new messages via socket.io
+  // Listen for socket events
   useEffect(() => {
     if (!socket) return;
+
     const handleNewMessage = (msg) => {
-      setMessages((prev) => [...prev, msg]);
+      if (selectedTicket && msg.ticketId === selectedTicket._id) {
+        setMessages((prev) => [...prev, msg]);
+      }
+      // Update ticket preview if exists
+      setTickets(prev => prev.map(ticket => {
+        if (ticket._id === msg.ticketId) {
+          return { ...ticket, lastMessage: msg.content, updatedAt: new Date() };
+        }
+        return ticket;
+      }));
     };
+
+    const handleStatusChange = ({ ticketId, status }) => {
+      setTickets(prev => prev.map(ticket => {
+        if (ticket._id === ticketId) {
+          return { ...ticket, status };
+        }
+        return ticket;
+      }));
+      if (selectedTicket?._id === ticketId) {
+        setSelectedTicket(prev => ({ ...prev, status }));
+      }
+    };
+
+    const handleNewTicket = (ticket) => {
+      setTickets(prev => [ticket, ...prev]);
+    };
+
     socket.on('newMessage', handleNewMessage);
+    socket.on('ticketStatusChange', handleStatusChange);
+    socket.on('newTicket', handleNewTicket);
+
     return () => {
       socket.off('newMessage', handleNewMessage);
+      socket.off('ticketStatusChange', handleStatusChange);
+      socket.off('newTicket', handleNewTicket);
     };
-  }, [socket]);
+  }, [socket, selectedTicket]);
 
   // fetchMessages and fetchTickets are called from the initial effect below
   // fetchMessages will be defined below; effect moved after its declaration to avoid use-before-define warnings

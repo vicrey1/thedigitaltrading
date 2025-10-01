@@ -1,7 +1,8 @@
 // src/pages/admin/Cars.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { FiPlus, FiEdit, FiTrash2 } from 'react-icons/fi';
 import { useTheme } from '../../contexts/ThemeContext';
+import debounce from 'lodash/debounce';
 import { getAdminCars, createCar, updateCar, deleteCar } from '../../services/carAPI';
 
 const AdminCars = () => {
@@ -13,6 +14,10 @@ const AdminCars = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState('all');
+  const [sortConfig, setSortConfig] = useState({
+    key: 'make',
+    direction: 'asc'
+  });
   const [formData, setFormData] = useState({
     make: '',
     model: '',
@@ -46,6 +51,23 @@ const AdminCars = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Debounced search handler
+  const debouncedSearch = useCallback(
+    debounce((term) => {
+      fetchCars();
+    }, 300),
+    [] // Empty dependency array since fetchCars is stable
+  );
+
+  // Effect to handle search term changes
+  useEffect(() => {
+    debouncedSearch(searchTerm);
+    // Clean up debounce on unmount
+    return () => {
+      debouncedSearch.cancel();
+    };
+  }, [searchTerm, debouncedSearch]);
+
   const fetchCars = async () => {
     setLoading(true);
     try {
@@ -56,15 +78,65 @@ const AdminCars = () => {
       const response = await getAdminCars(filters);
       setCars(response.cars || []);
     } catch (error) {
-      // Handle error silently or show user-friendly message
+          // Show error message to user
+      alert('Failed to load cars. Please try again.');
       setCars([]);
     } finally {
       setLoading(false);
     }
   };
 
+  const validateForm = (data) => {
+    const errors = {};
+    const currentYear = new Date().getFullYear();
+
+    if (data.year < 1900 || data.year > currentYear + 1) {
+      errors.year = `Year must be between 1900 and ${currentYear + 1}`;
+    }
+
+    if (data.price <= 0) {
+      errors.price = 'Price must be greater than 0';
+    }
+
+    if (data.mileage < 0) {
+      errors.mileage = 'Mileage cannot be negative';
+    }
+
+    if (data.contactInfo.phone && !/^\+?[\d\s-()]+$/.test(data.contactInfo.phone)) {
+      errors.phone = 'Invalid phone number format';
+    }
+
+    if (data.contactInfo.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.contactInfo.email)) {
+      errors.email = 'Invalid email format';
+    }
+
+    if (data.images.length === 0) {
+      errors.images = 'At least one image is required';
+    }
+
+    return errors;
+  };
+
+  const [formErrors, setFormErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setFormErrors({});
+    
+    const errors = validateForm(formData);
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      // Scroll to first error
+      const firstError = Object.keys(errors)[0];
+      const errorElement = document.querySelector(`[name="${firstError}"]`);
+      if (errorElement) {
+        errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      return;
+    }
+
+    setIsSubmitting(true);
     try {
       // Prepare form data with proper image handling
       const submitData = {
@@ -93,15 +165,32 @@ const AdminCars = () => {
       }
       
       if (isCreating) {
-        await createCar(submitData);
+        const response = await createCar(submitData);
+        if (response.error) {
+          throw new Error(response.error);
+        }
       } else {
-        await updateCar(selectedCar._id, submitData);
+        const response = await updateCar(selectedCar._id, submitData);
+        if (response.error) {
+          throw new Error(response.error);
+        }
       }
-      fetchCars();
+      await fetchCars();
       resetForm();
+      // Show success message
+      alert(isCreating ? 'Car created successfully!' : 'Car updated successfully!');
     } catch (error) {
-      // Handle error with user-friendly message
-      alert('Failed to save car. Please try again.');
+      // Set specific error message based on the error
+      setFormErrors({
+        submit: error.message || 'Failed to save car. Please try again.'
+      });
+      // Scroll error into view
+      const errorElement = document.querySelector('[data-error="submit"]');
+      if (errorElement) {
+        errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -141,15 +230,30 @@ const AdminCars = () => {
     }));
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this car?')) {
-      try {
-        await deleteCar(id);
-        fetchCars();
-      } catch (error) {
-        // Handle error with user-friendly message
-        alert('Failed to delete car. Please try again.');
-      }
+  const [deleteConfirmation, setDeleteConfirmation] = useState({ show: false, carId: null });
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleDeleteClick = (car) => {
+    setDeleteConfirmation({
+      show: true,
+      carId: car._id,
+      carName: `${car.year} ${car.make} ${car.model}`
+    });
+  };
+
+  const handleDelete = async () => {
+    if (!deleteConfirmation.carId) return;
+    
+    setIsDeleting(true);
+    try {
+      await deleteCar(deleteConfirmation.carId);
+      await fetchCars();
+      alert('Car deleted successfully!');
+    } catch (error) {
+      alert('Failed to delete car. Please try again.');
+    } finally {
+      setIsDeleting(false);
+      setDeleteConfirmation({ show: false, carId: null, carName: '' });
     }
   };
 
@@ -208,12 +312,53 @@ const AdminCars = () => {
     setIsEditing(false);
   };
 
-  const filteredCars = cars.filter(car => {
+  const handleSort = (key) => {
+    setSortConfig(prevConfig => {
+      if (prevConfig.key === key) {
+        // If clicking the same column, toggle direction
+        return {
+          key,
+          direction: prevConfig.direction === 'asc' ? 'desc' : 'asc'
+        };
+      }
+      // If clicking a different column, sort ascending by that column
+      return { key, direction: 'asc' };
+    });
+  };
+
+  // Function to sort cars based on current sort config
+  const sortCars = (cars) => {
+    return [...cars].sort((a, b) => {
+      let aValue = a[sortConfig.key];
+      let bValue = b[sortConfig.key];
+
+      // Handle nested properties (e.g., 'location.city')
+      if (sortConfig.key.includes('.')) {
+        const keys = sortConfig.key.split('.');
+        aValue = keys.reduce((obj, key) => obj?.[key], a);
+        bValue = keys.reduce((obj, key) => obj?.[key], b);
+      }
+
+      // Handle numeric values
+      if (typeof aValue === 'number' && typeof bValue === 'number') {
+        return sortConfig.direction === 'asc' ? aValue - bValue : bValue - aValue;
+      }
+
+      // Handle string values
+      if (aValue === null || aValue === undefined) aValue = '';
+      if (bValue === null || bValue === undefined) bValue = '';
+      
+      const compareResult = String(aValue).localeCompare(String(bValue));
+      return sortConfig.direction === 'asc' ? compareResult : -compareResult;
+    });
+  };
+
+  const filteredCars = sortCars(cars.filter(car => {
     const matchesSearch = car.make.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          car.model.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesFilter = filter === 'all' || car.status === filter;
     return matchesSearch && matchesFilter;
-  });
+  }));
 
   if (loading) {
     return (
@@ -290,21 +435,35 @@ const AdminCars = () => {
                 onChange={(e) => setFormData({...formData, model: e.target.value})}
                 className={`px-4 py-2 rounded-lg border ${
                   isDarkMode ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-300'
-                }`}
+                } ${formErrors.model ? 'border-red-500' : ''}`}
                 required
               />
               <input
                 type="number"
+                name="year"
                 placeholder="Year"
                 value={formData.year}
-                onChange={(e) => setFormData({...formData, year: e.target.value})}
+                onChange={(e) => {
+                  setFormData({...formData, year: e.target.value});
+                  if (formErrors.year) {
+                    const newErrors = {...formErrors};
+                    delete newErrors.year;
+                    setFormErrors(newErrors);
+                  }
+                }}
                 className={`px-4 py-2 rounded-lg border ${
                   isDarkMode ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-300'
-                }`}
+                } ${formErrors.year ? 'border-red-500' : ''}`}
                 required
               />
+              {formErrors.year && (
+                <div className="md:col-span-2 text-red-500 text-sm mt-1">
+                  {formErrors.year}
+                </div>
+              )}
               <input
                 type="number"
+                name="price"
                 placeholder="Price"
                 value={formData.price}
                 onChange={(e) => setFormData({...formData, price: e.target.value})}
@@ -548,18 +707,61 @@ const AdminCars = () => {
               <div className="md:col-span-2 flex gap-4">
                 <button
                   type="submit"
-                  className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg"
+                  disabled={isSubmitting}
+                  className={`flex items-center justify-center gap-2 px-6 py-2 rounded-lg text-white ${
+                    isSubmitting
+                      ? 'bg-green-400 cursor-not-allowed'
+                      : 'bg-green-600 hover:bg-green-700'
+                  }`}
                 >
-                  {isCreating ? 'Create Car' : 'Update Car'}
+                  {isSubmitting ? (
+                    <>
+                      <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                          fill="none"
+                        />
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        />
+                      </svg>
+                      {isCreating ? 'Creating...' : 'Updating...'}
+                    </>
+                  ) : (
+                    <>{isCreating ? 'Create Car' : 'Update Car'}</>
+                  )}
                 </button>
                 <button
                   type="button"
                   onClick={resetForm}
-                  className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-lg"
+                  disabled={isSubmitting}
+                  className={`px-6 py-2 rounded-lg text-white ${
+                    isSubmitting
+                      ? 'bg-gray-400 cursor-not-allowed'
+                      : 'bg-gray-600 hover:bg-gray-700'
+                  }`}
                 >
                   Cancel
                 </button>
               </div>
+
+              {Object.keys(formErrors).length > 0 && (
+                <div className="md:col-span-2 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg mt-4">
+                  <p className="font-medium">Please fix the following errors:</p>
+                  <ul className="list-disc list-inside mt-2">
+                    {Object.values(formErrors).map((error, index) => (
+                      <li key={index}>{error}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </form>
           </div>
         )}
@@ -571,12 +773,96 @@ const AdminCars = () => {
             <table className="w-full">
               <thead className={`border-b ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
                 <tr>
-                  <th className="text-left p-4">Car</th>
-                  <th className="text-left p-4">Year</th>
-                  <th className="text-left p-4">Price</th>
-                  <th className="text-left p-4">Mileage</th>
-                  <th className="text-left p-4">Status</th>
-                  <th className="text-left p-4">Featured</th>
+                  <th 
+                    onClick={() => handleSort('make')}
+                    className={`text-left p-4 cursor-pointer select-none hover:bg-gray-50 ${
+                      isDarkMode ? 'hover:bg-gray-800' : ''
+                    }`}
+                  >
+                    <div className="flex items-center gap-1">
+                      Car
+                      {sortConfig.key === 'make' && (
+                        <span className="text-xs">
+                          {sortConfig.direction === 'asc' ? '↑' : '↓'}
+                        </span>
+                      )}
+                    </div>
+                  </th>
+                  <th 
+                    onClick={() => handleSort('year')}
+                    className={`text-left p-4 cursor-pointer select-none hover:bg-gray-50 ${
+                      isDarkMode ? 'hover:bg-gray-800' : ''
+                    }`}
+                  >
+                    <div className="flex items-center gap-1">
+                      Year
+                      {sortConfig.key === 'year' && (
+                        <span className="text-xs">
+                          {sortConfig.direction === 'asc' ? '↑' : '↓'}
+                        </span>
+                      )}
+                    </div>
+                  </th>
+                  <th 
+                    onClick={() => handleSort('price')}
+                    className={`text-left p-4 cursor-pointer select-none hover:bg-gray-50 ${
+                      isDarkMode ? 'hover:bg-gray-800' : ''
+                    }`}
+                  >
+                    <div className="flex items-center gap-1">
+                      Price
+                      {sortConfig.key === 'price' && (
+                        <span className="text-xs">
+                          {sortConfig.direction === 'asc' ? '↑' : '↓'}
+                        </span>
+                      )}
+                    </div>
+                  </th>
+                  <th 
+                    onClick={() => handleSort('mileage')}
+                    className={`text-left p-4 cursor-pointer select-none hover:bg-gray-50 ${
+                      isDarkMode ? 'hover:bg-gray-800' : ''
+                    }`}
+                  >
+                    <div className="flex items-center gap-1">
+                      Mileage
+                      {sortConfig.key === 'mileage' && (
+                        <span className="text-xs">
+                          {sortConfig.direction === 'asc' ? '↑' : '↓'}
+                        </span>
+                      )}
+                    </div>
+                  </th>
+                  <th 
+                    onClick={() => handleSort('status')}
+                    className={`text-left p-4 cursor-pointer select-none hover:bg-gray-50 ${
+                      isDarkMode ? 'hover:bg-gray-800' : ''
+                    }`}
+                  >
+                    <div className="flex items-center gap-1">
+                      Status
+                      {sortConfig.key === 'status' && (
+                        <span className="text-xs">
+                          {sortConfig.direction === 'asc' ? '↑' : '↓'}
+                        </span>
+                      )}
+                    </div>
+                  </th>
+                  <th 
+                    onClick={() => handleSort('featured')}
+                    className={`text-left p-4 cursor-pointer select-none hover:bg-gray-50 ${
+                      isDarkMode ? 'hover:bg-gray-800' : ''
+                    }`}
+                  >
+                    <div className="flex items-center gap-1">
+                      Featured
+                      {sortConfig.key === 'featured' && (
+                        <span className="text-xs">
+                          {sortConfig.direction === 'asc' ? '↑' : '↓'}
+                        </span>
+                      )}
+                    </div>
+                  </th>
                   <th className="text-left p-4">Actions</th>
                 </tr>
               </thead>
@@ -608,8 +894,8 @@ const AdminCars = () => {
                     </td>
                     <td className="p-4">
                       <div className="flex gap-2">
-                        <button onClick={() => handleEdit(car)} className="text-blue-600 hover:text-blue-800 p-1"><FiEdit /></button>
-                        <button onClick={() => handleDelete(car._id)} className="text-red-600 hover:text-red-800 p-1"><FiTrash2 /></button>
+                        <button onClick={() => handleEdit(car)} className="text-blue-600 hover:text-blue-800 p-1" title="Edit Car"><FiEdit /></button>
+                        <button onClick={() => handleDeleteClick(car)} className="text-red-600 hover:text-red-800 p-1" title="Delete Car"><FiTrash2 /></button>
                       </div>
                     </td>
                   </tr>
@@ -662,6 +948,68 @@ const AdminCars = () => {
         {filteredCars.length === 0 && (
           <div className="text-center py-8">
             <p className="text-gray-500">No cars found.</p>
+          </div>
+        )}
+
+        {/* Delete Confirmation Modal */}
+        {deleteConfirmation.show && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className={`relative max-w-md w-full rounded-lg shadow-lg p-6 ${
+              isDarkMode ? 'bg-gray-800' : 'bg-white'
+            }`}>
+              <h3 className="text-xl font-semibold mb-4">Confirm Delete</h3>
+              <p className="mb-6">
+                Are you sure you want to delete this car?
+                <br />
+                <span className="font-semibold">{deleteConfirmation.carName}</span>
+              </p>
+              <div className="flex justify-end gap-4">
+                <button
+                  onClick={() => setDeleteConfirmation({ show: false, carId: null })}
+                  disabled={isDeleting}
+                  className={`px-4 py-2 rounded-lg ${
+                    isDarkMode
+                      ? 'bg-gray-600 hover:bg-gray-700'
+                      : 'bg-gray-200 hover:bg-gray-300'
+                  } text-gray-900`}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleDelete}
+                  disabled={isDeleting}
+                  className={`px-4 py-2 rounded-lg text-white ${
+                    isDeleting
+                      ? 'bg-red-400 cursor-not-allowed'
+                      : 'bg-red-600 hover:bg-red-700'
+                  }`}
+                >
+                  {isDeleting ? (
+                    <div className="flex items-center gap-2">
+                      <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                          fill="none"
+                        />
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        />
+                      </svg>
+                      Deleting...
+                    </div>
+                  ) : (
+                    'Delete'
+                  )}
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>

@@ -30,10 +30,13 @@ API.interceptors.response.use(
   }
 );
 
-export const getUsers = async () => {
+// User management functions
+export const getUsers = async ({ page = 1, limit = 10, search = '', filter = 'all' } = {}) => {
   try {
-    console.log('Calling getUsers API...');
-    const response = await API.get('/users');
+    console.log('Calling getUsers API with params:', { page, limit, search, filter });
+    const response = await API.get('/users', {
+      params: { page, limit, search, filter }
+    });
     console.log('getUsers API response:', response.data);
     
     // Ensure we have the expected data structure
@@ -44,11 +47,50 @@ export const getUsers = async () => {
     
     return {
       users: response.data.users,
-      total: response.data.total || response.data.users.length
+      total: response.data.total,
+      currentPage: response.data.currentPage,
+      totalPages: response.data.totalPages
     };
   } catch (error) {
     console.error('getUsers API error:', error);
     throw error.response?.data?.message || 'Failed to fetch users';
+  }
+};
+
+// User Management Operations
+export const updateUserTier = async (userId, tier) => {
+  try {
+    const response = await API.patch(`/users/${userId}/tier`, { tier });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data?.message || 'Failed to update user tier';
+  }
+};
+
+export const updateUserRole = async (userId, role) => {
+  try {
+    const response = await API.patch(`/users/${userId}/role`, { role });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data?.message || 'Failed to update user role';
+  }
+};
+
+export const updateUserKyc = async (userId, action, reason) => {
+  try {
+    const response = await API.post(`/users/${userId}/kyc/${action}`, { reason });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data?.message || 'Failed to update user KYC status';
+  }
+};
+
+export const deleteUser = async (userId) => {
+  try {
+    const response = await API.delete(`/users/${userId}`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data?.message || 'Failed to delete user';
   }
 };
 
@@ -72,16 +114,6 @@ export const approveKYC = async (userId) => {
 
 export const rejectKYC = async (userId, reason) => {
   const response = await API.post(`/users/${userId}/kyc/reject`, { reason });
-  return response.data;
-};
-
-export const updateUserTier = async (userId, tier) => {
-  const response = await API.patch(`/users/${userId}/tier`, { tier });
-  return response.data;
-};
-
-export const updateUserRole = async (userId, role) => {
-  const response = await API.patch(`/users/${userId}/role`, { role });
   return response.data;
 };
 
