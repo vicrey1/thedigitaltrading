@@ -41,12 +41,12 @@ export const AdminAuthProvider = ({ children }) => {
     try {
       console.log('AdminAuthProvider: Starting login...');
       const response = await adminLogin(email, password);
-      
+      console.log('AdminAuthProvider: Login response:', response);
       if (!response || !response.token || !response.admin) {
         throw new Error('Invalid login response');
       }
-      
       localStorage.setItem('adminToken', response.token);
+      console.log('AdminAuthProvider: Token stored in localStorage:', localStorage.getItem('adminToken'));
       setAdmin(response.admin);
       navigate('/admin');
       return { success: true };

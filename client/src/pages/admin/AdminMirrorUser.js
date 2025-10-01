@@ -36,7 +36,13 @@ const AdminMirrorUser = ({ userId, onBack }) => {
       setProfile(profileRes.data);
       setKyc(kycRes.data);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to fetch user data');
+      if (err.response?.status === 401) {
+        setError('Your admin session has expired or you are not authorized. Please log in again or check your admin permissions.');
+      } else if (err.response?.status === 403) {
+        setError('Access forbidden: You do not have admin privileges.');
+      } else {
+        setError(err.response?.data?.message || 'Failed to fetch user data');
+      }
     } finally {
       setLoading(false);
     }
@@ -61,14 +67,22 @@ const AdminMirrorUser = ({ userId, onBack }) => {
   if (error) {
     return (
       <div className="p-4 bg-red-900/50 border border-red-500 text-red-300 rounded">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-2">
           <div>{error}</div>
-          <button
-            onClick={() => { setError(''); fetchAll(); }}
-            className="px-4 py-2 bg-red-800 hover:bg-red-700 text-white rounded"
-          >
-            Try Again
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={() => { setError(''); fetchAll(); }}
+              className="px-4 py-2 bg-red-800 hover:bg-red-700 text-white rounded"
+            >
+              Try Again
+            </button>
+            <button
+              onClick={onBack}
+              className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded"
+            >
+              Back to User List
+            </button>
+          </div>
         </div>
       </div>
     );
