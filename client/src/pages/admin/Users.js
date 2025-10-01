@@ -46,9 +46,11 @@ const AdminUsers = () => {
 
   const fetchUsers = async () => {
     try {
+      console.log('Fetching users...');
       setLoading(true);
       setError(null);
       const data = await getUsers();
+      console.log('Received users data:', data);
       setUsers(data.users || []);
       
       // Calculate stats
