@@ -531,8 +531,8 @@ const AdminWithdrawals = () => {
           />
         </div>
       </AdminCard>
-          
-          {/* Filter Summary */}
+      
+      {/* Filter Summary */}
           {Object.values(filters).some(value => value !== 'all') && (
             <div className={`mt-4 text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
               <span className="font-medium">Applied Filters:</span>{' '}

@@ -100,7 +100,7 @@ const AdminUserList = ({ onSelectUser, filter = 'all' }) => {
 
           {/* Mobile stacked cards */}
           <div className="md:hidden space-y-3">
-            {filtered.map(user => (
+            {users.map(user => (
               <div key={user._id || user.id} className="bg-gray-900 rounded-lg p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">

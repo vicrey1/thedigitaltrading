@@ -109,7 +109,9 @@ const getStatusVariant = (status) => {
         </div>
       )
     }
-  ];inCard, AdminButton, AdminInput, AdminSelect, AdminTable, 
+  ];
+
+import { AdminCard, AdminButton, AdminInput, AdminSelect, AdminTable, 
   StatusBadge, AdminModal, LoadingSpinner 
 } from '../../components/admin/AdminComponents';
 import { getUsers, updateUser } from '../../services/adminAPI';

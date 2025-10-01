@@ -4,7 +4,7 @@ import Dashboard from '../../pages/Dashboard';
 import Settings from '../../pages/Settings';
 import KYCPage from '../../pages/KYCPage';
 
-import { API } from '../../services/adminAPI';import { API } from '../../services/adminAPI';
+import { API } from '../../services/adminAPI';
 
         <div className="mb-4 p-4 bg-red-900/50 border border-red-500 text-red-300 rounded flex items-center justify-between">
 
