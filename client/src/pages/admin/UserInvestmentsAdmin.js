@@ -1,6 +1,7 @@
 // src/pages/admin/UserInvestmentsAdmin.js
 import React, { useState } from 'react';
 import axios from 'axios';
+import { toast } from 'react-toastify';
 
 const UserInvestmentsAdmin = () => {
   const [userId, setUserId] = useState('');
@@ -9,8 +10,14 @@ const UserInvestmentsAdmin = () => {
   const [editForm, setEditForm] = useState({});
 
   const fetchInvestments = async () => {
-    const res = await axios.get(`/api/admin/user-investments/${userId}`, { headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` } });
-    setInvestments(res.data);
+    try {
+      const res = await axios.get(`/api/admin/user-investments/${userId}`, { 
+        headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` }
+      });
+      setInvestments(res.data);
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to fetch investments');
+    }
   };
 
   const handleEdit = (inv) => {
@@ -20,9 +27,51 @@ const UserInvestmentsAdmin = () => {
 
   const handleEditSubmit = async (e) => {
     e.preventDefault();
-    await axios.put(`/api/admin/user-investments/${editing}`, editForm, { headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` } });
-    setEditing(null);
-    fetchInvestments();
+    try {
+      await axios.put(
+        `/api/admin/user-investments/${editing}`, 
+        editForm,
+        { headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` } }
+      );
+      toast.success('Investment updated successfully');
+      setEditing(null);
+      fetchInvestments();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to update investment');
+    }
+  };
+
+  const updateInvestmentBalance = async (investmentId) => {
+    try {
+      const newBalance = prompt('Enter new balance:');
+      if (!newBalance || isNaN(newBalance)) {
+        toast.error('Please enter a valid number');
+        return;
+      }
+      await axios.post(
+        `/api/admin/user-investments/${investmentId}/balance`,
+        { balance: parseFloat(newBalance) },
+        { headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` } }
+      );
+      toast.success('Balance updated successfully');
+      fetchInvestments();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to update balance');
+    }
+  };
+
+  const updateInvestmentBalance = async (investmentId, newBalance) => {
+    try {
+      await axios.post(
+        `/api/admin/user-investments/${investmentId}/balance`,
+        { balance: newBalance },
+        { headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` } }
+      );
+      toast.success('Balance updated successfully');
+      fetchInvestments();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to update balance');
+    }
   };
 
   const [gainLossAmount, setGainLossAmount] = useState('');
@@ -73,8 +122,24 @@ const UserInvestmentsAdmin = () => {
                 <td className="py-3 px-4">
                   <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
                     <div className="flex gap-2 mb-2 sm:mb-0">
-                      <button className="text-blue-600 font-semibold hover:underline" onClick={() => handleEdit(inv)}>Edit</button>
-                      <button className="text-green-600 font-semibold hover:underline" onClick={() => handleComplete(inv._id)}>Complete</button>
+                      <button 
+                        className="text-blue-500 hover:text-blue-400" 
+                        onClick={() => handleEdit(inv)}
+                      >
+                        Edit
+                      </button>
+                      <button 
+                        className="text-green-500 hover:text-green-400" 
+                        onClick={() => updateInvestmentBalance(inv._id)}
+                      >
+                        Quick Balance
+                      </button>
+                      <button 
+                        className="text-yellow-500 hover:text-yellow-400" 
+                        onClick={() => handleComplete(inv._id)}
+                      >
+                        Complete
+                      </button>
                     </div>
                     <div className="flex items-center gap-2">
                       <input className="p-1 border rounded w-28 sm:w-20 bg-gray-800 text-white border-gray-700 focus:border-gold outline-none" type="number" placeholder="Gain/Loss $" value={gainLossAmount} onChange={e => setGainLossAmount(e.target.value)} />
