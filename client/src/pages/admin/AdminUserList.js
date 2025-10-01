@@ -8,11 +8,18 @@ const AdminUserList = ({ onSelectUser }) => {
 
   useEffect(() => {
     const fetchUsers = async () => {
-      const res = await axios.get('/api/admin/users', {
-        headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` }
-      });
-      setUsers(res.data);
-      setLoading(false);
+      try {
+        setLoading(true);
+        const res = await axios.get('/api/admin/users', {
+          headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` }
+        });
+        setUsers(res.data.users || []); // Handle expected data structure
+      } catch (error) {
+        console.error('Error fetching users:', error);
+        setUsers([]);
+      } finally {
+        setLoading(false);
+      }
     };
     fetchUsers();
   }, []);

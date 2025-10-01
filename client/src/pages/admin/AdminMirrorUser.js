@@ -19,27 +19,42 @@ const AdminMirrorUser = ({ userId, onBack }) => {
 
   useEffect(() => {
     const fetchAll = async () => {
+      if (!userId) return;
+      
       setLoading(true);
       setError('');
       try {
+        // First verify if we have a valid admin token
+        const adminToken = localStorage.getItem('adminToken');
+        if (!adminToken) {
+          throw new Error('No admin authorization token found');
+        }
+
         const [portfolioRes, profileRes, kycRes] = await Promise.all([
           API.get(`/users/${userId}/portfolio`),
           API.get(`/users/${userId}/profile`),
           API.get(`/users/${userId}/kyc`)
         ]);
         
+        // Validate responses
+        if (!portfolioRes.data) throw new Error('Invalid portfolio data');
+        if (!profileRes.data) throw new Error('Invalid profile data');
+        
         setPortfolioData(portfolioRes.data);
         setProfile(profileRes.data);
         setKyc(kycRes.data);
       } catch (err) {
         console.error('Error fetching user data:', err);
-        // Log detailed response for debugging auth-triggered redirects
-        if (err.response) {
-          console.error('FetchAll response status:', err.response.status);
-          console.error('FetchAll response data:', err.response.data);
-          console.error('FetchAll request headers:', err.config?.headers);
+        
+        // Handle specific error cases
+        if (err.response?.status === 401) {
+          setError('Admin session expired. Please log in again.');
+        } else if (err.response?.status === 403) {
+          setError('You do not have permission to view this user\'s data.');
+        } else {
+          setError(err.response?.data?.message || err.message || 'Failed to fetch user data');
         }
-        setError(err.response?.data?.message || 'Failed to fetch user data');
+        
         setPortfolioData(null);
         setProfile(null);
         setKyc(null);
@@ -47,9 +62,8 @@ const AdminMirrorUser = ({ userId, onBack }) => {
         setLoading(false);
       }
     };
-    if (userId) {
-      fetchAll();
-    }
+    
+    fetchAll();
   }, [userId]);
 
   // Handler for completing active investment
