@@ -60,20 +60,6 @@ const UserInvestmentsAdmin = () => {
     }
   };
 
-  const updateInvestmentBalance = async (investmentId, newBalance) => {
-    try {
-      await axios.post(
-        `/api/admin/user-investments/${investmentId}/balance`,
-        { balance: newBalance },
-        { headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` } }
-      );
-      toast.success('Balance updated successfully');
-      fetchInvestments();
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to update balance');
-    }
-  };
-
   const [gainLossAmount, setGainLossAmount] = useState('');
   const [gainLossType, setGainLossType] = useState('gain');
 
