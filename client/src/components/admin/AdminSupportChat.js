@@ -2,112 +2,82 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useSocket } from '../../contexts/SocketContext';
 import { useAdminAuth } from '../../auth/AdminAuthProvider';
 import { toast } from 'react-toastify';
-import { AiOutlinePaperClip, AiOutlineSend } from 'react-icons/ai';
-import { BsCheckAll, BsCheck } from 'react-icons/bs';
 import './AdminSupportChat.css';
 
 const AdminSupportChat = () => {
-  const { admin } = useAdminAuth();
+  useAdminAuth();
   const socket = useSocket();
-  const [chats, setChats] = useState([]);
-  const [selectedChat, setSelectedChat] = useState(null);
+  const [tickets, setTickets] = useState([]);
+  const [selectedTicket, setSelectedTicket] = useState(null);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
-  const [attachments, setAttachments] = useState([]);
-  const [onlineUsers, setOnlineUsers] = useState(new Set());
-  const [typingUsers, setTypingUsers] = useState(new Set());
-  const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(false);
+  const [attachments, setAttachments] = useState([]);
+  const [analytics, setAnalytics] = useState({});
+  const [agents, setAgents] = useState([]);
+  const [filters, setFilters] = useState({
+    status: 'all',
+    priority: 'all',
+    category: 'all',
+    assignedAgent: 'all'
+  });
   const [isMobile, setIsMobile] = useState(false);
   const [showSidebar, setShowSidebar] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
-  const typingTimeoutRef = useRef(null);
 
-  // Socket event handlers
+  const statuses = [
+    { value: 'all', label: 'All Statuses' },
+    { value: 'open', label: 'Open' },
+    { value: 'in_progress', label: 'In Progress' },
+    { value: 'waiting_for_customer', label: 'Waiting for Customer' },
+    { value: 'resolved', label: 'Resolved' },
+    { value: 'closed', label: 'Closed' }
+  ];
+
+  const priorities = [
+    { value: 'all', label: 'All Priorities' },
+    { value: 'low', label: 'Low', color: '#28a745' },
+    { value: 'medium', label: 'Medium', color: '#ffc107' },
+    { value: 'high', label: 'High', color: '#fd7e14' },
+    { value: 'urgent', label: 'Urgent', color: '#dc3545' }
+  ];
+
+  const categories = [
+    { value: 'all', label: 'All Categories' },
+    { value: 'general', label: 'General Inquiry' },
+    { value: 'technical', label: 'Technical Support' },
+    { value: 'billing', label: 'Billing & Payments' },
+    { value: 'account', label: 'Account Issues' },
+    { value: 'investment', label: 'Investment Questions' },
+    { value: 'security', label: 'Security Concerns' },
+    { value: 'feature', label: 'Feature Request' },
+    { value: 'bug', label: 'Bug Report' }
+  ];
+
+  // Listen for new messages via socket.io
   useEffect(() => {
     if (!socket) return;
-
-    socket.on('message', (message) => {
-      if (selectedChat?._id === message.chatId) {
-        setMessages(prev => [...prev, message]);
-        socket.emit('admin:markMessagesRead', { chatId: selectedChat._id });
-      }
-      setChats(prev => prev.map(chat => {
-        if (chat._id === message.chatId) {
-          return {
-            ...chat,
-            lastMessage: message,
-            unreadCount: selectedChat?._id === message.chatId ? 0 : (chat.unreadCount || 0) + 1
-          };
-        }
-        return chat;
-      }));
-    });
-
-    socket.on('typing', ({ chatId, userId }) => {
-      setTypingUsers(prev => new Set(prev).add(userId));
-    });
-
-    socket.on('stopTyping', ({ chatId, userId }) => {
-      setTypingUsers(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(userId);
-        return newSet;
-      });
-    });
-
-    socket.on('userOnline', (userId) => {
-      setOnlineUsers(prev => new Set(prev).add(userId));
-    });
-
-    socket.on('userOffline', (userId) => {
-      setOnlineUsers(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(userId);
-        return newSet;
-      });
-    });
-
-    return () => {
-      socket.off('message');
-      socket.off('typing');
-      socket.off('stopTyping');
-      socket.off('userOnline');
-      socket.off('userOffline');
+    const handleNewMessage = (msg) => {
+      setMessages((prev) => [...prev, msg]);
     };
-  }, [socket, selectedChat]);
+    socket.on('newMessage', handleNewMessage);
+    return () => {
+      socket.off('newMessage', handleNewMessage);
+    };
+  }, [socket]);
 
-  // Auto-scroll to bottom when new messages arrive
+  // fetchMessages and fetchTickets are called from the initial effect below
+  // fetchMessages will be defined below; effect moved after its declaration to avoid use-before-define warnings
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Mobile detection
-  useEffect(() => {
-    const checkMobile = () => {
-      const mobile = window.innerWidth < 768;
-      setIsMobile(mobile);
-      setShowSidebar(!mobile);
-    };
-    
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
-
-  // Initial data fetch
-  useEffect(() => {
-    if (socket && admin) {
-      socket.emit('joinAdminChat');
-      fetchChats();
-    }
-  }, [socket, admin, fetchChats]);
-
-  // Fetch chats
-  const fetchChats = useCallback(async () => {
+  const fetchAnalytics = useCallback(async () => {
     try {
-      const response = await fetch('/api/admin/chat/active', {
+      const response = await fetch('/api/admin/support/analytics', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
         }
@@ -115,18 +85,64 @@ const AdminSupportChat = () => {
 
       if (response.ok) {
         const data = await response.json();
-        setChats(data.chats);
+        setAnalytics(data);
       }
     } catch (error) {
-      console.error('Error loading chats:', error);
-      toast.error('Failed to load chats');
+      console.error('Error fetching analytics:', error);
     }
   }, []);
 
-  // Fetch messages for selected chat
-  const fetchMessages = useCallback(async (chatId) => {
+  const fetchAgents = useCallback(async () => {
     try {
-      const response = await fetch(`/api/admin/chat/${chatId}/messages`, {
+      const response = await fetch('/api/admin/support/agents', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setAgents(data.agents);
+      }
+    } catch (error) {
+      console.error('Error fetching agents:', error);
+    }
+  }, []);
+
+  const fetchTickets = useCallback(async () => {
+    try {
+      const queryParams = new URLSearchParams();
+      
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== 'all') {
+          queryParams.append(key, value);
+        }
+      });
+
+      if (searchTerm) {
+        queryParams.append('search', searchTerm);
+      }
+
+      const response = await fetch(`/api/admin/support/tickets?${queryParams}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setTickets(data.tickets);
+      }
+    } catch (error) {
+      console.error('Error loading tickets:', error);
+      toast.error('Failed to load tickets');
+    }
+  }, [filters, searchTerm]);
+  
+
+  const fetchMessages = useCallback(async (ticketId) => {
+    try {
+      const response = await fetch(`/api/admin/support/tickets/${ticketId}/messages`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
         }
@@ -135,59 +151,169 @@ const AdminSupportChat = () => {
       if (response.ok) {
         const data = await response.json();
         setMessages(data.messages);
-        // Mark messages as read
-        socket.emit('admin:markMessagesRead', { chatId });
       }
     } catch (error) {
       console.error('Error fetching messages:', error);
       toast.error('Failed to load messages');
     }
-  }, [socket]);
+  }, []);
 
-  // Chat selection
-  const handleChatSelect = useCallback((chat) => {
-    setSelectedChat(chat);
-    if (isMobile) {
-      setShowSidebar(false);
+  // Call fetchMessages when a ticket is selected
+  useEffect(() => {
+    if (selectedTicket) {
+      fetchMessages(selectedTicket._id || selectedTicket);
     }
-    fetchMessages(chat._id);
-  }, [isMobile, fetchMessages]);
+  }, [selectedTicket, fetchMessages]);
 
-  // Message input handlers
-  const handleInputChange = (e) => {
-    setNewMessage(e.target.value);
-    if (selectedChat) {
-      socket.emit('admin:typing', { chatId: selectedChat._id });
-      if (typingTimeoutRef.current) {
-        clearTimeout(typingTimeoutRef.current);
-      }
-      typingTimeoutRef.current = setTimeout(() => {
-        socket.emit('admin:stopTyping', { chatId: selectedChat._id });
-      }, 1000);
+  // Run initial fetches after helpers are defined
+  useEffect(() => {
+    fetchAnalytics();
+    fetchAgents();
+    fetchTickets();
+
+    // mobile detection
+    const checkMobile = () => {
+      const mobile = typeof window !== 'undefined' && window.innerWidth < 768;
+      setIsMobile(mobile);
+      setShowSidebar(!mobile);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, [fetchAnalytics, fetchAgents, fetchTickets]);
+
+  const assignTicket = async (ticketId, agentId) => {
+    try {
+      const response = await fetch(`/api/admin/support/tickets/${ticketId}/assign`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+        },
+        body: JSON.stringify({ agentId })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setTickets(tickets.map(t => t._id === ticketId ? data.ticket : t));
+        if (selectedTicket?._id === ticketId) {
+          setSelectedTicket(data.ticket);
+        }
+        toast.success('Ticket assigned successfully');
+       } else {
+         const error = await response.json();
+         toast.error(error.message || 'Failed to assign ticket');
+       }
+     } catch (error) {
+       console.error('Error assigning ticket:', error);
+       toast.error('Failed to assign ticket');
     }
   };
 
-  const handleKeyPress = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
+  const updateTicketStatus = async (ticketId, status) => {
+    try {
+      const response = await fetch(`/api/admin/support/tickets/${ticketId}/status`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+        },
+        body: JSON.stringify({ status })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setTickets(tickets.map(t => t._id === ticketId ? data.ticket : t));
+        if (selectedTicket?._id === ticketId) {
+          setSelectedTicket(data.ticket);
+        }
+        toast.success('Ticket status updated successfully');
+       } else {
+         const error = await response.json();
+         toast.error(error.message || 'Failed to update status');
+       }
+     } catch (error) {
+       console.error('Error updating status:', error);
+       toast.error('Failed to update status');
     }
   };
 
-  const handleFileChange = (e) => {
+  const sendMessage = async (e) => {
+    e.preventDefault();
+    if (!newMessage.trim() && attachments.length === 0) return;
+
+    setLoading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('content', newMessage);
+      formData.append('messageType', 'text');
+
+      // Add attachments
+      attachments.forEach((file, index) => {
+        formData.append('attachments', file);
+      });
+
+      const response = await fetch(`/api/admin/support/tickets/${selectedTicket._id}/messages`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+        },
+        body: formData
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setMessages([...messages, data.message]);
+        setNewMessage('');
+        setAttachments([]);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+      } else {
+         const error = await response.json();
+         toast.error(error.message || 'Failed to send message');
+       }
+     } catch (error) {
+       console.error('Error sending message:', error);
+       toast.error('Failed to send message');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleFileSelect = (e) => {
     const files = Array.from(e.target.files);
-    if (files.length > 5) {
-      toast.error('You can only upload up to 5 files at once');
-      return;
-    }
+    setAttachments([...attachments, ...files]);
+  };
 
-    const totalSize = files.reduce((acc, file) => acc + file.size, 0);
-    if (totalSize > 10 * 1024 * 1024) { // 10MB limit
-      toast.error('Total file size must be less than 10MB');
-      return;
-    }
+  const removeAttachment = (index) => {
+    setAttachments(attachments.filter((_, i) => i !== index));
+  };
 
-    setAttachments(files);
+  const getStatusColor = (status) => {
+    const colors = {
+      'open': '#007bff',
+      'in_progress': '#ffc107',
+      'waiting_for_customer': '#17a2b8',
+      'resolved': '#28a745',
+      'closed': '#6c757d'
+    };
+    return colors[status] || '#6c757d';
+  };
+
+  const getPriorityColor = (priority) => {
+    const colors = {
+      'low': '#28a745',
+      'medium': '#ffc107',
+      'high': '#fd7e14',
+      'urgent': '#dc3545'
+    };
+    return colors[priority] || '#6c757d';
+  };
+
+  const formatDate = (date) => {
+    return new Date(date).toLocaleString();
   };
 
   const formatFileSize = (bytes) => {
@@ -198,209 +324,295 @@ const AdminSupportChat = () => {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
-  const handleSendMessage = async () => {
-    if (!selectedChat || (!newMessage.trim() && !attachments.length)) {
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      // Handle file uploads first
-      let uploadedFiles = [];
-      if (attachments.length > 0) {
-        const formData = new FormData();
-        attachments.forEach(file => {
-          formData.append('files', file);
-        });
-
-        const uploadResponse = await fetch('/api/uploads', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
-          },
-          body: formData
-        });
-
-        if (uploadResponse.ok) {
-          const data = await uploadResponse.json();
-          uploadedFiles = data.files;
-        }
-      }
-
-      // Send message with any attachments
-      socket.emit('admin:message', {
-        chatId: selectedChat._id,
-        content: newMessage.trim(),
-        attachments: uploadedFiles
-      });
-
-      setNewMessage('');
-      setAttachments([]);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
-    } catch (error) {
-      console.error('Error sending message:', error);
-      toast.error('Failed to send message');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
-    <div className="admin-support-container">
-      {/* Users sidebar */}
-      <div className={`users-sidebar ${!showSidebar ? 'hidden' : ''}`}>
-        <div className="search-container">
+    <div className="admin-support-chat">
+      {/* Header with Analytics */}
+      <div className="admin-support-header">
+        <div className="flex items-center justify-between">
+          <h2>Support Management</h2>
+          {isMobile && (
+            <button onClick={() => setShowSidebar(prev => !prev)} className="px-3 py-2 rounded bg-gray-100">{showSidebar ? 'Hide' : 'Show'} tickets</button>
+          )}
+        </div>
+        <div className="analytics-cards">
+          <div className="analytics-card">
+            <div className="card-value">{analytics.totalTickets || 0}</div>
+            <div className="card-label">Total Tickets</div>
+          </div>
+          <div className="analytics-card">
+            <div className="card-value">{analytics.openTickets || 0}</div>
+            <div className="card-label">Open Tickets</div>
+          </div>
+          <div className="analytics-card">
+            <div className="card-value">{analytics.avgResponseTime || '0h'}</div>
+            <div className="card-label">Avg Response</div>
+          </div>
+          <div className="analytics-card">
+            <div className="card-value">{analytics.satisfactionRating || '0.0'}</div>
+            <div className="card-label">Satisfaction</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Filters */}
+      <div className="filters-section">
+        <div className="search-box">
           <input
             type="text"
-            placeholder="Search users..."
+            placeholder="Search tickets..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="search-input"
           />
         </div>
-        <div className="users-list">
-          {chats.filter(chat =>
-            chat.user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            chat.user.email.toLowerCase().includes(searchTerm.toLowerCase())
-          ).map(chat => (
-            <div
-              key={chat._id}
-              className={`user-item ${selectedChat?._id === chat._id ? 'selected' : ''}`}
-              onClick={() => handleChatSelect(chat)}
-            >
-              <div className="user-info">
-                <div className={`status-indicator ${onlineUsers.has(chat.user._id) ? 'online' : 'offline'}`} />
-                <div className="user-details">
-                  <div className="user-name">{chat.user.name}</div>
-                  <div className="user-email">{chat.user.email}</div>
-                  <div className="last-message">
-                    {typingUsers.has(chat.user._id) ? (
-                      <span className="typing">typing...</span>
-                    ) : (
-                      chat.lastMessage?.content
-                    )}
-                  </div>
-                </div>
-                {chat.unreadCount > 0 && (
-                  <div className="unread-count">{chat.unreadCount}</div>
-                )}
-              </div>
-            </div>
-          ))}
+        <div className="filters">
+          <select
+            value={filters.status}
+            onChange={(e) => setFilters({...filters, status: e.target.value})}
+          >
+            {statuses.map(status => (
+              <option key={status.value} value={status.value}>{status.label}</option>
+            ))}
+          </select>
+          <select
+            value={filters.priority}
+            onChange={(e) => setFilters({...filters, priority: e.target.value})}
+          >
+            {priorities.map(priority => (
+              <option key={priority.value} value={priority.value}>{priority.label}</option>
+            ))}
+          </select>
+          <select
+            value={filters.category}
+            onChange={(e) => setFilters({...filters, category: e.target.value})}
+          >
+            {categories.map(category => (
+              <option key={category.value} value={category.value}>{category.label}</option>
+            ))}
+          </select>
+          <select
+            value={filters.assignedAgent}
+            onChange={(e) => setFilters({...filters, assignedAgent: e.target.value})}
+          >
+            <option value="all">All Agents</option>
+            <option value="unassigned">Unassigned</option>
+            {agents.map(agent => (
+              <option key={agent._id} value={agent._id}>
+                {agent.userId?.firstName} {agent.userId?.lastName}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
 
-      {/* Chat area */}
-      <div className="chat-area">
-        {selectedChat ? (
-          <>
-            <div className="chat-header">
-              <div className="selected-user-info">
-                <h2>{selectedChat.user.name}</h2>
-                <span className={`status ${onlineUsers.has(selectedChat.user._id) ? 'online' : 'offline'}`}>
-                  {onlineUsers.has(selectedChat.user._id) ? 'Online' : 'Offline'}
-                </span>
+      <div className="admin-support-content">
+        {/* Tickets List */}
+        {showSidebar && (
+          <div className={`admin-tickets-sidebar ${isMobile ? 'mobile-overlay' : ''}`} style={isMobile ? { position: 'fixed', top: 0, left: 0, zIndex: 60, height: '100vh', overflow: 'auto' } : {}}>
+            {isMobile && (
+              <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '0.5rem 1rem', borderBottom: '1px solid #e9ecef', background: '#fff' }}>
+                <button onClick={() => setShowSidebar(false)} aria-label="Close tickets" className="p-2 rounded bg-gray-100">Close</button>
               </div>
-              <button 
-                onClick={() => {
-                  fetch(`/api/admin/chat/${selectedChat._id}/end`, {
-                    method: 'POST',
-                    headers: {
-                      'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
-                    }
-                  });
-                  setSelectedChat(null);
-                  setChats(chats.filter(c => c._id !== selectedChat._id));
-                }} 
-                className="end-chat-button"
-              >
-                End Chat
-              </button>
-            </div>
-
-            <div className="messages-container">
-              {messages.map((message, index) => (
-                <div
-                  key={index}
-                  className={`message ${message.senderType === 'Admin' ? 'admin-message' : 'user-message'}`}
+            )}
+          <div className="tickets-count">
+            {tickets.length} ticket{tickets.length !== 1 ? 's' : ''}
+          </div>
+          <div className="admin-tickets-list">
+            {tickets.length === 0 ? (
+              <div className="no-tickets">
+                <p>No tickets found</p>
+              </div>
+            ) : (
+              tickets.map(ticket => (
+                <div 
+                  key={ticket._id}
+                  className={`admin-ticket-item ${selectedTicket?._id === ticket._id ? 'active' : ''}`}
+                  onClick={() => setSelectedTicket(ticket)}
                 >
-                  <div className="message-content">
-                    {message.content}
-                    {message.attachments?.length > 0 && (
-                      <div className="attachments">
-                        {message.attachments.map((attachment, i) => (
-                          <div key={i} className="attachment">
-                            <a
-                              href={`/api/admin/chat/attachments/${attachment.filename}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="attachment-link"
-                            >
-                              <AiOutlinePaperClip />
-                              {attachment.originalName} ({formatFileSize(attachment.size)})
-                            </a>
-                          </div>
-                        ))}
+                  <div className="admin-ticket-header">
+                    <span className="ticket-id">#{ticket.ticketId}</span>
+                    <div className="ticket-badges">
+                      <span 
+                        className="priority-badge"
+                        style={{ backgroundColor: getPriorityColor(ticket.priority) }}
+                      >
+                        {ticket.priority}
+                      </span>
+                      <span 
+                        className="status-badge"
+                        style={{ backgroundColor: getStatusColor(ticket.status) }}
+                      >
+                        {ticket.status.replace('_', ' ')}
+                      </span>
+                    </div>
+                  </div>
+                  <h4 className="admin-ticket-subject">{ticket.subject}</h4>
+                  <div className="admin-ticket-meta">
+                    <div className="ticket-user">
+                      {ticket.userId?.firstName} {ticket.userId?.lastName}
+                    </div>
+                    <div className="ticket-category">{ticket.category}</div>
+                    <div className="ticket-date">{formatDate(ticket.createdAt)}</div>
+                    {ticket.assignedAgent && (
+                      <div className="assigned-agent">
+                        Assigned to: {ticket.assignedAgent.firstName} {ticket.assignedAgent.lastName}
                       </div>
                     )}
                   </div>
-                  {message.senderType === 'Admin' && (
-                    <div className="message-status">
-                      {message.seen ? <BsCheckAll /> : <BsCheck />}
-                    </div>
-                  )}
                 </div>
-              ))}
-              {typingUsers.has(selectedChat.user._id) && (
-                <div className="typing-indicator">
-                  typing...
-                </div>
-              )}
-              <div ref={messagesEndRef} />
-            </div>
-
-            <div className="chat-input-container">
-              <button
-                className="attachment-btn"
-                onClick={() => fileInputRef.current.click()}
-              >
-                <AiOutlinePaperClip size={20} />
-              </button>
-              <input
-                type="file"
-                multiple
-                hidden
-                ref={fileInputRef}
-                onChange={handleFileChange}
-                accept="image/*,application/pdf"
-              />
-              <div className="message-input-wrapper">
-                <textarea
-                  className="message-input"
-                  placeholder="Type a message..."
-                  value={newMessage}
-                  onChange={handleInputChange}
-                  onKeyDown={handleKeyPress}
-                />
-              </div>
-              <button
-                className="send-btn"
-                onClick={handleSendMessage}
-                disabled={loading || (!newMessage.trim() && !attachments.length)}
-              >
-                <AiOutlineSend size={20} />
-              </button>
-            </div>
-          </>
-        ) : (
-          <div className="no-chat-selected">
-            <h3>Select a user to start chatting</h3>
-            <p>Choose a user from the list to view and respond to their messages.</p>
+              ))
+            )}
+          </div>
           </div>
         )}
+
+        {/* Chat Area */}
+        <div className="admin-chat-area">
+          {selectedTicket ? (
+            <>
+              {/* Ticket Header */}
+              <div className="admin-ticket-header-detail">
+                <div className="ticket-info">
+                  <h3>#{selectedTicket.ticketId} - {selectedTicket.subject}</h3>
+                  <div className="ticket-user-info">
+                    <strong>Customer:</strong> {selectedTicket.userId?.firstName} {selectedTicket.userId?.lastName} 
+                    ({selectedTicket.userId?.email})
+                  </div>
+                  <div className="ticket-description">
+                    {selectedTicket.description}
+                  </div>
+                </div>
+                <div className="ticket-actions">
+                  <div className="action-group">
+                    <label>Status:</label>
+                    <select
+                      value={selectedTicket.status}
+                      onChange={(e) => updateTicketStatus(selectedTicket._id, e.target.value)}
+                    >
+                      {statuses.slice(1).map(status => (
+                        <option key={status.value} value={status.value}>{status.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="action-group">
+                    <label>Assign to:</label>
+                    <select
+                      value={selectedTicket.assignedAgent?._id || ''}
+                      onChange={(e) => assignTicket(selectedTicket._id, e.target.value)}
+                    >
+                      <option value="">Unassigned</option>
+                      {agents.map(agent => (
+                        <option key={agent._id} value={agent._id}>
+                          {agent.userId?.firstName} {agent.userId?.lastName}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Messages */}
+              <div className="admin-messages-container">
+                {messages.map(message => (
+                  <div 
+                    key={message._id}
+                    className={`admin-message ${message.senderType === 'user' ? 'customer-message' : 'agent-message'}`}
+                  >
+                    <div className="admin-message-header">
+                      <span className="sender">
+                        {message.senderType === 'user' 
+                          ? `${selectedTicket.userId?.firstName} ${selectedTicket.userId?.lastName}` 
+                          : `${message.senderId?.firstName} ${message.senderId?.lastName} (Agent)`
+                        }
+                      </span>
+                      <span className="timestamp">{formatDate(message.createdAt)}</span>
+                    </div>
+                    <div className="admin-message-content">
+                      {message.content}
+                      {message.attachments && message.attachments.length > 0 && (
+                        <div className="admin-message-attachments">
+                          {message.attachments.map(attachment => (
+                            <div key={attachment._id} className="admin-attachment">
+                              <a 
+                                href={`/api/support/attachments/${attachment._id}/download`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="admin-attachment-link"
+                              >
+                                📎 {attachment.originalName} ({formatFileSize(attachment.size)})
+                              </a>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+                <div ref={messagesEndRef} />
+              </div>
+
+              {/* Message Input */}
+              {selectedTicket.status !== 'closed' && (
+                <form onSubmit={sendMessage} className="admin-message-form">
+                  {attachments.length > 0 && (
+                    <div className="admin-attachments-preview">
+                      {attachments.map((file, index) => (
+                        <div key={index} className="admin-attachment-preview">
+                          <span>{file.name} ({formatFileSize(file.size)})</span>
+                          <button 
+                            type="button"
+                            onClick={() => removeAttachment(index)}
+                            className="remove-attachment"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  <div className="admin-message-input-container">
+                    <textarea
+                      value={newMessage}
+                      onChange={(e) => setNewMessage(e.target.value)}
+                      placeholder="Type your response..."
+                      className="admin-message-input"
+                      rows="3"
+                    />
+                    <div className="admin-message-actions">
+                      <input
+                        type="file"
+                        ref={fileInputRef}
+                        onChange={handleFileSelect}
+                        multiple
+                        className="file-input"
+                        accept="image/*,.pdf,.doc,.docx,.txt"
+                      />
+                      <button 
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="btn btn-outline-secondary"
+                      >
+                        📎
+                      </button>
+                      <button 
+                        type="submit"
+                        disabled={loading || (!newMessage.trim() && attachments.length === 0)}
+                        className="btn btn-primary"
+                      >
+                        {loading ? 'Sending...' : 'Send Response'}
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              )}
+            </>
+          ) : (
+            <div className="no-ticket-selected">
+              <h3>Select a ticket to view details</h3>
+              <p>Choose a ticket from the list to start managing the conversation.</p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
