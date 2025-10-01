@@ -1,12 +1,113 @@
 // src/pages/admin/Users.js
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { 
   FiUsers, FiUserPlus, FiMail, FiPhone, FiCalendar, 
-  FiDollarSign, FiTrendingUp, FiShield, FiEdit, FiTrash2, FiEye 
+  FiDollarSign, FiTrendingUp, FiShield, FiEdit, FiTrash2, FiEye,
+  FiSearch, FiFilter, FiList, FiArrowUp, FiArrowDown 
 } from 'react-icons/fi';
 import { useTheme } from '../../contexts/ThemeContext';
 import { 
   AdminCard, AdminButton, AdminInput, AdminSelect, AdminTable, 
+  StatusBadge, AdminModal, LoadingSpinner 
+} from '../../components/admin/AdminComponents';
+
+// API base URL configuration
+const API_BASE_URL = process.env.REACT_APP_API_URL || '';
+const api = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+impor  const getStatusVariant = (status) => {
+    switch (status) {
+      case 'active': return 'success';
+      case 'suspended': return 'danger';
+      case 'pending': return 'warning';
+      default: return 'default';
+    }
+  };
+
+  // Define table structure
+  const columns = [
+    {
+      header: 'User',
+      key: 'user',
+      sortable: true,
+      render: (user) => (
+        <div className="flex items-center space-x-3">
+          <div>
+            <div className="font-medium">{user.name || 'N/A'}</div>
+            <div className="text-sm text-gray-500">{user.email}</div>
+          </div>
+        </div>
+      )
+    },
+    {
+      header: 'Username',
+      key: 'username',
+      sortable: true,
+      render: (user) => user.username || 'N/A'
+    },
+    {
+      header: 'Status',
+      key: 'status',
+      sortable: true,
+      render: (user) => <StatusBadge status={user.status} />
+    },
+    {
+      header: 'Total Investment',
+      key: 'totalInvestment',
+      sortable: true,
+      render: (user) => `$${(user.totalInvestment || 0).toLocaleString()}`
+    },
+    {
+      header: 'Verified',
+      key: 'verified',
+      sortable: true,
+      render: (user) => (
+        <span className={`px-2 py-1 rounded ${user.isVerified ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+          {user.isVerified ? 'Yes' : 'No'}
+        </span>
+      )
+    },
+    {
+      header: 'Joined',
+      key: 'createdAt',
+      sortable: true,
+      render: (user) => new Date(user.createdAt).toLocaleDateString()
+    },
+    {
+      header: 'Actions',
+      key: 'actions',
+      render: (user) => (
+        <div className="flex space-x-2">
+          <AdminButton
+            onClick={() => handleViewUser(user)}
+            icon={<FiEye />}
+            variant="info"
+            size="sm"
+            tooltip="View Details"
+          />
+          <AdminButton
+            onClick={() => handleEditUser(user)}
+            icon={<FiEdit />}
+            variant="secondary"
+            size="sm"
+            tooltip="Edit User"
+          />
+          <AdminButton
+            onClick={() => handleDeleteUser(user)}
+            icon={<FiTrash2 />}
+            variant="danger"
+            size="sm"
+            tooltip="Delete User"
+          />
+        </div>
+      )
+    }
+  ];inCard, AdminButton, AdminInput, AdminSelect, AdminTable, 
   StatusBadge, AdminModal, LoadingSpinner 
 } from '../../components/admin/AdminComponents';
 import { getUsers, updateUser } from '../../services/adminAPI';
@@ -20,6 +121,8 @@ const AdminUsers = () => {
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
+  const [sortField, setSortField] = useState('createdAt');
+  const [sortOrder, setSortOrder] = useState('desc');
   const [showUserModal, setShowUserModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
@@ -39,68 +142,234 @@ const AdminUsers = () => {
   }, []);
 
   useEffect(() => {
-    filterUsers();
-  // Include all dependencies that filterUsers depends on
+    filterAndSortUsers();
+  // Include all dependencies that filterAndSortUsers depends on
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [users, searchTerm, filterStatus]);
+  }, [users, searchTerm, filterStatus, sortField, sortOrder]);
+
+  const filterAndSortUsers = () => {
+    let filtered = [...users];
+
+    // Apply search filter
+    if (searchTerm) {
+      const searchLower = searchTerm.toLowerCase();
+      filtered = filtered.filter(user =>
+        user.name?.toLowerCase().includes(searchLower) ||
+        user.email?.toLowerCase().includes(searchLower)
+      );
+    }
+
+    // Apply status filter
+    if (filterStatus !== 'all') {
+      filtered = filtered.filter(user => user.status === filterStatus);
+    }
+
+    // Apply sorting
+    filtered.sort((a, b) => {
+      let aVal = a[sortField];
+      let bVal = b[sortField];
+
+      // Handle dates
+      if (sortField === 'createdAt' || sortField === 'lastLogin') {
+        aVal = new Date(aVal || 0);
+        bVal = new Date(bVal || 0);
+      }
+
+      // Handle null values
+      if (aVal === null || aVal === undefined) return 1;
+      if (bVal === null || bVal === undefined) return -1;
+
+      // Compare values
+      if (aVal < bVal) return sortOrder === 'asc' ? -1 : 1;
+      if (aVal > bVal) return sortOrder === 'asc' ? 1 : -1;
+      return 0;
+    });
+
+    setFilteredUsers(filtered);
+  };
 
   const fetchUsers = async () => {
     try {
       console.log('Fetching users...');
       setLoading(true);
       setError(null);
-      const data = await getUsers();
+
+      // Verify admin token
+      const adminToken = localStorage.getItem('adminToken');
+      if (!adminToken) {
+        throw new Error('No admin token found. Please log in again.');
+      }
+
+      const response = await api.get('/api/admin/users', {
+        headers: { Authorization: `Bearer ${adminToken}` }
+      });
+
+      const data = response.data;
       console.log('Received users data:', data);
-      setUsers(data.users || []);
+
+      if (!data || !data.users) {
+        throw new Error('Invalid response format from server');
+      }
+
+      setUsers(data.users);
       
       // Calculate stats
       const stats = {
-        total: data.users?.length || 0,
-        active: data.users?.filter(user => user.status === 'active').length || 0,
-        verified: data.users?.filter(user => user.isVerified).length || 0,
-        totalInvestments: data.users?.reduce((sum, user) => sum + (user.totalInvestment || 0), 0) || 0
+        total: data.users.length,
+        active: data.users.filter(user => user.status === 'active').length,
+        verified: data.users.filter(user => user.isVerified).length,
+        totalInvestments: data.users.reduce((sum, user) => sum + (parseFloat(user.totalInvestment) || 0), 0)
       };
       setUserStats(stats);
+
+      // Initialize filtered users
+      setFilteredUsers(data.users);
     } catch (error) {
-      console.error("Failed to fetch users:", error);
-      // Surface error to the UI so admins can debug
-      setError(typeof error === 'string' ? error : (error?.message || 'Failed to fetch users'));
+      console.error('Failed to fetch users:', error);
+      setError(error.response?.data?.message || error.message || 'Failed to fetch users');
       setUsers([]);
+      setFilteredUsers([]);
       setUserStats({ total: 0, active: 0, verified: 0, totalInvestments: 0 });
+
+      // Handle specific error cases
+      if (error.response?.status === 401) {
+        setError('Your session has expired. Please log in again.');
+      } else if (error.response?.status === 403) {
+        setError('You do not have permission to view users.');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAddUser = async (userData) => {
+    try {
+      setLoading(true);
+      const adminToken = localStorage.getItem('adminToken');
+      
+      const response = await axios.post('/api/admin/users', userData, {
+        headers: { Authorization: `Bearer ${adminToken}` }
+      });
+
+      if (response.data) {
+        setUsers(prevUsers => [...prevUsers, response.data]);
+        setShowEditModal(false);
+        setEditingUser(null);
+      }
+    } catch (error) {
+      console.error('Failed to add user:', error);
+      setError(error.response?.data?.message || 'Failed to add user');
+    } finally {
+      setLoading(false);
+    }
+  };
     } finally {
       setLoading(false);
     }
   };
 
   const filterUsers = () => {
-    let filtered = users;
-
-    // Search filter
-    if (searchTerm) {
-      filtered = filtered.filter(user => 
-        user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.username?.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+    if (!Array.isArray(users)) {
+      console.error('Users is not an array:', users);
+      setFilteredUsers([]);
+      return;
     }
 
-    // Status filter
-    if (filterStatus !== 'all') {
-      filtered = filtered.filter(user => user.status === filterStatus);
+    let filtered = [...users];
+
+    try {
+      // Apply search filter
+      if (searchTerm) {
+        const searchLower = searchTerm.toLowerCase();
+        filtered = filtered.filter(user =>
+          (user.name?.toLowerCase().includes(searchLower)) ||
+          (user.email?.toLowerCase().includes(searchLower))
+        );
+      }
+
+      // Apply status filter
+      if (filterStatus !== 'all') {
+        filtered = filtered.filter(user => user.status === filterStatus);
+      }
+
+      // Apply sorting
+      const compareValues = (a, b) => {
+        let aVal = a[sortField];
+        let bVal = b[sortField];
+
+        // Handle dates
+        if (sortField === 'createdAt' || sortField === 'lastLogin') {
+          aVal = new Date(aVal || 0).getTime();
+          bVal = new Date(bVal || 0).getTime();
+        }
+
+        // Handle numbers
+        if (typeof aVal === 'number' && typeof bVal === 'number') {
+          return sortOrder === 'asc' ? aVal - bVal : bVal - aVal;
+        }
+
+        // Handle strings
+        aVal = String(aVal || '').toLowerCase();
+        bVal = String(bVal || '').toLowerCase();
+        
+        return sortOrder === 'asc' 
+          ? aVal.localeCompare(bVal)
+          : bVal.localeCompare(aVal);
+      };
+
+      filtered.sort(compareValues);
+      if (searchTerm.trim()) {
+        const searchLower = searchTerm.toLowerCase().trim();
+        filtered = filtered.filter(user => {
+          return (
+            (user.name || '').toLowerCase().includes(searchLower) ||
+            (user.email || '').toLowerCase().includes(searchLower) ||
+            (user.username || '').toLowerCase().includes(searchLower)
+          );
+        });
+      }
+
+      // Status filter
+      if (filterStatus && filterStatus !== 'all') {
+        filtered = filtered.filter(user => user.status === filterStatus);
+      }
+
+      // Sort users by registration date (newest first)
+      filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    } catch (error) {
+      console.error('Error filtering users:', error);
+      filtered = [];
     }
 
     setFilteredUsers(filtered);
   };
 
   const handleUpdateUser = async (userId, updates) => {
+    if (!userId || !updates) {
+      alert('Invalid user data provided');
+      return;
+    }
+
     try {
+      setLoading(true);
       await updateUser(userId, updates);
-      await fetchUsers(); // Refresh data
+      
+      // Show success message
+      const successMessage = document.createElement('div');
+      successMessage.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded shadow-lg';
+      successMessage.textContent = 'User updated successfully';
+      document.body.appendChild(successMessage);
+      setTimeout(() => successMessage.remove(), 3000);
+
+      // Refresh data
+      await fetchUsers();
       setShowEditModal(false);
       setEditingUser(null);
     } catch (error) {
-      // Handle error silently or show user-friendly message
-      alert('Failed to update user. Please try again.');
+      console.error('Error updating user:', error);
+      alert(error.response?.data?.message || 'Failed to update user. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -109,15 +378,48 @@ const AdminUsers = () => {
     setShowUserModal(true);
   };
 
+  const handleSort = (field) => {
+    if (sortField === field) {
+      setSortOrder(current => current === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortOrder('asc');
+    }
+  };
+
   const handleEditUser = (user) => {
     setEditingUser(user);
     setShowEditModal(true);
   };
 
-  const handleDeleteUser = (user) => {
-    if (window.confirm(`Are you sure you want to delete user ${user.name}?`)) {
-      // TODO: Implement delete functionality
-      alert('Delete functionality not implemented yet.');
+  const handleDeleteUser = async (user) => {
+    if (!user || !user._id) {
+      alert('Invalid user selected');
+      return;
+    }
+
+    if (!window.confirm(`Are you sure you want to delete user ${user.name || user.email}? This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await API.delete(`/users/${user._id}`);
+      
+      // Show success message
+      const successMessage = document.createElement('div');
+      successMessage.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded shadow-lg';
+      successMessage.textContent = 'User deleted successfully';
+      document.body.appendChild(successMessage);
+      setTimeout(() => successMessage.remove(), 3000);
+
+      // Refresh user list
+      await fetchUsers();
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      alert(error.response?.data?.message || 'Failed to delete user. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -131,6 +433,121 @@ const AdminUsers = () => {
   };
 
   const columns = [
+    {
+      header: 'Name',
+      key: 'name',
+      sortable: true,
+      render: (user) => user.name || 'N/A'
+    },
+    {
+      header: 'Email',
+      key: 'email',
+      sortable: true,
+      render: (user) => user.email
+    },
+    {
+      header: 'Status',
+      key: 'status',
+      sortable: true,
+      render: (user) => <StatusBadge status={user.status} />
+    },
+    {
+      header: 'Last Login',
+      key: 'lastLogin',
+      sortable: true,
+      render: (user) => user.lastLogin 
+        ? new Date(user.lastLogin).toLocaleDateString()
+        : 'Never'
+    },
+    {
+      header: 'Actions',
+      key: 'actions',
+      render: (user) => (
+        <div className="flex space-x-2">
+          <AdminButton
+            onClick={() => handleViewUser(user)}
+            icon={<FiEye />}
+            variant="info"
+            size="sm"
+            tooltip="View Details"
+          />
+          <AdminButton
+            onClick={() => handleEditUser(user)}
+            icon={<FiEdit />}
+            variant="secondary"
+            size="sm"
+            tooltip="Edit User"
+          />
+          <AdminButton
+            onClick={() => handleDeleteUser(user)}
+            icon={<FiTrash2 />}
+            variant="danger"
+            size="sm"
+            tooltip="Delete User"
+          />
+        </div>
+      )
+    }
+  ];
+
+  // Define the table structure
+  const columns = [
+    {
+      header: 'Name',
+      key: 'name',
+      sortable: true,
+      render: (user) => user.name || 'N/A'
+    },
+    {
+      header: 'Email',
+      key: 'email',
+      sortable: true,
+      render: (user) => user.email
+    },
+    {
+      header: 'Status',
+      key: 'status',
+      sortable: true,
+      render: (user) => <StatusBadge status={user.status} />
+    },
+    {
+      header: 'Last Login',
+      key: 'lastLogin',
+      sortable: true,
+      render: (user) => user.lastLogin 
+        ? new Date(user.lastLogin).toLocaleDateString()
+        : 'Never'
+    },
+    {
+      header: 'Actions',
+      key: 'actions',
+      render: (user) => (
+        <div className="flex space-x-2">
+          <AdminButton
+            onClick={() => handleEditUser(user)}
+            icon={<FiEdit />}
+            variant="secondary"
+            size="sm"
+            tooltip="Edit User"
+          />
+          <AdminButton
+            onClick={() => handleViewUser(user)}
+            icon={<FiEye />}
+            variant="info"
+            size="sm"
+            tooltip="View Details"
+          />
+          <AdminButton
+            onClick={() => handleDeleteUser(user)}
+            icon={<FiTrash2 />}
+            variant="danger"
+            size="sm"
+            tooltip="Delete User"
+          />
+        </div>
+      )
+    }
+
     {
       key: 'name',
       title: 'User',
@@ -295,14 +712,16 @@ const AdminUsers = () => {
               placeholder="Search users by name, email, or username..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              icon={<FiSearch />}
             />
           </div>
           
-          <div className="w-full sm:w-auto flex flex-col sm:flex-row sm:items-center sm:space-x-3 gap-2">
+          <div className="w-full sm:w-auto flex flex-wrap sm:flex-row sm:items-center gap-3">
             <div className="w-full sm:w-40">
               <AdminSelect
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value)}
+                icon={<FiFilter />}
                 options={[
                   { value: 'all', label: 'All Status' },
                   { value: 'active', label: 'Active' },
