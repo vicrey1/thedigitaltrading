@@ -46,7 +46,7 @@ const AdminUserList = ({ onSelectUser, filter = 'all' }) => {
     return () => {
       if (searchDebounce) clearTimeout(searchDebounce);
     };
-  }, [search, page, filter, lastRefresh]);
+  }, [search, page, filter]);
 
   return (
     <div className="p-2 sm:p-4 md:p-6 max-w-full sm:max-w-4xl mx-auto overflow-x-auto">
@@ -85,7 +85,7 @@ const AdminUserList = ({ onSelectUser, filter = 'all' }) => {
                 </tr>
               </thead>
               <tbody>
-                {filtered.map(user => (
+                {users.map(user => (
                   <tr key={user._id || user.id} className="border-b border-gray-800 hover:bg-gray-800 transition">
                     <td className="py-3 px-4 break-all">{user.email}</td>
                     <td className="py-3 px-4">{user.name}</td>

@@ -7,6 +7,7 @@ import {
   FiRefreshCw, FiCalendar, FiAlertCircle, FiInbox, FiArrowRight,
   FiHardDrive, FiMail
 } from 'react-icons/fi';
+import AdminCard from '../../components/admin/AdminCard';
 import { 
   LineChart, Line, AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer

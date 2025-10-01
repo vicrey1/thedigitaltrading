@@ -531,8 +531,6 @@ const AdminWithdrawals = () => {
           />
         </div>
       </AdminCard>
-
-      </div>
           
           {/* Filter Summary */}
           {Object.values(filters).some(value => value !== 'all') && (

@@ -21,7 +21,8 @@ const api = axios.create({
     'Content-Type': 'application/json',
   },
 });
-impor  const getStatusVariant = (status) => {
+
+const getStatusVariant = (status) => {
     switch (status) {
       case 'active': return 'success';
       case 'suspended': return 'danger';

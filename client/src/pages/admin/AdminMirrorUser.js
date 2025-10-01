@@ -1,12 +1,8 @@
-import React, { useState, useEffect } from 'react';import React, { useState, useEffect } from 'react';
-
-import Portfolio from '../../pages/Portfolio';import Portfolio from '../../pages/Portfolio';
-
-import Dashboard from '../../pages/Dashboard';import Dashboard from '../../pages/Dashboard';
-
-import Settings from '../../pages/Settings';import Settings from '../../pages/Settings';
-
-import KYCPage from '../../pages/KYCPage';import KYCPage from '../../pages/KYCPage';
+import React, { useState, useEffect } from 'react';
+import Portfolio from '../../pages/Portfolio';
+import Dashboard from '../../pages/Dashboard';
+import Settings from '../../pages/Settings';
+import KYCPage from '../../pages/KYCPage';
 
 import { API } from '../../services/adminAPI';import { API } from '../../services/adminAPI';
 
