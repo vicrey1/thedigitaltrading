@@ -72,6 +72,16 @@ const AdminUsers = () => {
     }
   };
 
+  const handleEdit = (user) => {
+    // TODO: Implement edit functionality
+    console.log('Edit user:', user);
+  };
+
+  const handleView = (user) => {
+    // TODO: Implement view functionality
+    console.log('View user:', user);
+  };
+
   if (loading) {
     return <LoadingSpinner />;
   }

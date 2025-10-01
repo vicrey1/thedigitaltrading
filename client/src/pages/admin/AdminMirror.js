@@ -91,3 +91,5 @@ const AdminMirror = () => {
     </div>
   );
 };
+
+export default AdminMirror;
