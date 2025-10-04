@@ -1,6 +1,7 @@
 // src/components/admin/FundEditor.js
 import React, { useState, useEffect } from 'react';
 import { FiX, FiSave, FiTrash2 } from 'react-icons/fi';
+import { getStoredAdminToken } from '../../utils/authToken';
 import FundPerformanceChart from './FundPerformanceChart';
 
 const FundEditor = ({ fund, onSave, onCancel }) => {
@@ -130,9 +131,10 @@ const FundEditor = ({ fund, onSave, onCancel }) => {
     if (!pdfFile || !fund?._id) return;
     const formData = new FormData();
     formData.append('pdf', pdfFile);
+    const token = getStoredAdminToken();
     await fetch(`${process.env.REACT_APP_API_BASE_URL}/funds/${fund._id}/report`, {
       method: 'POST',
-      headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` },
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
       body: formData
     });
     setPdfFile(null);

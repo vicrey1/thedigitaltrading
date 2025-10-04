@@ -1,5 +1,6 @@
 // src/services/carAPI.js
 import axios from 'axios';
+import { getStoredToken } from '../utils/authToken';
 
 const API = axios.create({
   baseURL: process.env.REACT_APP_API_BASE_URL + '/api/cars',
@@ -7,7 +8,7 @@ const API = axios.create({
 
 // Add auth token to requests
 API.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
+  const token = getStoredToken();
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -20,9 +21,9 @@ const AdminAPI = axios.create({
 });
 
 AdminAPI.interceptors.request.use((config) => {
-  const token = localStorage.getItem('adminToken');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+  const adminToken = localStorage.getItem('adminToken');
+  if (adminToken && typeof adminToken === 'string' && adminToken.split && adminToken.split('.').length === 3) {
+    config.headers.Authorization = `Bearer ${adminToken}`;
   }
   return config;
 });

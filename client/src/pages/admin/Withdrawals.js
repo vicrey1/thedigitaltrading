@@ -80,7 +80,8 @@ const AdminWithdrawals = () => {
   };
 
   const applyFilters = () => {
-    let filtered = [...withdrawals];
+    // Ensure withdrawals is always an array
+    let filtered = Array.isArray(withdrawals) ? [...withdrawals] : [];
 
     if (searchTerm) {
       const search = searchTerm.toLowerCase();
@@ -173,6 +174,7 @@ const AdminWithdrawals = () => {
               onChange={e => setFilters({ ...filters, status: e.target.value })}
               options={[
                 { value: 'all', label: 'All Status' },
+                { value: 'processing', label: 'Processing' },
                 { value: 'pending', label: 'Pending' },
                 { value: 'approved', label: 'Approved' },
                 { value: 'rejected', label: 'Rejected' }

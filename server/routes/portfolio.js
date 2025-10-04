@@ -77,7 +77,13 @@ async function getPortfolioData(userId) {
   // Calculate totalInvested after allInvestments is defined
   const totalInvested = allInvestments.reduce((sum, inv) => sum + inv.amount, 0);
   // Calculate availableBalance: depositBalance - totalInvested + totalConfirmedRoi
-  const availableBalance = depositBalance - totalInvested + totalConfirmedRoi;
+  const computedAvailableBalance = depositBalance - totalInvested + totalConfirmedRoi;
+
+  // Prefer an explicitly stored numeric user.availableBalance when present. This ensures admin
+  // manual adjustments are reflected immediately in the UI. Fall back to computedAvailableBalance otherwise.
+  const availableBalance = (userDoc && typeof userDoc.availableBalance === 'number')
+    ? userDoc.availableBalance
+    : computedAvailableBalance;
   function calculateInvestmentROI(inv) {
     const roiTransactions = (inv.transactions || []).filter(t => t.type === 'roi');
     const roiSum = roiTransactions.reduce((sum, t) => {
@@ -195,7 +201,9 @@ async function getPortfolioData(userId) {
       performancePercentile,
       depositBalance,
       availableBalance,
-      lockedBalance: userDoc?.lockedBalance || 0
+      lockedBalance: userDoc?.lockedBalance || 0,
+      // include rawComputedAvailableBalance for debugging/visibility if needed
+      computedAvailableBalance
     },
     performanceData,
     allocationData,

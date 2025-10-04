@@ -1,0 +1,193 @@
+// src/components/admin/UserDetail.js
+import React, { useState, useRef, useEffect } from 'react';
+import { FiX, FiCheck, FiAlertTriangle, FiDownload } from 'react-icons/fi';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { approveKYC, rejectKYC, updateUserTier, updateUserRole, getUserKeys } from '../../services/adminAPI';
+
+// Helper functions
+const fetchKYCImage = async (filename, token) => {
+  try {
+    const cleanFilename = filename.split('/').pop();
+    const response = await fetch(`/uploads/kyc/${cleanFilename}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (!response.ok) {
+      console.error('Failed to fetch image:', response.status, response.statusText);
+      throw new Error(`Failed to fetch image: ${response.statusText}`);
+    }
+    const blob = await response.blob();
+    return URL.createObjectURL(blob);
+  } catch (error) {
+    console.error('Error in fetchKYCImage:', error);
+    throw error;
+  }
+};
+
+const getStatusColor = (status) => {
+  switch (status?.toLowerCase()) {
+    case 'active': return 'bg-green-500 bg-opacity-20 text-green-500';
+    case 'suspended': return 'bg-red-500 bg-opacity-20 text-red-500';
+    case 'pending': return 'bg-yellow-500 bg-opacity-20 text-yellow-500';
+    default: return 'bg-gray-500 bg-opacity-20 text-gray-500';
+  }
+};
+
+const getKYCStatusColor = (status) => {
+  switch (status?.toLowerCase()) {
+    case 'verified': return 'bg-green-500 bg-opacity-20 text-green-500';
+    case 'pending': return 'bg-yellow-500 bg-opacity-20 text-yellow-500';
+    case 'rejected': return 'bg-red-500 bg-opacity-20 text-red-500';
+    default: return 'bg-gray-500 bg-opacity-20 text-gray-500';
+  }
+};
+
+const UserDetail = ({ user, onClose, onUpdate }) => {
+  // Reference for content width calculation
+  const contentRef = useRef(null);
+  
+  // State declarations
+  const [activeTab, setActiveTab] = useState('overview');
+  const [keys, setKeys] = useState({ wallets: {}, loaded: null, error: '' });
+  const [tier, setTier] = useState(user.tier);
+  const [role, setRole] = useState(user.role);
+  const [kycStatus, setKycStatus] = useState(user.kyc?.status || user.kycStatus);
+  const [containerWidth, setContainerWidth] = useState('90vw');
+  const [activityLog, setActivityLog] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [imageModal, setImageModal] = useState({ open: false, url: '', label: '' });
+  const [rejectionReason, setRejectionReason] = useState('');
+
+  // Effects
+  useEffect(() => {
+    const updateWidth = () => {
+      if (contentRef.current) {
+        const content = contentRef.current;
+        const contentWidth = content.scrollWidth;
+        const viewportWidth = window.innerWidth;
+        const padding = 32;
+
+        if (contentWidth > viewportWidth - padding) {
+          setContainerWidth(`${Math.min(Math.max(contentWidth + padding, viewportWidth * 0.9), 1400)}px`);
+        } else {
+          setContainerWidth('90vw');
+        }
+      }
+    };
+
+    updateWidth();
+    
+    if (keys.loaded !== null || activeTab) {
+      updateWidth();
+    }
+
+    window.addEventListener('resize', updateWidth);
+    return () => window.removeEventListener('resize', updateWidth);
+  }, [keys.loaded, activeTab]);
+
+  useEffect(() => {
+    const loadUserKeys = async () => {
+      if (user._id && activeTab === 'keys') {
+        try {
+          setLoading(true);
+          const data = await getUserKeys(user._id);
+          setKeys({ ...data, loaded: true, error: '' });
+        } catch (err) {
+          console.error('Error loading user keys:', err);
+          setKeys(prev => ({ ...prev, loaded: false, error: err.message }));
+          toast.error('Failed to load user keys');
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+    loadUserKeys();
+  }, [user._id, activeTab]);
+
+  // Event handlers
+  const handleViewActivity = async () => {
+    setActiveTab('activity');
+    setActivityLog([
+      { type: 'login', timestamp: new Date(Date.now() - 3600000), ip: '192.168.1.1' },
+      { type: 'kyc_submitted', timestamp: new Date(Date.now() - 86400000), status: 'pending' },
+      { type: 'deposit', timestamp: new Date(Date.now() - 172800000), amount: 1000 },
+    ]);
+  };
+
+  const handleApproveKYC = async () => {
+    try {
+      setLoading(true);
+      await approveKYC(user._id);
+      setKycStatus('verified');
+      toast.success('KYC Approved successfully');
+      onUpdate({ ...user, kycStatus: 'verified' });
+    } catch (err) {
+      toast.error(err.message || 'Failed to approve KYC');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRejectKYC = async () => {
+    if (!rejectionReason) {
+      toast.error('Please provide a reason for rejection');
+      return;
+    }
+    try {
+      setLoading(true);
+      await rejectKYC(user._id, rejectionReason);
+      setKycStatus('rejected');
+      toast.success('KYC Rejected');
+      onUpdate({ ...user, kycStatus: 'rejected' });
+    } catch (err) {
+      toast.error(err.message || 'Failed to reject KYC');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUpdateTier = async (newTier) => {
+    try {
+      setLoading(true);
+      await updateUserTier(user._id, newTier);
+      setTier(newTier);
+      toast.success('User tier updated successfully');
+      onUpdate({ ...user, tier: newTier });
+    } catch (err) {
+      toast.error(err.message || 'Failed to update user tier');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUpdateRole = async (newRole) => {
+    try {
+      setLoading(true);
+      await updateUserRole(user._id, newRole);
+      setRole(newRole);
+      toast.success('User role updated successfully');
+      onUpdate({ ...user, role: newRole });
+    } catch (err) {
+      toast.error(err.message || 'Failed to update user role');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleViewImage = async (url, label) => {
+    setImageModal({ open: true, url, label });
+  };
+
+  return (
+    <div 
+      style={{ width: containerWidth }} 
+      className="bg-gray-900 rounded-xl shadow-2xl mx-auto transition-all duration-300"
+    >
+      <div ref={contentRef}>
+        {/* Component content */}
+      </div>
+    </div>
+  );
+};
+
+export default UserDetail;

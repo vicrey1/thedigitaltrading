@@ -6,7 +6,7 @@ const Plan = require('../models/Plan');
 // GET /api/plans - Get all investment plans
 router.get('/', async (req, res) => {
   try {
-    const plans = await Plan.find({ isActive: true });
+    const plans = await Plan.find({}); // Return all plans, not just active
     res.json(plans);
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch plans' });

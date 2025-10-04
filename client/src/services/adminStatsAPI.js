@@ -1,12 +1,13 @@
 // src/services/adminStatsAPI.js
 import axios from 'axios';
+import { getStoredAdminToken } from '../utils/authToken';
 
 const API = axios.create({
   baseURL: process.env.REACT_APP_API_BASE_URL + '/api/admin',
 });
 
 API.interceptors.request.use((config) => {
-  const token = localStorage.getItem('adminToken');
+  const token = getStoredAdminToken();
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }

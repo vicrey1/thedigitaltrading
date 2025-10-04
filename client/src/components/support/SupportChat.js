@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { getStoredToken } from '../../utils/authToken';
 import { useSocket } from '../../contexts/SocketContext';
 import { toast } from 'react-toastify';
 import './SupportChat.css';
@@ -101,7 +102,7 @@ const SupportChat = () => {
     try {
       const response = await fetch('/api/support/tickets', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': getStoredToken() ? `Bearer ${getStoredToken()}` : undefined
         }
       });
 
@@ -124,7 +125,7 @@ const SupportChat = () => {
     try {
       const response = await fetch(`/api/support/tickets/${ticketId}/messages`, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': getStoredToken() ? `Bearer ${getStoredToken()}` : undefined
         }
       });
 
@@ -147,7 +148,7 @@ const SupportChat = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': getStoredToken() ? `Bearer ${getStoredToken()}` : undefined
         },
         body: JSON.stringify(newTicket)
       });
@@ -193,7 +194,7 @@ const SupportChat = () => {
       const response = await fetch(`/api/support/tickets/${selectedTicket._id}/messages`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': getStoredToken() ? `Bearer ${getStoredToken()}` : undefined
         },
         body: formData
       });

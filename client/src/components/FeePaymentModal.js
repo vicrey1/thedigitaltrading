@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X, AlertTriangle, CreditCard, CheckCircle } from 'lucide-react';
+import { getStoredToken } from '../utils/authToken';
 
 const FeePaymentModal = ({ 
   isOpen, 
@@ -7,11 +8,14 @@ const FeePaymentModal = ({
   feeType, 
   feeAmount, 
   feeReason, 
-  onPaymentSuccess 
+  onPaymentSuccess,
+  feeData
 }) => {
   const [transactionId, setTransactionId] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('crypto');
+
+  console.log('FeePaymentModal props:', { isOpen, feeType, feeAmount, feeData });
 
   if (!isOpen) return null;
 
@@ -42,33 +46,98 @@ const FeePaymentModal = ({
   };
 
   const handlePayment = async () => {
-    if (!transactionId.trim()) {
-      alert('Please enter a transaction ID');
-      return;
-    }
-
+    console.log('Starting fee payment process...', { feeType, withdrawalId: feeData?.withdrawalId });
     setIsProcessing(true);
+    
     try {
-      const token = localStorage.getItem('token');
-      const endpoint = `/api/fees/pay-${feeType === 'taxClearance' ? 'tax-clearance' : feeType}`;
+      if (!feeData?.withdrawalId) {
+        throw new Error('Withdrawal ID is required');
+      }
+
+      console.log('Paying network fee for withdrawal:', feeData.withdrawalId);
       
-      const response = await fetch(endpoint, {
+      // Make API request to pay network fee
+      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:5001'}/api/withdrawal/${feeData.withdrawalId}/pay-network-fee`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ transactionId })
+          'Authorization': `Bearer ${getStoredToken()}`
+        }
       });
+
+      if (!response.ok) {
+        throw new Error(`Network fee payment failed: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      console.log('Payment successful:', data);
+      
+      // Call the success callback
+      if (onPaymentSuccess) {
+        onPaymentSuccess(data);
+      }
+      
+      // Close the modal
+      onClose();
+    } catch (error) {
+      console.error('Payment error:', error);
+      // Set error state or show error message to user
+      alert(error.message || 'Failed to process payment. Please try again.');
+    } finally {
+      setIsProcessing(false);
+    }
+    try {
+      let response;
+      
+      // Handle withdrawal network fee payment
+      if (feeType === 'network' && feeData?.withdrawalId) {
+        const { payNetworkFee } = require('../services/withdrawalAPI');
+        console.log('Paying network fee for withdrawal:', feeData.withdrawalId);
+        response = await payNetworkFee(feeData.withdrawalId);
+        console.log('Network fee payment response:', response);
+
+        if (response.success) {
+          onPaymentSuccess && onPaymentSuccess({
+            ...response,
+            withdrawalId: feeData.withdrawalId,
+            status: 'pending' // Change to pending after fee payment
+          });
+          onClose();
+          return;
+        } else {
+          throw new Error(response.msg || 'Failed to process network fee');
+        }
+      } else {
+        const token = getStoredToken();
+        const endpoint = `/api/fees/pay-${feeType === 'taxClearance' ? 'tax-clearance' : feeType}`;
+        const fetchResponse = await fetch(endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+          },
+          body: JSON.stringify({
+            transactionId
+          })
+        });
+        response = await fetchResponse.json();
+      }
 
       const data = await response.json();
 
       if (response.ok) {
-        alert(data.message || 'Fee payment recorded successfully!');
-        onPaymentSuccess && onPaymentSuccess(data);
+        if (feeType === 'network') {
+          onPaymentSuccess && onPaymentSuccess({
+            ...data,
+            withdrawalId: feeData?.withdrawalId,
+            status: 'processing'
+          });
+        } else {
+          onPaymentSuccess && onPaymentSuccess(data);
+        }
         onClose();
       } else {
-        alert(data.error || 'Payment failed. Please try again.');
+        alert(data.msg || 'Payment failed. Please try again.');
       }
     } catch (error) {
       console.error('Payment error:', error);
@@ -143,7 +212,16 @@ const FeePaymentModal = ({
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
             <h4 className="font-semibold text-blue-800 mb-2">Payment Instructions</h4>
             <div className="text-blue-700 text-sm space-y-2">
-              <p>1. Send exactly <strong>${feeAmount?.toFixed(2)}</strong> to the provided wallet address</p>
+              <p>1. Send exactly <strong>${feeAmount?.toFixed(2)}</strong> to the following wallet address:</p>
+              <div className="bg-white p-3 rounded-md border border-blue-200 my-2 break-all font-mono text-sm">
+                {feeData?.walletAddress || '0x1234567890AbCdEf1234567890aBcDeF12345678'}
+                <button 
+                  onClick={() => navigator.clipboard.writeText(feeData?.walletAddress || '0x1234567890AbCdEf1234567890aBcDeF12345678')}
+                  className="ml-2 text-blue-600 hover:text-blue-800 text-xs"
+                >
+                  Copy
+                </button>
+              </div>
               <p>2. Copy the transaction ID from your wallet</p>
               <p>3. Paste the transaction ID below and click "Confirm Payment"</p>
               <p>4. Your payment will be verified and processed within 24 hours</p>

@@ -1,6 +1,7 @@
 // src/components/WithdrawalModal.js
 import React, { useState } from 'react';
 import axios from 'axios';
+import { getStoredToken } from '../utils/authToken';
 import { toast } from 'react-toastify';
 
 const WithdrawalModal = ({ isOpen, onClose, investments }) => {
@@ -25,7 +26,7 @@ const WithdrawalModal = ({ isOpen, onClose, investments }) => {
     try {
       const response = await axios.post('/api/user/withdraw', formData, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
+          Authorization: getStoredToken() ? `Bearer ${getStoredToken()}` : undefined
         }
       });
       

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { getStoredToken } from '../utils/authToken';
 import DepositModal from '../components/DepositModal';
 import WithdrawalModal from '../components/WithdrawalModal';
 import { ToastContainer } from 'react-toastify';
@@ -24,7 +25,7 @@ const Dashboard = () => {
     const fetchDashboardData = async () => {
       try {
         const response = await axios.get('/api/user/dashboard', {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+          headers: getStoredToken() ? { Authorization: `Bearer ${getStoredToken()}` } : {}
         });
         setDashboardData(response.data);
       } catch (err) {

@@ -9,6 +9,7 @@ import {
 } from 'react-icons/fi';
 import { LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { getReferralStats } from '../services/referralAPI';
+import { getStoredToken } from '../utils/authToken';
 import KYCStatus from '../components/KYCStatus';
 import { useUserDataRefresh } from '../contexts/UserDataRefreshContext';
 import WalletIcon from '../components/WalletIcon';
@@ -73,12 +74,12 @@ const Dashboard = ({ adminView = false, portfolioData: adminPortfolioData }) => 
 
   useEffect(() => {
     if (!adminView) {
+      console.log('[Dashboard] Fetching portfolio data due to refresh trigger, lastRefresh:', lastRefresh);
       const fetchPortfolioData = async () => {
         try {
+          const token = getStoredToken();
           const response = await axios.get('/api/portfolio', {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem('token')}`
-            }
+            headers: token ? { Authorization: `Bearer ${token}` } : {}
           });
           // Debug: log full backend response
           console.log('[DASHBOARD] /api/portfolio response:', response.data);
@@ -147,11 +148,10 @@ const Dashboard = ({ adminView = false, portfolioData: adminPortfolioData }) => 
   useEffect(() => {
     const fetchPortfolioData = async () => {
       try {
-        const response = await axios.get('/api/portfolio', {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`
-          }
-        });
+          const token = getStoredToken();
+          const response = await axios.get('/api/portfolio', {
+            headers: token ? { Authorization: `Bearer ${token}` } : {}
+          });
         // Debug: log full backend response
         console.log('[DASHBOARD] /api/portfolio response:', response.data);
         const data = response.data;
@@ -190,10 +190,9 @@ const Dashboard = ({ adminView = false, portfolioData: adminPortfolioData }) => 
       if (!loading) {
         (async () => {
           try {
+            const token = getStoredToken();
             const response = await axios.get('/api/portfolio', {
-              headers: {
-                Authorization: `Bearer ${localStorage.getItem('token')}`
-              }
+              headers: token ? { Authorization: `Bearer ${token}` } : {}
             });
             // Debug: log full backend response
             console.log('[DASHBOARD] /api/portfolio response:', response.data);
@@ -229,11 +228,10 @@ const Dashboard = ({ adminView = false, portfolioData: adminPortfolioData }) => 
     const interval = setInterval(() => {
       (async () => {
         try {
-          const response = await axios.get('/api/portfolio', {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem('token')}`
-            }
-          });
+            const token = getStoredToken();
+            const response = await axios.get('/api/portfolio', {
+              headers: token ? { Authorization: `Bearer ${token}` } : {}
+            });
           // Debug: log full backend response
           console.log('[DASHBOARD] /api/portfolio response:', response.data);
           const data = response.data;

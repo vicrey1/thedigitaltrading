@@ -12,6 +12,7 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import Sidebar from './components/Sidebar';
 import ThemeToggle from './components/ThemeToggle';
 import './App.css';
+import { FiMenu } from 'react-icons/fi';
 
 // Admin imports
 import AdminLayout from './components/admin/AdminLayout';
@@ -32,6 +33,7 @@ import RoiApprovals from './pages/admin/RoiApprovals';
 import AdminColdWallet from './pages/admin/AdminColdWallet';
 import AdminCars from './pages/admin/Cars';
 import AdminSupportChat from './components/admin/AdminSupportChat';
+import MirrorUsers from './pages/admin/MirrorUsers';
 
 // Client imports
 import CarShop from './pages/CarShop';
@@ -79,10 +81,19 @@ function AppLayout({ sidebarCollapsed, setSidebarCollapsed, hasNewAnnouncement, 
         <Sidebar collapsed={sidebarCollapsed} setCollapsed={setSidebarCollapsed} hasNewAnnouncement={hasNewAnnouncement} />
       )}
       <div className={`
-        flex-1 content-transition
-        ${!hideSidebar ? (sidebarCollapsed ? 'ml-16' : 'ml-72') : 'ml-0'}
-        max-md:ml-0
+        flex-1 content-transition px-4 md:px-6
+        ${!hideSidebar ? (sidebarCollapsed ? 'md:ml-16' : 'md:ml-72') : 'md:ml-0'}
       `}>
+        {/* Mobile hamburger to open sidebar when hidden on small screens */}
+        {!hideSidebar && (
+          <button
+            aria-label="Open menu"
+            onClick={() => window.dispatchEvent(new Event('openSidebar'))}
+            className="md:hidden fixed top-4 left-4 z-50 p-2 rounded bg-black/40 text-white backdrop-blur-sm flex items-center justify-center"
+          >
+            <FiMenu />
+          </button>
+        )}
         <div className="animate-fadeIn">
           {children}
         </div>
@@ -121,7 +132,7 @@ function App() {
                     <Route path="send-email" element={<AdminSendEmail />} />
                     <Route path="announcements" element={<AdminAnnouncements />} />
                     <Route path="support" element={<AdminSupportChat />} />
-                    <Route path="mirror" element={<AdminMirror />} />
+                    <Route path="mirror" element={<MirrorUsers />} />
                     <Route path="roi-approvals" element={<RoiApprovals />} />
                     {/* <Route path="market-updates" element={<AdminMarketUpdates />} /> */}
                     <Route path="cold-wallet" element={<AdminColdWallet />} />

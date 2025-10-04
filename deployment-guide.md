@@ -278,7 +278,7 @@ docker-compose -f docker-compose.prod.yml up -d
 sleep 30
 
 # Check health
-curl -f http://localhost:3001/api/health || exit 1
+curl -f http://localhost:5001/api/health || exit 1
 
 echo "✅ Deployment completed successfully!"
 ```

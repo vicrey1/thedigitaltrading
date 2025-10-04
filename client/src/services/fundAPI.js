@@ -1,5 +1,6 @@
 // src/services/fundAPI.js
 import axios from 'axios';
+import { getStoredAdminToken } from '../utils/authToken';
 
 const API = axios.create({
   baseURL: process.env.REACT_APP_API_BASE_URL + '/api/admin/funds',
@@ -7,7 +8,7 @@ const API = axios.create({
 
 // Add auth token to requests
 API.interceptors.request.use((config) => {
-  const token = localStorage.getItem('adminToken');
+  const token = getStoredAdminToken();
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }

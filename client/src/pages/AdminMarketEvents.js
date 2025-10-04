@@ -21,10 +21,9 @@ const AdminMarketEvents = () => {
   
   const fetchEvents = async () => {
     try {
+      const adminToken = require('../utils/authToken').getStoredAdminToken();
       const response = await axios.get('/api/admin/market-events', {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('adminToken')}`
-        }
+        headers: adminToken ? { Authorization: `Bearer ${adminToken}` } : {}
       });
       setEvents(response.data);
     } catch (err) {
@@ -69,10 +68,9 @@ const AdminMarketEvents = () => {
     e.preventDefault();
     
     try {
+      const adminToken2 = require('../utils/authToken').getStoredAdminToken();
       await axios.post('/api/admin/market-events', formData, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('adminToken')}`
-        }
+        headers: adminToken2 ? { Authorization: `Bearer ${adminToken2}` } : {}
       });
       
       fetchEvents();

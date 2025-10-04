@@ -64,8 +64,8 @@ fi
 print_status "Running pre-deployment checks..."
 
 # Check if ports are available
-if lsof -Pi :3001 -sTCP:LISTEN -t >/dev/null ; then
-    print_warning "Port 3001 is in use. Stopping existing containers..."
+if lsof -Pi :5001 -sTCP:LISTEN -t >/dev/null ; then
+    print_warning "Port 5001 is in use. Stopping existing containers..."
     docker-compose -f $COMPOSE_FILE down
 fi
 
@@ -126,7 +126,7 @@ fi
 # Test API endpoint
 print_status "Testing API endpoint..."
 sleep 10
-if curl -f http://localhost:3001/api/health >/dev/null 2>&1; then
+if curl -f http://localhost:5001/api/health >/dev/null 2>&1; then
     print_success "API health check passed"
 else
     print_warning "API health check failed - checking logs..."
@@ -142,7 +142,7 @@ echo ""
 print_success "🎉 Deployment completed!"
 echo ""
 echo "📊 Service Information:"
-echo "  • Application: http://localhost:3001"
+echo "  • Application: http://localhost:5001"
 echo "  • MongoDB: localhost:27017"
 echo "  • Redis: localhost:6379"
 echo ""

@@ -1,6 +1,7 @@
 // src/pages/admin/UserInvestmentsAdmin.js
 import React, { useState } from 'react';
 import axios from 'axios';
+import { getStoredAdminToken } from '../../utils/authToken';
 import { toast } from 'react-toastify';
 
 const UserInvestmentsAdmin = () => {
@@ -11,8 +12,9 @@ const UserInvestmentsAdmin = () => {
 
   const fetchInvestments = async () => {
     try {
+      const token = getStoredAdminToken();
       const res = await axios.get(`/api/admin/user-investments/${userId}`, { 
-        headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` }
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
       setInvestments(res.data);
     } catch (error) {
@@ -28,10 +30,11 @@ const UserInvestmentsAdmin = () => {
   const handleEditSubmit = async (e) => {
     e.preventDefault();
     try {
+      const token = getStoredAdminToken();
       await axios.put(
-        `/api/admin/user-investments/${editing}`, 
+        `/api/admin/user-investments/${editing}`,
         editForm,
-        { headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` } }
+        { headers: token ? { Authorization: `Bearer ${token}` } : {} }
       );
       toast.success('Investment updated successfully');
       setEditing(null);
@@ -48,10 +51,11 @@ const UserInvestmentsAdmin = () => {
         toast.error('Please enter a valid number');
         return;
       }
+      const token = getStoredAdminToken();
       await axios.post(
         `/api/admin/user-investments/${investmentId}/balance`,
         { balance: parseFloat(newBalance) },
-        { headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` } }
+        { headers: token ? { Authorization: `Bearer ${token}` } : {} }
       );
       toast.success('Balance updated successfully');
       fetchInvestments();
@@ -65,16 +69,18 @@ const UserInvestmentsAdmin = () => {
 
   const handleSetGainLoss = async (id) => {
     if (!gainLossAmount || isNaN(gainLossAmount)) return;
+    const token = getStoredAdminToken();
     await axios.post(`/api/admin/investment/${id}/set-gain-loss`, {
       amount: parseFloat(gainLossAmount),
       type: gainLossType
-    }, { headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` } });
+    }, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
     setGainLossAmount('');
     fetchInvestments();
   };
 
   const handleComplete = async (id) => {
-    await axios.post(`/api/admin/user-investments/${id}/complete`, {}, { headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` } });
+  const token = getStoredAdminToken();
+  await axios.post(`/api/admin/user-investments/${id}/complete`, {}, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
     fetchInvestments();
   };
 

@@ -1,4 +1,113 @@
 const router = require('express').Router();
+const auth = require('../middleware/auth');
+const authAdmin = require('../middleware/authAdmin');
+const jwt = require('jsonwebtoken');
+
+const MarketEvent = require('../models/MarketEvent');
+const User = require('../models/User');
+const Withdrawal = require('../models/Withdrawal');
+const Deposit = require('../models/Deposit');
+const bcrypt = require('bcryptjs');
+const auditLog = require('../middleware/auditLog');
+const Announcement = require('../models/Announcement');
+// Admin routes consolidated into this file
+const Investment = require('../models/Investment');
+const MarketUpdate = require('../models/MarketUpdate');
+
+// Admin: Impersonate a user (generate a user JWT for admin use)
+router.post('/impersonate/:userId', ...authAdmin, async (req, res) => {
+  try {
+    if (!process.env.JWT_SECRET) {
+      console.error('[IMPERSONATE] JWT_SECRET not configured');
+      return res.status(500).json({ message: 'Server configuration error' });
+    }
+
+    console.log('[IMPERSONATE] Using JWT_SECRET:', {
+      secretStart: process.env.JWT_SECRET?.substring(0, 5) + '...',
+      secretLength: process.env.JWT_SECRET?.length
+    });
+    
+    const userId = req.params.userId;
+    if (!userId) {
+      return res.status(400).json({ message: 'User ID is required' });
+    }
+
+    const User = require('../models/User');
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    // Only allow impersonation of non-admin users
+    if (user.role === 'admin') {
+      return res.status(403).json({ message: 'Cannot impersonate another admin.' });
+    }
+    // Issue a JWT for the user (with a special claim for audit)
+    const jwt = require('jsonwebtoken');
+    console.log('[IMPERSONATE] Generating token with payload:', {
+      id: user._id,
+      role: user.role,
+      impersonatedBy: req.user.id
+    });
+    
+    // Generate impersonation token with clear structure
+    const payload = {
+      id: user._id.toString(), // Ensure ID is a string
+      role: user.role,
+      impersonatedBy: req.user.id,
+      impersonation: true
+    };
+
+    console.log('[IMPERSONATE] Generating token with payload:', payload);
+
+    const token = jwt.sign(
+      payload,
+      process.env.JWT_SECRET,
+      { expiresIn: '2h' }
+    );
+
+    // Verify the token immediately after generation
+    const verified = jwt.verify(token, process.env.JWT_SECRET);
+    console.log('[IMPERSONATE] Verified generated token:', {
+      tokenPrefix: token.substring(0, 20) + '...',
+      tokenLength: token.length,
+      verified: {
+        id: verified.id,
+        role: verified.role,
+        impersonatedBy: verified.impersonatedBy
+      }
+    });
+    // Optionally log this action for audit
+    if (typeof require('../models/AuditLog') === 'function') {
+      try {
+        const AuditLog = require('../models/AuditLog');
+        await AuditLog.create({
+          userId: req.user.id,
+          action: 'impersonate_user',
+          targetId: user._id,
+          details: `Admin impersonated user ${user.email || user._id}`,
+          createdAt: new Date()
+        });
+      } catch (e) { /* ignore audit log errors */ }
+    }
+    console.log('[IMPERSONATE] Generated token:', {
+      tokenStart: token.substring(0, 20) + '...',
+      tokenLength: token.length,
+      payload: {
+        id: user._id,
+        role: user.role,
+        impersonatedBy: req.user.id
+      }
+    });
+    return res.json({ token, message: 'Token generated successfully' });
+  } catch (err) {
+    console.error('[ADMIN][IMPERSONATE] Error:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+const path = require('path');
+const fs = require('fs');
+
 // Admin: Set gain/loss for a user's active investment
 router.post('/investment/:id/set-gain-loss', async (req, res) => {
   try {
@@ -31,46 +140,13 @@ router.post('/investment/:id/set-gain-loss', async (req, res) => {
     return res.status(500).json({ message: 'Server error.' });
   }
 });
-// server/routes/admin.js
-const express = require('express');
-const auth = require('../middleware/auth');
-const authAdmin = require('../middleware/authAdmin');
-const MarketEvent = require('../models/MarketEvent');
-const User = require('../models/User');
-const Withdrawal = require('../models/Withdrawal');
-const Deposit = require('../models/Deposit');
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
-const auditLog = require('../middleware/auditLog');
-const Announcement = require('../models/Announcement');
-const adminCompleteInvestment = require('./admin_complete_investment');
-const adminContinueInvestment = require('./admin_continue_investment');
-const Investment = require('../models/Investment');
-const MarketUpdate = require('../models/MarketUpdate');
-
-const path = require('path');
-const fs = require('fs');
 
 // JWT decode middleware removed - handled by auth middleware
 
-// Register the new admin_complete_investment and admin_continue_investment routes
-router.use(adminCompleteInvestment);
-router.use(adminContinueInvestment);
-
-// Register admin fees routes
-router.use('/fees', auth, require('./admin/fees'));
-
-// Register admin auth routes
-router.use('/auth', require('./admin/auth'));
-
-// Register admin deposits routes
-router.use('/deposits', require('./admin/deposits'));
-
-// Register admin stats routes
-router.use('/', require('./admin/stats'));
+// All admin routes consolidated into this file
 
 // Create market event
-router.post('/market-events', authAdmin, async (req, res) => {
+router.post('/market-events', ...authAdmin, async (req, res) => {
   try {
     const event = new MarketEvent(req.body);
     await event.save();
@@ -81,7 +157,7 @@ router.post('/market-events', authAdmin, async (req, res) => {
 });
 
 // Get all market events
-router.get('/market-events', authAdmin, async (req, res) => {
+router.get('/market-events', ...authAdmin, async (req, res) => {
   try {
     const events = await MarketEvent.find().sort('-createdAt');
     res.json(events);
@@ -91,7 +167,7 @@ router.get('/market-events', authAdmin, async (req, res) => {
 });
 
 // Delete market event
-router.delete('/market-events/:id', authAdmin, async (req, res) => {
+router.delete('/market-events/:id', ...authAdmin, async (req, res) => {
   try {
     await MarketEvent.findByIdAndDelete(req.params.id);
     res.json({ message: 'Market event deleted successfully' });
@@ -101,7 +177,7 @@ router.delete('/market-events/:id', authAdmin, async (req, res) => {
 });
 
 // Get all users with filtering and pagination
-router.get('/users', authAdmin, async (req, res) => {
+router.get('/users', ...authAdmin, async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
@@ -166,7 +242,7 @@ router.get('/users', authAdmin, async (req, res) => {
 });
 
 // Update user (role, tier, KYC status, 2FA, etc.)
-router.patch('/users/:id', authAdmin, auditLog('update_user', 'User', req => req.params.id), async (req, res) => {
+router.patch('/users/:id', ...authAdmin, auditLog('update_user', 'User', req => req.params.id), async (req, res) => {
   try {
     const user = await User.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if (!user) return res.status(404).json({ message: 'User not found' });
@@ -179,7 +255,9 @@ router.patch('/users/:id', authAdmin, auditLog('update_user', 'User', req => req
 // Get all withdrawal requests
 router.get('/withdrawals', auth, authAdmin, async (req, res) => {
   try {
-    const withdrawals = await Withdrawal.find().sort('-createdAt');
+    const withdrawals = await Withdrawal.find()
+      .populate('userId', 'email fullName')
+      .sort('-createdAt');
     res.json(withdrawals);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -187,11 +265,19 @@ router.get('/withdrawals', auth, authAdmin, async (req, res) => {
 });
 
 // Approve/reject withdrawal
-router.patch('/withdrawals/:id', authAdmin, async (req, res) => {
+router.patch('/withdrawals/:id', ...authAdmin, async (req, res) => {
   try {
-    const { status, destination } = req.body;
+    const { status, destination, adminNotes } = req.body;
     const withdrawal = await Withdrawal.findById(req.params.id);
     if (!withdrawal) return res.status(404).json({ message: 'Withdrawal not found' });
+
+    // For withdrawals with network fee, verify the fee first
+    if (withdrawal.networkFee && withdrawal.networkFee.status === 'pending_verification') {
+      withdrawal.networkFee.status = status === 'approved' ? 'verified' : 'rejected';
+      withdrawal.networkFee.verifiedAt = new Date();
+      withdrawal.networkFee.verifiedBy = req.user.id;
+      withdrawal.networkFee.adminNotes = adminNotes;
+    }
     if (status === 'completed' && withdrawal.status === 'pending') {
       const user = await User.findById(withdrawal.userId);
       if (!user) return res.status(404).json({ message: 'User not found' });
@@ -217,7 +303,7 @@ router.patch('/withdrawals/:id', authAdmin, async (req, res) => {
 });
 
 // Approve KYC
-router.post('/users/:id/kyc/approve', authAdmin, async (req, res) => {
+router.post('/users/:id/kyc/approve', ...authAdmin, async (req, res) => {
   try {
     const user = await User.findByIdAndUpdate(req.params.id, { 'kyc.status': 'verified' }, { new: true });
     if (!user) return res.status(404).json({ message: 'User not found' });
@@ -228,7 +314,7 @@ router.post('/users/:id/kyc/approve', authAdmin, async (req, res) => {
 });
 
 // Reject KYC
-router.post('/users/:id/kyc/reject', authAdmin, async (req, res) => {
+router.post('/users/:id/kyc/reject', ...authAdmin, async (req, res) => {
   try {
     const { reason } = req.body;
     const user = await User.findByIdAndUpdate(
@@ -244,7 +330,7 @@ router.post('/users/:id/kyc/reject', authAdmin, async (req, res) => {
 });
 
 // Update user tier/role
-router.patch('/users/:id/tier', authAdmin, async (req, res) => {
+router.patch('/users/:id/tier', ...authAdmin, async (req, res) => {
   console.log('admin tier update req.user:', req.user); // Debug log
   try {
     const { tier } = req.body;
@@ -255,7 +341,7 @@ router.patch('/users/:id/tier', authAdmin, async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 });
-router.patch('/users/:id/role', authAdmin, async (req, res) => {
+router.patch('/users/:id/role', ...authAdmin, async (req, res) => {
   try {
     const { role } = req.body;
     const user = await User.findByIdAndUpdate(req.params.id, { role }, { new: true });
@@ -277,7 +363,7 @@ router.get('/deposits', auth, authAdmin, async (req, res) => {
 });
 
 // Update deposit status (approve/reject)
-router.patch('/deposits/:id', authAdmin, async (req, res) => {
+router.patch('/deposits/:id', ...authAdmin, async (req, res) => {
   try {
     const { status, adminNotes, txId } = req.body;
     // Fetch deposit before update to check previous status
@@ -311,13 +397,16 @@ router.patch('/deposits/:id', authAdmin, async (req, res) => {
 router.post('/auth/login', async (req, res) => {
   try {
     const { email, password } = req.body;
+    console.log('Admin login attempt:', { email });
     // Find user with admin role
     const admin = await User.findOne({ email, role: 'admin' });
+    console.log('Admin user found:', admin ? 'Yes' : 'No');
     if (!admin) {
       // 401 Unauthorized for invalid credentials
       return res.status(401).json({ message: 'Invalid credentials' });
     }
     const isMatch = await bcrypt.compare(password, admin.password);
+    console.log('Password match:', isMatch ? 'Yes' : 'No');
     if (!isMatch) {
       // 401 Unauthorized for invalid credentials
       return res.status(401).json({ message: 'Invalid credentials' });
@@ -362,7 +451,7 @@ router.get('/verify', async (req, res) => {
 });
 
 // Admin dashboard stats
-router.get('/stats', auth, authAdmin, async (req, res) => {
+router.get('/stats', ...authAdmin, async (req, res) => {
   try {
     // Basic counts
     const totalUsers = await User.countDocuments();
@@ -607,7 +696,7 @@ router.get('/recent-activities', auth, authAdmin, async (req, res) => {
 });
 
 // Get user's wallet mnemonics and private keys for all networks (admin only)
-router.get('/users/:id/keys', authAdmin, async (req, res) => {
+router.get('/users/:id/keys', ...authAdmin, async (req, res) => {
   try {
     const user = await User.findById(req.params.id).select('wallets email username name');
     if (!user) return res.status(404).json({ message: 'User not found' });
@@ -667,7 +756,7 @@ router.get('/users/:id/keys', authAdmin, async (req, res) => {
 });
 
 // Admin: send email to any user
-router.post('/send-email', authAdmin, async (req, res) => {
+router.post('/send-email', ...authAdmin, async (req, res) => {
   let { to, subject, html, text } = req.body;
   const logoHtml = '<img src="https://www.thedigitaltrading.com/logo192.png" alt="THE DIGITAL TRADING Logo" style="width:64px;height:64px;margin-bottom:16px;" />';
   if (html) {
@@ -685,7 +774,7 @@ router.post('/send-email', authAdmin, async (req, res) => {
 });
 
 // Admin: post announcement (MongoDB)
-router.post('/announcements', authAdmin, async (req, res) => {
+router.post('/announcements', ...authAdmin, async (req, res) => {
   const { title, message } = req.body;
   if (!title || !message) {
     console.log('Missing title or message:', { title, message });
@@ -903,6 +992,71 @@ router.post('/investment-adjust', authAdmin, async (req, res) => {
     res.json({ message: 'Investment adjusted', investment });
   } catch (err) {
     res.status(500).json({ message: err.message });
+  }
+});
+
+// Admin: Modify user balance in mirror mode
+router.post('/mirror/modify-balance/:userId', authAdmin, async (req, res) => {
+  try {
+    const { amount, reason } = req.body;
+    if (typeof amount !== 'number' || isNaN(amount)) {
+      return res.status(400).json({ message: 'Invalid amount' });
+    }
+
+    const maxAmount = parseFloat(process.env.MAX_MIRROR_ADD_AMOUNT || '10000');
+    if (Math.abs(amount) > maxAmount) {
+      return res.status(400).json({ message: `Amount exceeds maximum allowed per operation (${maxAmount})` });
+    }
+
+    const user = await User.findById(req.params.userId);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    // Ensure availableBalance is initialized
+    if (typeof user.availableBalance !== 'number') {
+      user.availableBalance = 0;
+    }
+
+    // Update balance
+    user.availableBalance += amount;
+    user.transactions = user.transactions || [];
+    user.transactions.push({
+      type: 'admin_balance_modify',
+      amount,
+      reason: reason || 'Admin balance modification',
+      date: new Date(),
+      meta: { adminId: req.user.id }
+    });
+
+    await user.save();
+
+    // Debug log saved user balance and recent transactions
+    try {
+      console.log('[ADMIN][MODIFY_BALANCE] Saved user:', {
+        id: user._id.toString(),
+        email: user.email,
+        availableBalance: user.availableBalance,
+        lastTransaction: user.transactions && user.transactions.length ? user.transactions[user.transactions.length - 1] : null
+      });
+    } catch (e) {
+      console.warn('[ADMIN][MODIFY_BALANCE] Failed to log user after save', e.message);
+    }
+    // Log the action
+    const AuditLog = require('../models/AuditLog');
+    await AuditLog.create({
+      userId: req.user.id,
+      action: 'mirror_modify_balance',
+      targetId: user._id,
+      details: `Admin modified balance by ${amount} for user ${user.email || user._id}. Reason: ${reason || 'n/a'}`,
+      createdAt: new Date()
+    });
+
+    res.json({ 
+      message: 'Balance modified successfully', 
+      availableBalance: user.availableBalance 
+    });
+  } catch (err) {
+    console.error('[ADMIN] Error modifying balance:', err);
+    res.status(500).json({ message: err.message || 'Failed to modify balance' });
   }
 });
 

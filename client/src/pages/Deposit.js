@@ -1,6 +1,7 @@
 // src/pages/Deposit.js
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { getStoredToken } from '../utils/authToken';
 import { FiCheck } from 'react-icons/fi';
 import { QRCodeSVG } from 'qrcode.react';
 import { useUserDataRefresh } from '../contexts/UserDataRefreshContext';
@@ -22,8 +23,9 @@ const Deposit = () => {
   useEffect(() => {
     const fetchHistory = async () => {
       try {
+        const token = getStoredToken();
         const res = await axios.get('/api/deposit/history', {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+          headers: token ? { Authorization: `Bearer ${token}` } : {}
         });
         setHistory(res.data.deposits || []);
       } catch {}
@@ -34,8 +36,9 @@ const Deposit = () => {
   useEffect(() => {
     const fetchWallets = async () => {
       try {
+        const token = getStoredToken();
         const res = await axios.get('/api/wallets', {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+          headers: token ? { Authorization: `Bearer ${token}` } : {}
         });
         setWallets(res.data.wallets);
       } catch {}
@@ -66,7 +69,7 @@ const Deposit = () => {
         chain: selectedChain,
         network: selectedNetwork
       }, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+  headers: getStoredToken() ? { Authorization: `Bearer ${getStoredToken()}` } : {}
       });
       setSuccess(true);
       setAmount('');

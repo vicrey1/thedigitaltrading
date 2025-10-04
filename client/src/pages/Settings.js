@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext, createContext } from 'react';
+import { getStoredToken } from '../utils/authToken';
 import ConfirmModal from '../components/ConfirmModal';
 import { FiUser, FiLock, FiBell, FiGlobe, FiMoon, FiSun, FiEdit2, FiSave, FiX, FiShield, FiKey, FiLogOut, FiSettings, FiTrash2, FiActivity, FiUserX, FiSmartphone, FiMail, FiCreditCard, FiGift, FiUsers, FiHelpCircle } from 'react-icons/fi';
 import axios from 'axios';
+import { setWithdrawalPin as apiSetWithdrawalPin } from '../services/withdrawalAPI';
 import EmailVerification from '../components/EmailVerification';
 import { useUser } from '../contexts/UserContext';
 import { useUserDataRefresh } from '../contexts/UserDataRefreshContext';
@@ -28,6 +30,7 @@ export default function Settings() {
 
   // Withdrawal PIN state
   const [pin, setPin] = useState('');
+  const [currentPin, setCurrentPin] = useState('');
   const [pinMsg, setPinMsg] = useState('');
   const [pinError, setPinError] = useState('');
 
@@ -50,7 +53,7 @@ export default function Settings() {
   useEffect(() => {
     const fetchSessions = async () => {
       try {
-        const res = await axios.get('/api/user/sessions', { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
+  const res = await axios.get('/api/user/sessions', { headers: getStoredToken() ? { Authorization: `Bearer ${getStoredToken()}` } : {} });
         setSessions(res.data.sessions || []);
       } catch {}
       setLoadingSessions(false);
@@ -62,7 +65,7 @@ export default function Settings() {
   const handleLogoutSession = async (idx) => {
     if (!window.confirm('Logout this session?')) return;
     try {
-      await axios.post('/api/user/logout-session', { sessionIndex: idx }, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
+  await axios.post('/api/user/logout-session', { sessionIndex: idx }, { headers: getStoredToken() ? { Authorization: `Bearer ${getStoredToken()}` } : {} });
       setSessions(sessions => sessions.filter((_, i) => i !== idx));
     } catch (err) {
       alert(err.response?.data?.message || 'Failed to logout session');
@@ -76,7 +79,7 @@ export default function Settings() {
 
   const confirmDeleteAccount = async () => {
     try {
-      await axios.delete('/api/user/delete-account', { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
+  await axios.delete('/api/user/delete-account', { headers: getStoredToken() ? { Authorization: `Bearer ${getStoredToken()}` } : {} });
       toast.success('Account deleted. You will be logged out.', {
         position: 'top-center',
         autoClose: 2000,
@@ -106,10 +109,10 @@ export default function Settings() {
     async function fetchProfileAndKYC() {
       try {
         // Fetch user profile
-        const res = await axios.get('/api/user/profile', { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
+  const res = await axios.get('/api/user/profile', { headers: getStoredToken() ? { Authorization: `Bearer ${getStoredToken()}` } : {} });
         let userProfile = res.data.user;
         // Fetch latest KYC status
-        const kycRes = await axios.get('/api/user/kyc-status', { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
+  const kycRes = await axios.get('/api/user/kyc-status', { headers: getStoredToken() ? { Authorization: `Bearer ${getStoredToken()}` } : {} });
         // Only update KYC status if not already verified
         if (userProfile.kyc?.status !== 'verified') {
           userProfile.kyc = kycRes.data.kyc;
@@ -165,10 +168,16 @@ export default function Settings() {
       setPinError('PIN must be exactly 6 digits.');
       return;
     }
+    if (profile?.hasWithdrawalPin && !/^[0-9]{6}$/.test(currentPin)) {
+      setPinError('Current PIN must be exactly 6 digits.');
+      return;
+    }
     try {
-      // await setWithdrawalPin(pin); // Removed: setWithdrawalPin is not defined here
+      // Call server API to set the withdrawal PIN
+      await apiSetWithdrawalPin(pin, currentPin);
       setPinMsg('Withdrawal PIN set successfully!');
       setPin('');
+      setCurrentPin('');
     } catch (err) {
       setPinError(err.response?.data?.msg || 'Failed to set PIN.');
     }
@@ -266,19 +275,37 @@ export default function Settings() {
           <FiLock className="text-2xl text-gold" />
           <span className="font-semibold text-lg">Withdrawal PIN</span>
         </div>
-        <div className="flex flex-col sm:flex-row gap-2 items-center mb-2 w-full">
-          <input
-            type="password"
-            value={pin}
-            onChange={e => setPin(e.target.value.replace(/\D/g, '').slice(0, 6))}
-            className="p-2 rounded bg-gray-800 text-white border border-gray-700 focus:border-gold outline-none"
+        <div className="flex flex-col gap-2 mb-2 w-full">
+          {profile?.hasWithdrawalPin && (
+            <div className="w-full">
+              <label className="block text-sm text-gray-400 mb-1">Current PIN</label>
+              <input
+                type="password"
+                value={currentPin}
+                onChange={e => setCurrentPin(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                className="p-2 rounded bg-gray-800 text-white border border-gray-700 focus:border-gold outline-none w-full"
+                placeholder="Enter current 6-digit PIN"
+                maxLength={6}
+              />
+            </div>
+          )}
+          <div className="w-full">
+            <label className="block text-sm text-gray-400 mb-1">{profile?.hasWithdrawalPin ? 'New PIN' : 'Set PIN'}</label>
+            <input
+              type="password"
+              value={pin}
+              onChange={e => setPin(e.target.value.replace(/\D/g, '').slice(0, 6))}
+              className="p-2 rounded bg-gray-800 text-white border border-gray-700 focus:border-gold outline-none w-full"
             placeholder="Set or update 6-digit PIN"
             maxLength={6}
             minLength={6}
             pattern="[0-9]{6}"
           />
-          <button className="bg-gold text-black px-4 py-2 rounded-lg hover:bg-yellow-400" onClick={handleSetPin}>Set PIN</button>
-          <button className="text-blue-400 underline ml-2" onClick={() => setShowPinReset(true)}>Forgot PIN?</button>
+          </div>
+          <div className="flex items-center gap-2">
+            <button className="bg-gold text-black px-4 py-2 rounded-lg hover:bg-yellow-400" onClick={handleSetPin}>Set PIN</button>
+            <button className="text-blue-400 underline ml-2" onClick={() => setShowPinReset(true)}>Forgot PIN?</button>
+          </div>
         </div>
         {pinMsg && <div className="mt-2 text-green-400">{pinMsg}</div>}
         {pinError && <div className="mt-2 text-red-400">{pinError}</div>}

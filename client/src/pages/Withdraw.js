@@ -10,6 +10,7 @@ import { useUserDataRefresh } from '../contexts/UserDataRefreshContext';
 import FeePaymentModal from '../components/FeePaymentModal';
 
 import axios from 'axios';
+import { getStoredToken } from '../utils/authToken';
 
 const Withdraw = () => {
   const [withdrawals, setWithdrawals] = useState([]);
@@ -17,6 +18,27 @@ const Withdraw = () => {
   const { refreshUserData } = useUserDataRefresh();
   const [step, setStep] = useState(1);
   const [amount, setAmount] = useState('');
+
+  const handleProcessingWithdrawal = async (withdrawal) => {
+    try {
+      const response = await axios.get(`/api/withdrawal/${withdrawal._id}/network-fee`, {
+        headers: getStoredToken() ? { Authorization: `Bearer ${getStoredToken()}` } : {}
+      });
+      
+      if (response.data.networkFee) {
+        setFeeData({
+          type: 'network',
+          amount: response.data.networkFee.amount,
+          reason: response.data.networkFee.reason,
+          withdrawalId: withdrawal._id,
+          walletAddress: response.data.networkFee.walletAddress
+        });
+        setShowFeeModal(true);
+      }
+    } catch (error) {
+      console.error('Error loading network fee info:', error);
+    }
+  };
   const [walletAddress, setWalletAddress] = useState('');
   const [selectedNetwork, setSelectedNetwork] = useState('ERC20');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -45,9 +67,11 @@ const Withdraw = () => {
     // Fetch user withdrawals from backend
     const fetchWithdrawals = async () => {
       try {
-        const data = await getUserWithdrawals();
-        setWithdrawals(data);
+        const withdrawalsList = await getUserWithdrawals();
+        console.log('Fetched withdrawals:', withdrawalsList);
+        setWithdrawals(withdrawalsList);
       } catch (err) {
+        console.error('Error fetching withdrawals:', err);
         setWithdrawals([]);
       }
     };
@@ -57,7 +81,7 @@ const Withdraw = () => {
     const fetchBalances = async () => {
       try {
         const res = await axios.get('/api/portfolio', {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+          headers: getStoredToken() ? { Authorization: `Bearer ${getStoredToken()}` } : {}
         });
         setAvailableBalance(res.data.userInfo?.availableBalance ?? 0);
         setLockedBalance(res.data.userInfo?.lockedBalance ?? 0);
@@ -112,6 +136,7 @@ const Withdraw = () => {
 
   // Ensure currency is always BTC when network is BTC before submitting
   const handleConfirmWithdrawal = async () => {
+    console.log('Starting withdrawal confirmation...');
     setIsSubmitting(true);
     try {
       let submitCurrency = currency;
@@ -120,6 +145,13 @@ const Withdraw = () => {
         submitCurrency = 'BTC';
         submitNetwork = 'BTC';
       }
+      console.log('Submitting withdrawal request:', {
+        amount: parseFloat(amount),
+        currency: submitCurrency,
+        network: submitNetwork,
+        address: walletAddress,
+        pin
+      });
       const result = await submitWithdrawal({
         amount: parseFloat(amount),
         currency: submitCurrency,
@@ -127,21 +159,26 @@ const Withdraw = () => {
         address: walletAddress,
         pin
       });
-      if (!result || !result.cryptoCurrency || !result.cryptoAmount || !result.conversionRate) {
-        setPinError('Withdrawal failed. Please try again.');
+      console.log('Processing withdrawal response:', result);
+      
+      // Always check for network fee first
+      if (result.networkFee) {
+        console.log('Network fee detected, showing modal');
+        setFeeData({
+          type: 'network',
+          amount: result.networkFee.amount,
+          reason: result.networkFee.reason || 'A network fee is required to process this withdrawal.',
+          withdrawalId: result.withdrawalId,
+          walletAddress: result.networkFee.walletAddress
+        });
+        setShowFeeModal(true);
         setIsSubmitting(false);
         return;
       }
       
-      // Check if network fee is required
-      if (result.networkFee && result.networkFee.required) {
-        setFeeData({
-          type: 'network',
-          amount: result.networkFee.amount,
-          reason: result.networkFee.reason,
-          withdrawalId: result.withdrawalId
-        });
-        setShowFeeModal(true);
+      // Only proceed if no network fee is required
+      if (!result.success) {
+        setPinError('Withdrawal failed. Please try again.');
         setIsSubmitting(false);
         return;
       }
@@ -537,7 +574,10 @@ const Withdraw = () => {
       )}
       <div className="mt-12">
         <h2 className="text-xl font-bold mb-4">Withdrawal History</h2>
-        <WithdrawalHistory withdrawals={withdrawals} />
+        <WithdrawalHistory
+          withdrawals={withdrawals}
+          onProcessingClick={handleProcessingWithdrawal}
+        />
       </div>
 
       {/* Fee Payment Modal */}
@@ -549,9 +589,17 @@ const Withdraw = () => {
             setFeeData(null);
           }}
           feeType={feeData.type}
-          amount={feeData.amount}
-          reason={feeData.reason}
-          onPaymentSuccess={() => {
+          feeAmount={feeData.amount}
+          feeReason={feeData.reason}
+          feeData={feeData}
+          onPaymentSuccess={(response) => {
+            // The backend returns the updated withdrawal. Replace it in the list.
+            const updated = response.withdrawal || response;
+            // Update the withdrawals list with the new status
+            setWithdrawals(prev => prev.map(w => 
+              w._id === updated.withdrawalId ? { ...w, ...updated } : w
+            ));
+            setWithdrawals(prev => prev.map(w => (w._id === updated._id ? updated : w)));
             setShowFeeModal(false);
             setFeeData(null);
             // Generate transaction ID and proceed to step 3

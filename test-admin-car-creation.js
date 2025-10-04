@@ -2,7 +2,7 @@ const axios = require('axios');
 const FormData = require('form-data');
 const fs = require('fs');
 
-const BASE_URL = 'http://localhost:3001';
+const BASE_URL = 'http://localhost:5001';
 
 async function testAdminCarCreation() {
   try {

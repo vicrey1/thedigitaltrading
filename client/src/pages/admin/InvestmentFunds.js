@@ -9,7 +9,9 @@ const InvestmentFunds = () => {
   useEffect(() => {
     const fetchFunds = async () => {
       try {
-        const res = await axios.get('/api/admin/funds', { headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` } });
+  const { getStoredAdminToken } = require('../../utils/authToken');
+  const token = getStoredAdminToken();
+  const res = await axios.get('/api/admin/funds', { headers: token ? { Authorization: `Bearer ${token}` } : {} });
         setFunds(res.data || []);
       } catch (e) {
         console.error('Failed to fetch funds:', e);

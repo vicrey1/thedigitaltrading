@@ -32,7 +32,7 @@ export default function SupportAdmin() {
     if (!url) return null;
     if (authBlobCacheRef.current[cacheKey]) return authBlobCacheRef.current[cacheKey];
     try {
-      const token = localStorage.getItem('adminToken') || localStorage.getItem('token');
+  const token = localStorage.getItem('adminToken') || getStoredToken();
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
       const res = await apiFetch(url, { headers });
       if (!res.ok) throw new Error('Failed to fetch protected file');
@@ -285,7 +285,7 @@ export default function SupportAdmin() {
     (async () => {
       for (const id of missingIds) {
         try {
-          const token = localStorage.getItem('adminToken') || localStorage.getItem('token');
+          const token = localStorage.getItem('adminToken') || getStoredToken();
           const headers = token ? { Authorization: `Bearer ${token}` } : {};
           const res = await axios.get(`/api/admin/users/${id}/profile`, { headers });
           if (cancelled) return;

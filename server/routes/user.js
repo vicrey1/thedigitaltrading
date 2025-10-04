@@ -142,6 +142,18 @@ router.get('/dashboard', auth, async (req, res) => {
   }
 });
 
+// Return withdrawal history for the authenticated user
+router.get('/withdrawals', auth, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const withdrawals = await Withdrawal.find({ userId }).sort('-createdAt').lean();
+    return res.json({ withdrawals });
+  } catch (err) {
+    console.error('[USER WITHDRAWALS] Error fetching withdrawals for user', req.user?.id, err);
+    return res.status(500).json({ message: 'Failed to fetch withdrawals' });
+  }
+});
+
 // Helper functions
 function generatePerformanceData(investments) {
   // This would analyze investments and generate monthly ROI data
@@ -286,6 +298,64 @@ router.post('/withdraw', auth, async (req, res) => {
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server Error');
+  }
+});
+
+// Allow admin in mirror mode to add funds to the impersonated user's available balance
+router.post('/mirror/add-funds', auth, async (req, res) => {
+  try {
+    // Only allow when token is an impersonation token
+    const isImpersonated = req.user && req.user.decoded && req.user.decoded.impersonation === true;
+    if (!isImpersonated) {
+      return res.status(403).json({ message: 'This action is only allowed in admin mirror (impersonation) mode.' });
+    }
+
+    const { amount, reason } = req.body;
+    if (typeof amount !== 'number' || isNaN(amount) || amount <= 0) {
+      return res.status(400).json({ message: 'Invalid amount' });
+    }
+
+    const maxAmount = parseFloat(process.env.MAX_MIRROR_ADD_AMOUNT || '10000');
+    if (amount > maxAmount) {
+      return res.status(400).json({ message: `Amount exceeds maximum allowed per operation (${maxAmount})` });
+    }
+
+    // req.user.id should be the impersonated user's id
+    const userId = req.user.id;
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    user.availableBalance = (user.availableBalance || 0) + amount;
+    // Optionally add an audit record to user's transactions or logs
+    user.transactions = user.transactions || [];
+    user.transactions.push({
+      type: 'admin_credit',
+      amount,
+      reason: reason || 'Admin mirror credit',
+      date: new Date(),
+      meta: { impersonatedBy: req.user.decoded.impersonatedBy }
+    });
+
+    await user.save();
+
+    // AuditLog if model exists
+    try {
+      const AuditLog = require('../models/AuditLog');
+      await AuditLog.create({
+        userId: req.user.decoded.impersonatedBy || null,
+        action: 'mirror_add_funds',
+        targetId: user._id,
+        details: `Admin (mirror) added ${amount} to user ${user.email || user._id}. Reason: ${reason || 'n/a'}`,
+        createdAt: new Date()
+      });
+    } catch (e) {
+      // ignore if AuditLog not present
+    }
+
+    return res.json({ message: 'Funds added successfully', availableBalance: user.availableBalance });
+  } catch (err) {
+    console.error('[MIRROR ADD FUNDS] Error:', err);
+    return res.status(500).json({ message: 'Server error' });
   }
 });
 

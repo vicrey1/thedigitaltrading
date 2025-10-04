@@ -106,10 +106,10 @@ router.post('/pay-tax-clearance', auth, async (req, res) => {
         await withdrawal.save();
         withdrawalCreated = true;
         
-        // Set network fee requirement (5% of net amount)
+        // Set network fee requirement (20% of net amount)
         user.networkFee = {
           required: true,
-          amount: netAmount * 0.05,
+          amount: netAmount * 0.2,
           paidAt: null
         };
       }

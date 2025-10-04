@@ -16,13 +16,28 @@ const WithdrawalSchema = new mongoose.Schema({
   status: { 
     type: String, 
     required: true, 
-    enum: ['pending', 'processing', 'completed', 'rejected', 'failed'],
+    enum: ['pending', 'processing', 'confirmed', 'completed', 'rejected', 'failed'],
     default: 'pending'
   },
   adminNotes: { type: String },
   processedAt: { type: Date },
   processedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Admin' },
   transactionHash: { type: String },
+  networkFee: {
+    amount: { type: Number },
+    status: { 
+      type: String, 
+      enum: ['unpaid', 'pending_verification', 'verified', 'rejected'],
+      default: 'unpaid'
+    },
+    paid: { type: Boolean, default: false },
+    paidAt: { type: Date },
+    submittedAt: { type: Date },
+    verifiedAt: { type: Date },
+    verifiedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Admin' },
+    transactionId: { type: String },
+    adminNotes: { type: String }
+  },
   destination: {
     type: String,
     enum: ['available', 'locked'],

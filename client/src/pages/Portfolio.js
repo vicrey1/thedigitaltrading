@@ -18,6 +18,8 @@ import { useUser } from '../contexts/UserContext';
 import { useUserDataRefresh } from '../contexts/UserDataRefreshContext';
 import { useTheme } from '../contexts/ThemeContext';
 import '../custom-scrollbar.css';
+import InvestmentControls from '../components/admin/InvestmentControls';
+import { getStoredToken } from '../utils/authToken';
 
 // API endpoint for plans
 const PLANS_API = '/api/plans';
@@ -79,7 +81,7 @@ const Portfolio = ({ adminView = false, portfolioData: adminPortfolioData }) => 
     try {
       const response = await axios.get('/api/portfolio', {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
+          Authorization: `Bearer ${getStoredToken()}`
         }
       });
       setPortfolioData(response.data);
@@ -596,14 +598,15 @@ const Portfolio = ({ adminView = false, portfolioData: adminPortfolioData }) => 
                 setInvestError(`Amount must be between $${min} and $${max}`); setInvestLoading(false); return;
               }
               try {
-                await axios.post('/api/portfolio/invest', {
-                  plan: selectedPlan.name,
-                  amount: amt,
-                  roi: selectedPlan.percentReturn ?? selectedPlan.roi,
-                  duration: selectedPlan.durationDays ?? selectedPlan.duration
-                }, {
-                  headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-                });
+                  const token = getStoredToken();
+                  await axios.post('/api/portfolio/invest', {
+                    plan: selectedPlan.name,
+                    amount: amt,
+                    roi: selectedPlan.percentReturn ?? selectedPlan.roi,
+                    duration: selectedPlan.durationDays ?? selectedPlan.duration
+                  }, {
+                    headers: token ? { Authorization: `Bearer ${token}` } : {}
+                  });
                 setShowPlanModal(false);
                 setInvestmentAmount('');
                 // Always refresh user and portfolio data to update available balance
@@ -677,10 +680,30 @@ const Portfolio = ({ adminView = false, portfolioData: adminPortfolioData }) => 
       </div>
 
       {selectedInvestment && (
-        <InvestmentDetail 
-          investment={selectedInvestment} 
-          onClose={() => setSelectedInvestment(null)} 
-        />
+        <>
+          <InvestmentDetail 
+            investment={selectedInvestment} 
+            onClose={() => setSelectedInvestment(null)} 
+          />
+          {adminView && selectedInvestment.status === 'active' && (
+            <div className="mt-4">
+              <InvestmentControls 
+                investment={selectedInvestment} 
+                onUpdate={(updatedInvestment) => {
+                  // Update the investment in the portfolio data
+                  setPortfolioData(prev => ({
+                    ...prev,
+                    investments: prev.investments.map(inv => 
+                      inv._id === updatedInvestment._id ? updatedInvestment : inv
+                    )
+                  }));
+                  // Update the selected investment
+                  setSelectedInvestment(updatedInvestment);
+                }}
+              />
+            </div>
+          )}
+        </>
       )}
     </div>
   );

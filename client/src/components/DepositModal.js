@@ -1,6 +1,7 @@
 // src/components/DepositModal.js
 import React, { useState } from 'react';
 import axios from 'axios';
+import { getStoredToken } from '../utils/authToken';
 import { toast } from 'react-toastify';
 
 const DepositModal = ({ isOpen, onClose, fundTypes }) => {
@@ -25,7 +26,7 @@ const DepositModal = ({ isOpen, onClose, fundTypes }) => {
     try {
       const response = await axios.post('/api/user/deposit', formData, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
+          Authorization: getStoredToken() ? `Bearer ${getStoredToken()}` : undefined
         }
       });
       

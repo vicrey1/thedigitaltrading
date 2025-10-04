@@ -4,6 +4,7 @@ import { toast } from 'react-toastify';
 import { FiX, FiDollarSign, FiPieChart, FiTrendingUp, FiClock } from 'react-icons/fi';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Legend, Tooltip, ResponsiveContainer } from 'recharts';
 import { useTheme } from '../contexts/ThemeContext';
+import { getStoredToken } from '../utils/authToken';
 import FeePaymentModal from './FeePaymentModal';
 
 const InvestmentDetail = ({ investment, onClose }) => {
@@ -95,9 +96,9 @@ const InvestmentDetail = ({ investment, onClose }) => {
     setLiveInvestment(investment); // Reset on open
     const interval = setInterval(async () => {
       try {
-        const token = localStorage.getItem('token');
+        const token = getStoredToken();
         const res = await fetch(`/api/portfolio/investment/${investment.id}`, {
-          headers: { 'Authorization': `Bearer ${token}` }
+          headers: token ? { 'Authorization': `Bearer ${token}` } : {}
         });
         if (res.ok) {
           const data = await res.json();
@@ -279,10 +280,10 @@ const InvestmentDetail = ({ investment, onClose }) => {
                   return;
                 }
                 try {
-                  const token = localStorage.getItem('token');
+                  const token = getStoredToken();
                   const res = await fetch(`/api/investment/withdraw-roi/${investment.id}`, {
                     method: 'POST',
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: token ? { 'Authorization': `Bearer ${token}` } : {}
                   });
                   const data = await res.json();
                   if (data.success) {

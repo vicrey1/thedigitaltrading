@@ -18,9 +18,10 @@ const AdminAnnouncements = () => {
   // Fetch announcements
   const fetchAnnouncements = async () => {
     try {
-      const token = localStorage.getItem('adminToken');
+      const { getStoredAdminToken } = require('../../utils/authToken');
+      const token = getStoredAdminToken();
       const res = await axios.get('/api/admin/announcements', {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
       setAnnouncements(res.data.announcements || []);
     } catch (err) {
@@ -40,9 +41,10 @@ const AdminAnnouncements = () => {
     setSuccess('');
     setError('');
     try {
-      const token = localStorage.getItem('adminToken');
+      const { getStoredAdminToken } = require('../../utils/authToken');
+      const token = getStoredAdminToken();
       await axios.post('/api/admin/announcements', { title, message: richMessage }, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
       setSuccess('Announcement posted!');
       setTitle('');
@@ -61,9 +63,10 @@ const AdminAnnouncements = () => {
     setDeletingId(id);
     setError('');
     try {
-      const token = localStorage.getItem('adminToken');
+      const { getStoredAdminToken } = require('../../utils/authToken');
+      const token = getStoredAdminToken();
       await axios.delete(`/api/admin/announcements/${id}`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
       await fetchAnnouncements(); // Always re-fetch after delete
     } catch (err) {
@@ -93,10 +96,11 @@ const AdminAnnouncements = () => {
     if (file) {
       const formData = new FormData();
       formData.append('image', file);
-      const token = localStorage.getItem('adminToken');
+      const { getStoredAdminToken } = require('../../utils/authToken');
+      const token = getStoredAdminToken();
       try {
         const res = await axios.post('/api/upload-announcement-image', formData, {
-          headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${token}` }
+          headers: token ? { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${token}` } : { 'Content-Type': 'multipart/form-data' }
         });
         if (!res.data.url) throw new Error('No image URL returned');
         const imageUrl = res.data.url.startsWith('http')

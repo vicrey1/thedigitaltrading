@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
+import { getStoredToken } from '../utils/authToken';
 import countries from '../utils/countries';
 import Webcam from 'react-webcam';
 import { ToastContainer, toast } from 'react-toastify';
@@ -33,9 +34,9 @@ const KYCPage = () => {
   useEffect(() => {
     const fetchKYC = async () => {
       try {
-        const token = localStorage.getItem('token');
+        const token = getStoredToken();
         const res = await axios.get('/api/auth/kyc/status', {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: token ? { Authorization: `Bearer ${token}` } : {}
         });
         setKycStatus(res.data.kyc.status || 'pending');
         setRejectionReason(res.data.kyc.rejectionReason || '');
@@ -107,7 +108,7 @@ const KYCPage = () => {
       await axios.post('/api/auth/kyc/upload', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
-          Authorization: `Bearer ${localStorage.getItem('token')}`
+          Authorization: getStoredToken() ? `Bearer ${getStoredToken()}` : undefined
         }
       });
       setSuccess(true);

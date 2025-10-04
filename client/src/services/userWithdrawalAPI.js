@@ -1,12 +1,11 @@
-// src/services/userWithdrawalAPI.js
 import axios from 'axios';
-
 const API = axios.create({
   baseURL: `${process.env.REACT_APP_API_BASE_URL || ''}/api/user`,
 });
 
 API.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
+  const { getStoredToken } = require('../utils/authToken');
+  const token = getStoredToken();
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -15,5 +14,5 @@ API.interceptors.request.use((config) => {
 
 export const getUserWithdrawals = async () => {
   const response = await API.get('/withdrawals');
-  return response.data;
+  return response.data.withdrawals || [];
 };

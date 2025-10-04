@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { getStoredToken } from '../utils/authToken';
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || '';
 
@@ -9,7 +10,7 @@ const feeAPI = axios.create({
 
 // Add auth token to requests
 feeAPI.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
+  const token = getStoredToken();
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }

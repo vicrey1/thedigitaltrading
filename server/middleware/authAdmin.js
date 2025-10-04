@@ -1,11 +1,40 @@
-// Admin authentication middleware
-module.exports = (req, res, next) => {
-  if (!req.user || !req.user.id) {
-    return res.status(401).json({ error: 'Unauthorized' });
+﻿const auth = require("./auth");
+const logger = require("../utils/logger");
+
+// Admin authentication middleware - chained with auth middleware
+const adminAuth = [
+  auth,
+  (req, res, next) => {
+    try {
+      if (!req.user || !req.user.id) {
+        logger.error("[ADMIN AUTH] No user object found");
+        return res.status(401).json({ 
+          message: "Authentication required. Please log in.",
+          error: "NO_USER"
+        });
+      }
+
+      if (req.user.role !== "admin") {
+        logger.error("[ADMIN AUTH] User is not admin:", { userId: req.user.id, role: req.user.role });
+        return res.status(403).json({ 
+          message: "Access denied. Admin privileges required.",
+          error: "NOT_ADMIN"
+        });
+      }
+
+      logger.info("[ADMIN AUTH] Admin access granted", { 
+        userId: req.user.id,
+        source: req.user.source
+      });
+      next();
+    } catch (error) {
+      logger.error("[ADMIN AUTH] Error:", error);
+      res.status(500).json({ 
+        message: "Internal server error in authentication",
+        error: error.code || "AUTH_ERROR"
+      });
+    }
   }
-  // Check if user is admin
-  if (req.user.role !== 'admin') {
-    return res.status(403).json({ error: 'Forbidden: Admins only' });
-  }
-  next();
-};
+];
+
+module.exports = adminAuth;

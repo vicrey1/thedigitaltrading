@@ -3,6 +3,7 @@ import React from 'react';
 import { FiDownload } from 'react-icons/fi';
 
 const statusColors = {
+  processing: 'bg-blue-500 bg-opacity-20 text-blue-400',
   pending: 'bg-yellow-500 bg-opacity-20 text-yellow-400',
   completed: 'bg-green-500 bg-opacity-20 text-green-400',
   rejected: 'bg-red-500 bg-opacity-20 text-red-400'

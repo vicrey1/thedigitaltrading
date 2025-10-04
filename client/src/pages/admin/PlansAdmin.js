@@ -10,7 +10,9 @@ const PlansAdmin = () => {
 
   const fetchPlans = async () => {
     setLoading(true);
-    const res = await axios.get('/api/admin/plans', { headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` } });
+    const { getStoredAdminToken } = require('../../utils/authToken');
+    const token = getStoredAdminToken();
+    const res = await axios.get('/api/plans', { headers: token ? { Authorization: `Bearer ${token}` } : {} });
     setPlans(res.data);
     setLoading(false);
   };
@@ -27,16 +29,18 @@ const PlansAdmin = () => {
   };
 
   const handleDelete = async (id) => {
-    await axios.delete(`/api/admin/plans/${id}`, { headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` } });
+  const { getStoredAdminToken } = require('../../utils/authToken');
+  const token = getStoredAdminToken();
+  await axios.delete(`/api/plans/${id}`, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
     fetchPlans();
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (editing) {
-      await axios.put(`/api/admin/plans/${editing}`, form, { headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` } });
+      await axios.put(`/api/plans/${editing}`, form, { headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` } });
     } else {
-      await axios.post('/api/admin/plans', form, { headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` } });
+      await axios.post('/api/plans', form, { headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` } });
     }
     setEditing(null);
     setForm({ name: '', percentReturn: 150, durationDays: 4, minInvestment: 10, maxInvestment: 10000, isActive: true });

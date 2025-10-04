@@ -17,9 +17,10 @@ axios.interceptors.response.use(
 
       if (isExplicitTokenError) {
         // Determine which token (if any) the failing request used
-        const authHeader = error.config?.headers?.Authorization || '';
-        const adminToken = localStorage.getItem('adminToken');
-        const userToken = localStorage.getItem('token');
+  const authHeader = error.config?.headers?.Authorization || '';
+  const { getStoredAdminToken, getStoredToken } = require('./authToken');
+  const adminToken = getStoredAdminToken();
+  const userToken = getStoredToken();
 
         // Only logout if the failing request actually used the same token we have stored locally
         if (adminToken && authHeader === `Bearer ${adminToken}`) {

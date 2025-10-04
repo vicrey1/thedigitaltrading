@@ -10,7 +10,7 @@ import {
 import AdminCard from '../../components/admin/AdminCard';
 import { 
   LineChart, Line, AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
-  XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
+  XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer 
 } from 'recharts';
 import { useTheme } from '../../contexts/ThemeContext';
 import { getAdminStats, getRecentActivities } from '../../services/adminStatsAPI';
@@ -36,7 +36,7 @@ const AdminIndex = () => {
     });
   }, [ensureNumber]);
   
-  const [stats, setStats] = useState({
+  const [stats, setStats] = useState(() => ({
     totalUsers: 0,
     activeInvestments: 0,
     totalDeposits: 0,
@@ -48,34 +48,40 @@ const AdminIndex = () => {
     successfulDeposits: 0,
     successfulWithdrawals: 0,
     averageInvestment: 0,
-    totalInvestments: 0
-  });
-  const [activities, setActivities] = useState([]);
+    totalInvestments: 0,
+    investmentGrowth: 0
+  }));
   const [timeframe, setTimeframe] = useState('7d');
-  const [chartData, setChartData] = useState({
+  const [chartData] = useState({
     investments: [],
     transactions: [],
     userGrowth: [],
     revenue: []
   });
-  const [systemHealth, setSystemHealth] = useState({
-    status: 'healthy',
+  const [systemHealth] = useState({
+    api: 'healthy',
+    database: 'healthy',
+    email: 'healthy',
     lastBackup: null,
     serverLoad: 0,
-    databaseSize: 0
+    databaseSize: 0,
+    cpuUsage: 0,
+    memoryUsage: 0,
+    storageUsage: 0,
+    emailQueue: 0,
+    lastCheck: new Date(),
+    apiLatency: 0
   });
-  const [loading, setLoading] = useState({
-    stats: true,
-    activities: true,
-    charts: true,
-    health: true
-  });
-  const [error, setError] = useState({
+  const [loading, setLoading] = useState(() => ({
+    stats: false,
+    activities: false,
+    health: false
+  }));
+  const [error, setError] = useState(() => ({
     stats: null,
     activities: null,
-    charts: null,
     health: null
-  });
+  }));
 
   // Chart data - will be populated from API
   const [revenueData, setRevenueData] = useState([]);
@@ -83,12 +89,20 @@ const AdminIndex = () => {
   const [investmentDistribution, setInvestmentDistribution] = useState([]);
   const [systemMetrics, setSystemMetrics] = useState([]);
 
-  // Fetch data from backend
+    // Fetch data from backend
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        setLoading(true);
-        setError(null);
+        setLoading(prevLoading => ({ 
+          ...(prevLoading || {}), 
+          stats: true, 
+          health: true 
+        }));
+        setError(prevError => ({ 
+          ...(prevError || {}), 
+          stats: null, 
+          health: null 
+        }));
         const data = await getAdminStats();
         
         // Update stats
@@ -113,17 +127,19 @@ const AdminIndex = () => {
         const activitiesData = await getRecentActivities(10);
         setRecentActivities(activitiesData || []);
         
-      } catch (err) {
-        console.error('Failed to fetch dashboard data:', err);
-        
-        // Check if it's an authentication error
-        if (err.response?.status === 401) {
-          setError('Authentication required. Please log in to view admin dashboard.');
-        } else {
-          setError('Failed to load dashboard data. Please try again.');
-        }
-        
-        // Fallback to default values on error
+        } catch (err) {
+          console.error('Failed to fetch dashboard data:', err);
+          
+          const errorMessage = err.response?.status === 401
+            ? 'Authentication required. Please log in to view admin dashboard.'
+            : 'Failed to load dashboard data. Please try again.';
+          
+          setError(prevError => ({
+            ...(prevError || {}),
+            stats: errorMessage,
+            health: errorMessage
+          }));
+          // Fallback to default values on error
         setStats({
           totalUsers: 0,
           activeInvestments: 0,
@@ -152,6 +168,8 @@ const AdminIndex = () => {
   const refreshData = () => {
     const fetchData = async () => {
       try {
+        setLoading(prev => ({ ...prev, stats: true, health: true }));
+        setError(prev => ({ ...prev, stats: null, health: null }));
         const data = await getAdminStats();
         setStats({
           totalUsers: ensureNumber(data.totalUsers, 0),
@@ -176,6 +194,8 @@ const AdminIndex = () => {
       } catch (err) {
         console.error('Failed to refresh data:', err);
         setError('Failed to refresh data. Please try again.');
+      } finally {
+        setLoading(false);
       }
     };
     fetchData();
@@ -309,21 +329,21 @@ const AdminIndex = () => {
           </button>
           <button 
             onClick={refreshData}
-            disabled={loading}
+            disabled={loading?.stats}
             className={`
               flex items-center px-4 py-2 rounded-lg transition-colors
               ${isDarkMode ? 'bg-orange-600 hover:bg-orange-700' : 'bg-orange-500 hover:bg-orange-600'}
               text-white disabled:opacity-50 disabled:cursor-not-allowed
             `}
           >
-            <FiRefreshCw className={`mr-2 ${loading ? 'animate-spin' : ''}`} size={16} />
-            {loading ? 'Refreshing...' : 'Refresh'}
+            <FiRefreshCw className={`mr-2 ${loading?.stats ? 'animate-spin' : ''}`} size={16} />
+            {loading?.stats ? 'Refreshing...' : 'Refresh'}
           </button>
         </div>
       </div>
 
       {/* Error Display */}
-      {error && (
+      {(error?.stats || error?.health || error?.activities) && (
         <div className={`
           p-4 rounded-lg border-l-4 border-red-500 
           ${isDarkMode ? 'bg-red-900/20 text-red-300' : 'bg-red-50 text-red-700'}
@@ -332,7 +352,9 @@ const AdminIndex = () => {
             <FiAlertCircle className="mr-2" size={16} />
             <span className="font-medium">Error loading dashboard data</span>
           </div>
-          <p className="mt-1 text-sm">{error}</p>
+          {error.stats && <p className="mt-1 text-sm">{error.stats}</p>}
+          {error.health && <p className="mt-1 text-sm">{error.health}</p>}
+          {error.activities && <p className="mt-1 text-sm">{error.activities}</p>}
           <button 
             onClick={refreshData}
             className="mt-2 text-sm underline hover:no-underline"
@@ -347,41 +369,41 @@ const AdminIndex = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <AdminCard
           title="Total Users"
-          value={stats.totalUsers.toLocaleString()}
+          value={(stats?.totalUsers || 0).toLocaleString()}
           icon={<FiUsers className="text-blue-500" />}
-          trend={stats.monthlyGrowth}
-          loading={loading.stats}
-          subtitle={`${stats.activeUsers} active users`}
+          trend={stats?.monthlyGrowth}
+          loading={loading?.stats}
+          subtitle={`${stats?.activeUsers || 0} active users`}
         />
         <AdminCard
           title="Total Investments"
-          value={`$${stats.totalInvestments.toLocaleString()}`}
+          value={`$${(stats?.totalInvestments || 0).toLocaleString()}`}
           icon={<FiTrendingUp className="text-green-500" />}
-          trend={stats.investmentGrowth}
-          loading={loading.stats}
-          subtitle={`Avg: $${stats.averageInvestment.toLocaleString()}`}
+          trend={stats?.investmentGrowth}
+          loading={loading?.stats}
+          subtitle={`Avg: $${(stats?.averageInvestment || 0).toLocaleString()}`}
         />
         <AdminCard
           title="Transactions"
-          value={`$${(stats.totalDeposits + stats.totalWithdrawals).toLocaleString()}`}
+          value={`$${((stats?.totalDeposits || 0) + (stats?.totalWithdrawals || 0)).toLocaleString()}`}
           icon={<FiDollarSign className="text-purple-500" />}
-          loading={loading.stats}
+          loading={loading?.stats}
           subtitle={
             <>
-              <span className="text-green-500">↑${stats.successfulDeposits.toLocaleString()}</span>
+              <span className="text-green-500">↑${(stats?.successfulDeposits || 0).toLocaleString()}</span>
               {' / '}
-              <span className="text-red-500">↓${stats.successfulWithdrawals.toLocaleString()}</span>
+              <span className="text-red-500">↓${(stats?.successfulWithdrawals || 0).toLocaleString()}</span>
             </>
           }
         />
         <AdminCard
           title="System Status"
-          value={systemHealth.status}
+          value={systemHealth.api || 'Unknown'}
           icon={<FiActivity className={`${
-            systemHealth.status === 'healthy' ? 'text-green-500' : 
-            systemHealth.status === 'warning' ? 'text-yellow-500' : 'text-red-500'
+            systemHealth.api === 'healthy' ? 'text-green-500' : 
+            systemHealth.api === 'degraded' ? 'text-yellow-500' : 'text-red-500'
           }`} />}
-          loading={loading.health}
+          loading={loading.stats}
           subtitle={`Last backup: ${
             systemHealth.lastBackup 
               ? new Date(systemHealth.lastBackup).toLocaleDateString() 
@@ -647,51 +669,93 @@ const AdminIndex = () => {
         </div>
       </div>
 
-      {/* Quick Actions */}
+      {/* Admin Feature Cards */}
       <div>
-        <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <h2 className="text-xl font-semibold mb-4">Admin Features</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           <QuickActionCard
-            title="Manage Users"
-            description="View and manage user accounts"
+            title="Users"
+            description="View, search, filter, and manage all users. Mirror user accounts and manage KYC."
             icon={FiUsers}
             color="bg-gradient-to-r from-blue-500 to-blue-600"
             link="/admin/users"
           />
           <QuickActionCard
-            title="Investment Plans"
-            description="Create and manage investment plans"
-            icon={FiBarChart2}
-            color="bg-gradient-to-r from-green-500 to-green-600"
-            link="/admin/plans"
-          />
-          <QuickActionCard
-            title="Withdrawals"
-            description="Process pending withdrawals"
-            icon={FiDownload}
-            color="bg-gradient-to-r from-orange-500 to-orange-600"
-            link="/admin/withdrawals"
-          />
-          <QuickActionCard
-            title="Car Management"
-            description="Manage luxury car inventory"
-            icon={FiTruck}
-            color="bg-gradient-to-r from-purple-500 to-purple-600"
-            link="/admin/cars"
-          />
-          <QuickActionCard
-            title="User Mirror"
-            description="Mirror user account view"
+            title="KYC Management"
+            description="Review and approve/reject user KYC submissions."
             icon={FiEye}
             color="bg-gradient-to-r from-indigo-500 to-indigo-600"
             link="/admin/mirror"
           />
           <QuickActionCard
-            title="Cold Wallet"
-            description="Manage cold wallet funds"
+            title="Investments"
+            description="View and manage user investments and funds."
+            icon={FiTrendingUp}
+            color="bg-gradient-to-r from-green-500 to-green-600"
+            link="/admin/investments"
+          />
+          <QuickActionCard
+            title="Withdrawals"
+            description="Process and approve pending withdrawals."
+            icon={FiDownload}
+            color="bg-gradient-to-r from-orange-500 to-orange-600"
+            link="/admin/withdrawals"
+          />
+          <QuickActionCard
+            title="Deposits"
+            description="View and manage user deposits."
             icon={FiDollarSign}
+            color="bg-gradient-to-r from-purple-500 to-purple-600"
+            link="/admin/deposits"
+          />
+          <QuickActionCard
+            title="Car Management"
+            description="Manage luxury car inventory."
+            icon={FiTruck}
+            color="bg-gradient-to-r from-pink-500 to-pink-600"
+            link="/admin/cars"
+          />
+          <QuickActionCard
+            title="Announcements"
+            description="Create and manage platform announcements."
+            icon={FiInbox}
+            color="bg-gradient-to-r from-yellow-500 to-yellow-600"
+            link="/admin/announcements"
+          />
+          <QuickActionCard
+            title="Support"
+            description="View and manage support tickets and agents."
+            icon={FiActivity}
+            color="bg-gradient-to-r from-gray-700 to-gray-900"
+            link="/admin/support"
+          />
+          <QuickActionCard
+            title="Plans"
+            description="Create and manage investment plans."
+            icon={FiBarChart2}
+            color="bg-gradient-to-r from-green-700 to-green-900"
+            link="/admin/plans"
+          />
+          <QuickActionCard
+            title="Wallets"
+            description="View and manage admin and cold wallets."
+            icon={FiHardDrive}
             color="bg-gradient-to-r from-gray-500 to-gray-600"
-            link="/admin/cold-wallet"
+            link="/admin/wallets"
+          />
+          <QuickActionCard
+            title="Settings"
+            description="Update admin settings and notification preferences."
+            icon={FiPieChart}
+            color="bg-gradient-to-r from-blue-700 to-blue-900"
+            link="/admin/settings"
+          />
+          <QuickActionCard
+            title="Send Email"
+            description="Send emails to users."
+            icon={FiMail}
+            color="bg-gradient-to-r from-orange-700 to-orange-900"
+            link="/admin/send-email"
           />
         </div>
       </div>
@@ -744,7 +808,7 @@ const AdminIndex = () => {
               `}>
                 <div className="flex items-center">
                   <FiAlertCircle className="mr-2" />
-                  <span>{error.activities}</span>
+                  <span>{typeof error.activities === 'string' ? error.activities : 'Error loading activities'}</span>
                 </div>
               </div>
             )}
@@ -789,22 +853,22 @@ const AdminIndex = () => {
             }`}
             title="Refresh system status"
           >
-            <FiRefreshCw className={`w-5 h-5 ${loading.health ? 'animate-spin' : ''}`} />
+            <FiRefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
           </button>
         </div>
         
-        {loading.health ? (
+        {loading.stats ? (
           <div className="flex justify-center py-8">
             <div className="w-10 h-10 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
           </div>
-        ) : error.health ? (
+        ) : error.stats ? (
           <div className={`
             p-4 rounded-lg text-sm
             ${isDarkMode ? 'bg-red-900/20 text-red-300' : 'bg-red-50 text-red-700'}
           `}>
             <div className="flex items-center">
               <FiAlertCircle className="mr-2" />
-              <span>{error.health}</span>
+              <span>{typeof error.stats === 'string' ? error.stats : 'Error loading system status'}</span>
             </div>
           </div>
         ) : (

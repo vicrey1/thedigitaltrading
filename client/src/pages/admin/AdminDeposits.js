@@ -11,8 +11,9 @@ const AdminDeposits = () => {
   const [actionStatus, setActionStatus] = useState('');
 
   useEffect(() => {
-    // Redirect to login if no adminToken
-    if (!localStorage.getItem('adminToken')) {
+    // Redirect to login if no valid adminToken
+    const { getStoredAdminToken } = require('../../utils/authToken');
+    if (!getStoredAdminToken()) {
       navigate('/admin/login');
       return;
     }

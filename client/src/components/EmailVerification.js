@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { getStoredToken } from '../utils/authToken';
 import { useUser } from '../contexts/UserContext';
 
 const CODE_LENGTH = 6;
@@ -23,7 +24,7 @@ const EmailVerification = ({ email, onVerified }) => {
     setLoading(true);
     setError(null);
     try {
-      await axios.post('/api/auth/send-verification', {}, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
+    await axios.post('/api/auth/send-verification', {}, { headers: getStoredToken() ? { Authorization: `Bearer ${getStoredToken()}` } : {} });
       setSent(true);
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to send code.');
@@ -37,7 +38,7 @@ const EmailVerification = ({ email, onVerified }) => {
     setLoading(true);
     setError(null);
     try {
-      const resp = await axios.post('/api/auth/verify-email', { code: code.join('') }, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
+  const resp = await axios.post('/api/auth/verify-email', { code: code.join('') }, { headers: getStoredToken() ? { Authorization: `Bearer ${getStoredToken()}` } : {} });
       console.log('[EMAIL-VERIFICATION] Backend response:', resp.data);
       // Add a short delay to ensure DB write is complete before refreshing context
       await new Promise(res => setTimeout(res, 500));

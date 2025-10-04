@@ -1,7 +1,7 @@
 const axios = require('axios');
 const jwt = require('jsonwebtoken');
 
-const BASE_URL = 'http://localhost:3001/api';
+const BASE_URL = 'http://localhost:5001/api';
 
 async function testJWTTokens() {
   console.log('🔍 Testing JWT Token Contents...\n');

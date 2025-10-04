@@ -1,0 +1,56 @@
+/* Auto-adjusting layout styles */
+.auto-adjusting-container {
+  width: 100%;
+  max-width: var(--container-width, 90vw);
+  margin: 0 auto;
+  transition: max-width 0.3s ease;
+}
+
+/* Grid layout utilities */
+.auto-fit-grid {
+  display: grid;
+  gap: 1.5rem;
+}
+
+/* Responsive container queries */
+@container (min-width: 600px) {
+  .content-card {
+    grid-column: span 2;
+  }
+}
+
+@container (min-width: 900px) {
+  .content-card.wide {
+    grid-column: span 3;
+  }
+}
+
+/* Ensure content doesn't overflow its container */
+.content-wrapper {
+  max-width: 100%;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  word-break: break-word;
+}
+
+/* Smooth width transitions */
+.width-transition {
+  transition: width 0.3s ease-in-out;
+}
+
+/* Dynamic padding based on container width */
+.dynamic-padding {
+  padding: clamp(1rem, calc(1rem + 1vw), 2rem);
+}
+
+/* Flex grow for content that can expand */
+.flex-grow-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.flex-grow-item {
+  flex: 1 1 var(--min-width, 300px);
+  max-width: 100%;
+}

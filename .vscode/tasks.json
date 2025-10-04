@@ -7,6 +7,12 @@
 			"command": "node server/scripts/update_roi.js",
 			"isBackground": false,
 			"group": "build"
+		},
+		{
+			"label": "build",
+			"type": "shell",
+			"command": "cd client && npm run build",
+			"group": "build"
 		}
 	]
 }

@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
-const API_BASE = '/api/admin/plans';
+const API_BASE = '/api/plans';
 
 export default function AdminPlans() {
   const [plans, setPlans] = useState([]);
@@ -15,8 +15,9 @@ export default function AdminPlans() {
   }, []);
 
   async function fetchPlans() {
-    const token = localStorage.getItem('adminToken');
-    const config = { headers: { Authorization: `Bearer ${token}` } };
+    const { getStoredAdminToken } = require('../utils/authToken');
+    const token = getStoredAdminToken();
+    const config = { headers: token ? { Authorization: `Bearer ${token}` } : {} };
     const res = await axios.get(API_BASE, config);
     setPlans(res.data);
   }
@@ -27,8 +28,9 @@ export default function AdminPlans() {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    const token = localStorage.getItem('adminToken');
-    const config = { headers: { Authorization: `Bearer ${token}` } };
+  const { getStoredAdminToken } = require('../utils/authToken');
+  const token = getStoredAdminToken();
+  const config = { headers: token ? { Authorization: `Bearer ${token}` } : {} };
     const payload = {
       name: form.name,
       roi: form.roi,

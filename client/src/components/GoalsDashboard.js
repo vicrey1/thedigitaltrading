@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { getStoredToken } from '../utils/authToken';
 import { FiTarget, FiTrash2, FiPlusCircle } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 
@@ -13,8 +14,8 @@ export default function GoalsDashboard() {
   const fetchGoals = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('token');
-      const res = await axios.get('/api/goals', { headers: { Authorization: `Bearer ${token}` } });
+      const token = getStoredToken();
+      const res = await axios.get('/api/goals', { headers: token ? { Authorization: `Bearer ${token}` } : {} });
       setGoals(res.data);
     } catch {
       toast.error('Failed to load goals');
@@ -28,8 +29,8 @@ export default function GoalsDashboard() {
     e.preventDefault();
     if (!title || !targetAmount) return toast.error('Title and target required');
     try {
-      const token = localStorage.getItem('token');
-      await axios.post('/api/goals', { title, targetAmount }, { headers: { Authorization: `Bearer ${token}` } });
+  const token = getStoredToken();
+  await axios.post('/api/goals', { title, targetAmount }, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
       setTitle(''); setTargetAmount(''); setShowAdd(false);
       toast.success('Goal added!');
       fetchGoals();
@@ -41,8 +42,8 @@ export default function GoalsDashboard() {
   const handleDeleteGoal = async (id) => {
     if (!window.confirm('Delete this goal?')) return;
     try {
-      const token = localStorage.getItem('token');
-      await axios.delete(`/api/goals/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+  const token = getStoredToken();
+  await axios.delete(`/api/goals/${id}`, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
       toast.success('Goal deleted');
       fetchGoals();
     } catch {

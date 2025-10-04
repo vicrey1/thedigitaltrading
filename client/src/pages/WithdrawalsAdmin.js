@@ -15,10 +15,12 @@ const WithdrawalsAdmin = () => {
   const fetchWithdrawals = async () => {
     setLoading(true);
     try {
+      const { getStoredAdminToken } = require('../utils/authToken');
+      const token = getStoredAdminToken();
       const res = await axios.get('/api/admin/withdrawals?status=pending', {
-        headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` }
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
-      setWithdrawals(res.data);
+      setWithdrawals(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       setError('Failed to fetch withdrawals');
     } finally {
@@ -28,8 +30,10 @@ const WithdrawalsAdmin = () => {
 
   const handleApprove = async (id) => {
     try {
+      const { getStoredAdminToken } = require('../utils/authToken');
+      const token = getStoredAdminToken();
       await axios.put(`/api/admin/withdrawals/${id}`, { status: 'completed', adminNotes: '' }, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` }
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
       fetchWithdrawals();
     } catch {
@@ -43,8 +47,10 @@ const WithdrawalsAdmin = () => {
       return;
     }
     try {
+      const { getStoredAdminToken } = require('../utils/authToken');
+      const token = getStoredAdminToken();
       await axios.put(`/api/admin/withdrawals/${id}`, { status: 'rejected', adminNotes: rejectReason }, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` }
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
       setActionId(null);
       setRejectReason('');
@@ -60,7 +66,7 @@ const WithdrawalsAdmin = () => {
   return (
     <div className="max-w-6xl mx-auto p-8 md:p-12 lg:p-16 xl:p-20 2xl:p-24 font-sans text-base text-gray-100 bg-black rounded-xl shadow-lg">
       <h2 className="text-3xl font-bold mb-6">Withdrawal Management</h2>
-      {withdrawals.length === 0 ? (
+      {(Array.isArray(withdrawals) ? withdrawals : []).length === 0 ? (
         <div>No pending withdrawals.</div>
       ) : (
         <table className="min-w-full bg-white border border-gray-200">
@@ -74,7 +80,7 @@ const WithdrawalsAdmin = () => {
             </tr>
           </thead>
           <tbody>
-            {withdrawals.map(w => (
+            {(Array.isArray(withdrawals) ? withdrawals : []).map(w => (
               <tr key={w._id}>
                 <td className="py-2 px-4 border-b">
                   <div>{w.userName || w.userId}</div>

@@ -1,5 +1,6 @@
 // src/services/withdrawalAPI.js
 import axios from 'axios';
+import { getStoredToken } from '../utils/authToken';
 
 const API = axios.create({
   baseURL: process.env.REACT_APP_API_BASE_URL + '/api/admin/withdrawals',
@@ -7,7 +8,8 @@ const API = axios.create({
 
 // Add auth token to requests
 API.interceptors.request.use((config) => {
-  const token = localStorage.getItem('adminToken');
+  const { getStoredAdminToken } = require('../utils/authToken');
+  const token = getStoredAdminToken();
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -52,10 +54,10 @@ export const bulkUpdateWithdrawals = async (ids, updates) => {
 
 // User withdrawal endpoints (not admin)
 const userAPI = axios.create({
-  baseURL: process.env.REACT_APP_API_BASE_URL + '/api/withdrawal',
+  baseURL: '/api/withdrawal', // Uses Vite's proxy in dev mode
 });
 userAPI.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
+  const token = getStoredToken();
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -63,14 +65,25 @@ userAPI.interceptors.request.use((config) => {
 });
 
 // Add setWithdrawalPin API
-export const setWithdrawalPin = async (pin) => {
-  const response = await userAPI.post('/set-withdrawal-pin', { pin });
+export const setWithdrawalPin = async (pin, currentPin = null) => {
+  const data = { pin };
+  if (currentPin) {
+    data.currentPin = currentPin;
+  }
+  const response = await userAPI.post('/set-withdrawal-pin', data);
   return response.data;
 };
 
 export const submitWithdrawal = async (data) => {
-  const response = await userAPI.post('/', data);
-  return response.data;
+  console.log('Sending withdrawal request:', { ...data, pin: '******' });
+  try {
+    const response = await userAPI.post('/', data);
+    console.log('Withdrawal API response:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Withdrawal API error:', error.response?.data || error.message);
+    throw error;
+  }
 };
 
 export const requestPinReset = async () => {
@@ -85,5 +98,10 @@ export const resetPin = async (code, newPin) => {
 
 export const verifyWithdrawalPin = async (pin) => {
   const response = await userAPI.post('/verify-pin', { pin });
+  return response.data;
+};
+
+export const payNetworkFee = async (withdrawalId) => {
+  const response = await userAPI.post(`/${withdrawalId}/pay-network-fee`);
   return response.data;
 };

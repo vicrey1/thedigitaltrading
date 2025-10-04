@@ -220,6 +220,17 @@ const UserSchema = new mongoose.Schema({
   pinResetCode: { type: String, select: false },
   pinResetExpiry: { type: Number, select: false },
   
+  // Transaction log for user (admin adjustments, deposits, withdrawals etc.)
+  transactions: {
+    type: [{ type: Object }],
+    default: []
+  },
+
+  availableBalance: {
+    type: Number,
+    default: 0
+  },
+  
   // Fee Management Fields
   activationFee: {
     required: { type: Boolean, default: false },

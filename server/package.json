@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "node -r dotenv/config server.js",
-    "dev": "cross-env NODE_ENV=development nodemon -r dotenv/config --env-file=.env.development server.js",
+    "start": "cross-env PORT=5001 node -r dotenv/config server.js",
+    "dev": "cross-env PORT=5001 NODE_ENV=development nodemon -r dotenv/config --env-file=.env.development server.js",
     "test": "jest",
     "seed": "node scripts/seed-plans.js",
     "list-plans": "node scripts/list-plans.js"

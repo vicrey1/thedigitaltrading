@@ -18,6 +18,10 @@ const app = express();
 // Apply CORS middleware with our custom configuration
 app.use(cors(corsOptions));
 
+// Parse JSON and URL-encoded bodies
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 // Use the PORT from environment (deployment hosts provide this).
 // Fall back to 5001 for local development only when no env PORT is present.
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 5001;
@@ -92,8 +96,11 @@ mongoose.connect(process.env.MONGO_URI)
 // Routes
 const authRouter = require('./routes/auth');
 const setupRouter = require('./routes/setup');
-console.log('Mounting /api/auth routes...');
+const withdrawalRouter = require('./routes/withdrawal');
+
+console.log('Mounting routes...');
 app.use('/api/auth', authRouter);
+app.use('/api/withdrawal', withdrawalRouter);
 app.use('/api/setup', setupRouter);
 console.log('/api/auth routes mounted. All /api/auth/* requests will be logged by the router.');
 app.use('/api/users', require('./routes/users'));
@@ -107,11 +114,9 @@ app.use('/api/portfolio', require('./routes/portfolio_invest'));
 app.use('/api/deposit', require('./routes/deposit'));
 app.use('/api/goals', require('./routes/goals'));
 app.use('/api/wallets', require('./routes/wallets'));
-app.use('/api/admin', require('./routes/admin'));
-app.use('/api/admin/plans', require('./routes/admin/plans'));
+app.use('/api/admin', require('./routes/admin')); // Consolidated admin routes
+app.use('/api/admin', require('./routes/adminUserActivity'));
 app.use('/api/market-updates', require('./routes/market-updates'));
-app.use('/api/admin/roi-approvals', require('./routes/admin/roi-approvals'));
-app.use('/api/admin/user-investments', require('./routes/admin/userInvestments'));
 app.use('/uploads', require('./routes/uploads'));
 app.use(require('./routes/sendTestEmail'));
 app.use('/api/test', require('./routes/test'));
@@ -122,11 +127,9 @@ app.use('/api/news', require('./routes/news')); // Add news API route
 
 app.use('/api/investment', require('./routes/investment'));
 app.use('/api/ai-chat', require('./routes/aiChat'));
-app.use('/api/withdrawal', require('./routes/withdrawal'));
 app.use('/api/cars', require('./routes/cars'));
 app.use('/api/fees', require('./routes/fees'));
-app.use('/api/support', require('./routes/supportChat'));
-app.use('/api/admin/support', require('./routes/admin/supportChat'));
+app.use('/api/support', require('./routes/supportChat')); // Support chat route
 
 // Serve car uploads statically
 app.use('/uploads/cars', express.static(__dirname + '/uploads/cars'));

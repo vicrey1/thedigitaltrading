@@ -1,5 +1,5 @@
 // src/components/Sidebar.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { 
   FiHome, FiPieChart, FiDollarSign, FiUpload, 
@@ -85,6 +85,62 @@ const Sidebar = ({ collapsed = false, setCollapsed = () => {}, hasNewAnnouncemen
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // Listen for global openSidebar event so other layout elements can trigger mobile sidebar
+  useEffect(() => {
+    const openHandler = () => setMobileOpen(true);
+    window.addEventListener('openSidebar', openHandler);
+    return () => window.removeEventListener('openSidebar', openHandler);
+  }, []);
+
+  // Focus trap & body scroll lock when mobile sidebar is open
+  const sidebarRef = useRef(null);
+  useEffect(() => {
+    if (!isMobile) return; // only for mobile off-canvas
+
+    const sidebarEl = sidebarRef.current;
+    let previousActive = null;
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setMobileOpen(false);
+      }
+
+      if (e.key === 'Tab' && sidebarEl) {
+        const focusable = sidebarEl.querySelectorAll('a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])');
+        if (!focusable.length) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    };
+
+    if (mobileOpen) {
+      // lock body scroll
+      previousActive = document.activeElement;
+      document.body.style.overflow = 'hidden';
+      document.addEventListener('keydown', handleKeyDown);
+
+      // focus first focusable element in sidebar
+      setTimeout(() => {
+        const focusable = sidebarEl.querySelectorAll('a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])');
+        if (focusable.length) focusable[0].focus();
+      }, 50);
+    }
+
+    return () => {
+      document.body.style.overflow = '';
+      document.removeEventListener('keydown', handleKeyDown);
+      if (previousActive && previousActive.focus) previousActive.focus();
+    };
+  }, [mobileOpen, isMobile]);
+
   // Close mobile sidebar on route change
   useEffect(() => {
     setMobileOpen(false);
@@ -100,19 +156,19 @@ const Sidebar = ({ collapsed = false, setCollapsed = () => {}, hasNewAnnouncemen
   // Don't render for admin routes
   if (location.pathname.startsWith('/admin')) return null;
 
-  const sidebarClasses = `
-    ${isDarkMode 
-      ? 'bg-gradient-to-b from-gray-900 via-gray-900 to-gray-800 text-gray-100 border-gray-700/50' 
-      : 'bg-gradient-to-b from-white via-gray-50 to-gray-100 text-gray-900 border-gray-200/80'
-    }
-    transition-transform duration-500 ease-in-out transform-gpu border-r backdrop-blur-sm
-    ${collapsed ? 'w-20' : 'w-72'}
-    h-screen flex flex-col
-    fixed top-0 left-0 z-50
-    ${mobileOpen ? 'translate-x-0 opacity-100 pointer-events-auto' : '-translate-x-full opacity-0 pointer-events-none'}
-    md:translate-x-0 md:opacity-100 md:pointer-events-auto
-    shadow-2xl overflow-hidden
-  `;
+  // Mobile-first sidebar classes. On small screens the sidebar is off-canvas
+  // by default and slides in as an overlay. On md+ it becomes a fixed column
+  // that pushes the page content (AppLayout handles the md-margin).
+  const widthClass = collapsed ? 'md:w-20 w-64' : 'md:w-72 w-full sm:w-72';
+  const bgClass = isDarkMode
+    ? 'bg-gradient-to-b from-gray-900 via-gray-900 to-gray-800 text-gray-100 border-gray-700/50'
+    : 'bg-gradient-to-b from-white via-gray-50 to-gray-100 text-gray-900 border-gray-200/80';
+
+  const visibilityClass = isMobile
+    ? (mobileOpen ? 'translate-x-0 opacity-100 pointer-events-auto' : '-translate-x-full opacity-0 pointer-events-none')
+    : 'translate-x-0 opacity-100 pointer-events-auto';
+
+  const sidebarClasses = `${bgClass} transition-transform duration-300 ease-in-out transform border-r backdrop-blur-sm ${widthClass} h-screen flex flex-col fixed top-0 left-0 z-50 ${visibilityClass} shadow-2xl overflow-hidden`;
 
   return (
     <>

@@ -1,6 +1,7 @@
 // src/pages/InvestmentDetail.js
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { getStoredToken } from '../utils/authToken';
 import { useParams } from 'react-router-dom';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { simulatePerformance, simulateTestimonials, simulateActivity } from '../utils/simulateData';
@@ -18,7 +19,7 @@ const InvestmentDetail = () => {
       try {
         const response = await axios.get(`/api/user/investment/${id}`, {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`
+            Authorization: getStoredToken() ? `Bearer ${getStoredToken()}` : undefined
           }
         });
         setInvestment(response.data);

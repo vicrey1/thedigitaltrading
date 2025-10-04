@@ -1,0 +1,66 @@
+/* Tooltip styles */
+.tooltip {
+  position: relative;
+}
+
+.tooltip::before {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  right: 50%;
+  transform: translateX(50%);
+  padding: 4px 8px;
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  font-size: 12px;
+  border-radius: 4px;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s ease;
+}
+
+.tooltip:hover::before {
+  opacity: 1;
+  visibility: visible;
+  bottom: 120%;
+}
+
+/* Custom width utilities */
+.w-90 {
+  width: 90%;
+}
+
+.max-w-8xl {
+  max-width: 88rem;
+}
+
+/* Responsive padding */
+.p-responsive {
+  padding: clamp(1rem, 2vw, 2rem);
+}
+
+/* Gradient borders */
+.gradient-border {
+  position: relative;
+  border: 1px solid transparent;
+  background-clip: padding-box;
+}
+
+.gradient-border::after {
+  content: '';
+  position: absolute;
+  top: -1px;
+  right: -1px;
+  bottom: -1px;
+  left: -1px;
+  background: linear-gradient(45deg, #FFD700, #FFA500);
+  z-index: -1;
+  border-radius: inherit;
+}
+
+/* Improved scrollbar for code blocks */
+.code-block {
+  white-space: pre-wrap;
+  word-break: break-word;
+}

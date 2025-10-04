@@ -1,6 +1,6 @@
 const axios = require('axios');
 
-const BASE_URL = 'http://localhost:3001';
+const BASE_URL = 'http://localhost:5001';
 
 async function testSupportChatSystem() {
   console.log('🧪 Testing Support Chat System...\n');

@@ -14,12 +14,13 @@ export const AdminAuthProvider = ({ children }) => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const token = localStorage.getItem('adminToken');
+        const { getStoredAdminToken } = require('../utils/authToken');
+        const token = getStoredAdminToken();
         if (!token) {
           setLoading(false);
           return;
         }
-        
+
         const adminData = await verifyAdminToken();
         setAdmin(adminData);
       } catch (error) {
@@ -45,8 +46,14 @@ export const AdminAuthProvider = ({ children }) => {
       if (!response || !response.token || !response.admin) {
         throw new Error('Invalid login response');
       }
-      localStorage.setItem('adminToken', response.token);
-      console.log('AdminAuthProvider: Token stored in localStorage:', localStorage.getItem('adminToken'));
+      // store only valid-looking tokens
+      const { getStoredAdminToken } = require('../utils/authToken');
+      if (response && response.token && response.token.split && response.token.split('.').length === 3) {
+        localStorage.setItem('adminToken', response.token);
+        console.log('AdminAuthProvider: Token stored in localStorage:', localStorage.getItem('adminToken'));
+      } else {
+        console.warn('AdminAuthProvider: Invalid token received, not storing');
+      }
       setAdmin(response.admin);
       navigate('/admin');
       return { success: true };

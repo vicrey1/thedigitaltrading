@@ -109,10 +109,10 @@ const AdminSupportChat = () => {
 
   const fetchAnalytics = useCallback(async () => {
     try {
+      const { getStoredAdminToken } = require('../../utils/authToken');
+      const adminToken = getStoredAdminToken();
       const response = await fetch('/api/admin/support/analytics', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
-        }
+        headers: adminToken ? { 'Authorization': `Bearer ${adminToken}` } : {}
       });
 
       if (response.ok) {
@@ -126,10 +126,10 @@ const AdminSupportChat = () => {
 
   const fetchAgents = useCallback(async () => {
     try {
+      const { getStoredAdminToken } = require('../../utils/authToken');
+      const adminToken2 = getStoredAdminToken();
       const response = await fetch('/api/admin/support/agents', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
-        }
+        headers: adminToken2 ? { 'Authorization': `Bearer ${adminToken2}` } : {}
       });
 
       if (response.ok) {
@@ -155,10 +155,10 @@ const AdminSupportChat = () => {
         queryParams.append('search', searchTerm);
       }
 
+      const { getStoredAdminToken } = require('../../utils/authToken');
+      const adminToken3 = getStoredAdminToken();
       const response = await fetch(`/api/admin/support/tickets?${queryParams}`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
-        }
+        headers: adminToken3 ? { 'Authorization': `Bearer ${adminToken3}` } : {}
       });
 
       if (response.ok) {
@@ -174,10 +174,10 @@ const AdminSupportChat = () => {
 
   const fetchMessages = useCallback(async (ticketId) => {
     try {
+      const { getStoredAdminToken } = require('../../utils/authToken');
+      const adminToken4 = getStoredAdminToken();
       const response = await fetch(`/api/admin/support/tickets/${ticketId}/messages`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
-        }
+        headers: adminToken4 ? { 'Authorization': `Bearer ${adminToken4}` } : {}
       });
 
       if (response.ok) {
@@ -216,11 +216,13 @@ const AdminSupportChat = () => {
 
   const assignTicket = async (ticketId, agentId) => {
     try {
+      const { getStoredAdminToken } = require('../../utils/authToken');
+      const adminToken5 = getStoredAdminToken();
       const response = await fetch(`/api/admin/support/tickets/${ticketId}/assign`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+          ...(adminToken5 ? { 'Authorization': `Bearer ${adminToken5}` } : {})
         },
         body: JSON.stringify({ agentId })
       });
@@ -244,11 +246,13 @@ const AdminSupportChat = () => {
 
   const updateTicketStatus = async (ticketId, status) => {
     try {
+      const { getStoredAdminToken } = require('../../utils/authToken');
+      const adminToken6 = getStoredAdminToken();
       const response = await fetch(`/api/admin/support/tickets/${ticketId}/status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+          ...(adminToken6 ? { 'Authorization': `Bearer ${adminToken6}` } : {})
         },
         body: JSON.stringify({ status })
       });
@@ -286,11 +290,11 @@ const AdminSupportChat = () => {
         formData.append('attachments', file);
       });
 
+      const { getStoredAdminToken } = require('../../utils/authToken');
+      const adminToken7 = getStoredAdminToken();
       const response = await fetch(`/api/admin/support/tickets/${selectedTicket._id}/messages`, {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
-        },
+        headers: adminToken7 ? { 'Authorization': `Bearer ${adminToken7}` } : {},
         body: formData
       });
 
